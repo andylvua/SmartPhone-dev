@@ -7,7 +7,6 @@
 #include <QTextStream>
 #include <QThread>
 #include <QDebug>
-#include <utility>
 
 Command::Command(std::string commandText, commandType type, QSerialPort &serial) : serial(serial) {
     this->commandText = std::move(commandText);
@@ -40,7 +39,8 @@ void GetCommand::execute() {
     QThread::msleep(2000);
     if (serial.waitForReadyRead(2000)) {
         //Data was returned
-        qDebug() << "Request: " << serial.readLine();
+        QThread::usleep(2000);
+        qDebug() << ("Request: "+getCommandText()).c_str();
     } else {
         //No data
         qDebug() << "Time out";
@@ -48,7 +48,8 @@ void GetCommand::execute() {
     QThread::msleep(2000);
     if (serial.waitForReadyRead(2000)) {
         //Data was returned
-        qDebug() << "Response: " << serial.readAll();
+        QThread::usleep(2000);
+        qDebug() << "Response: "<<serial.readAll();
 //        qDebug()<<"Response2: "<<serial.readAll();
     } else {
         //No data
@@ -56,20 +57,39 @@ void GetCommand::execute() {
     }
 }
 
-SetCommand::SetCommand(std::string commandText, QSerialPort &serial) : Command(commandText, commandType::setCommand,
-                                                                               serial) {};
+SetCommand::SetCommand(std::string commandText, QSerialPort &serial) :
+    Command(commandText, commandType::setCommand,serial) {};
 
 void SetCommand::execute() {
+    serial.write((getCommandText() + "\r\n").c_str());
+    //the serial must remain opened
+    QThread::msleep(2000);
+    if (serial.waitForReadyRead(2000)) {
+        //Data was returned
+        qDebug() << ("Request: "+getCommandText()).c_str() ;
+    } else {
+        //No data
+        qDebug() << "Time out";
+    }
+    QThread::msleep(2000);
+    if (serial.waitForReadyRead(2000)) {
+        //Data was returned
+        qDebug() << "Response: "<<serial.readAll();
+//        qDebug()<<"Response2: "<<serial.readAll();
+    } else {
+        //No data
+        qDebug() << "Time out";
+    }
 }
 
-Task::Task(std::string commandText, QSerialPort &serial) : Command(commandText, commandType::task, serial) {};
+Task::Task(std::string commandText, QSerialPort &serial) :
+    Command(commandText, commandType::task, serial) {};
 
 void Task::execute() {
 }
 
-OneTimeCommand::OneTimeCommand(std::string commandText, QSerialPort &serial) : Command(commandText,
-                                                                                       commandType::oneTimeCommand,
-                                                                                       serial) {};
+OneTimeCommand::OneTimeCommand(std::string commandText, QSerialPort &serial) :
+    Command(commandText,commandType::oneTimeCommand,serial) {};
 
 void OneTimeCommand::execute() {
 }

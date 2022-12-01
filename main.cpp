@@ -14,14 +14,14 @@ int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
 
     QSerialPort serial;
-//    serial.setPortName("/dev/ttyUSB0");
-    serial.setPortName("/dev/tty.usbserial-1420");
+    serial.setPortName("/dev/ttyUSB0");
+//    serial.setPortName("/dev/tty.usbserial-1420");
 
 
     if (serial.open(QIODevice::ReadWrite)) {
 
         //Now the serial port is open try to set configuration
-        if (!serial.setBaudRate(QSerialPort::Baud57600))
+        if (!serial.setBaudRate(QSerialPort::Baud115200))
             qDebug() << serial.errorString();
 
         if (!serial.setDataBits(QSerialPort::Data8))
