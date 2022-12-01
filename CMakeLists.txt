@@ -7,6 +7,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 set(CMAKE_PREFIX_PATH "/home/paul/Qt/5.15.2/gcc_64")
+#set(CMAKE_PREFIX_PATH "/Users/andrew/Qt/5.15.2/clang_64")
+
 
 find_package(Qt5 COMPONENTS
         Core

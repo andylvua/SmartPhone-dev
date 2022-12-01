@@ -33,24 +33,28 @@ public:
 
     void setType(commandType type);
 };
+
 class GetCommand : public Command{
 public:
     GetCommand(std::string commandText, QSerialPort& serial);
 
     void execute();
 };
+
 class SetCommand : public Command{
 public:
     SetCommand(std::string commandText, QSerialPort& serial);
 
     void execute();
 };
+
 class Task : public Command{
 public:
     Task(std::string commandText, QSerialPort& serial);
 
     void execute();
 };
+
 class OneTimeCommand : public Command{
 public:
     OneTimeCommand(std::string commandText, QSerialPort& serial);

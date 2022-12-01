@@ -8,32 +8,33 @@
 #include <QtSerialPort/QSerialPortInfo>
 
 #include "command.h"
-void at(QSerialPort& serial);
 
-int main(int argc, char *argv[])
-{
+
+int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
 
     QSerialPort serial;
-    serial.setPortName("/dev/ttyUSB0");
+//    serial.setPortName("/dev/ttyUSB0");
+    serial.setPortName("/dev/tty.usbserial-1420");
 
-    if(serial.open(QIODevice::ReadWrite)){
+
+    if (serial.open(QIODevice::ReadWrite)) {
 
         //Now the serial port is open try to set configuration
-        if(!serial.setBaudRate(QSerialPort::Baud57600))
-            qDebug()<<serial.errorString();
+        if (!serial.setBaudRate(QSerialPort::Baud57600))
+            qDebug() << serial.errorString();
 
-        if(!serial.setDataBits(QSerialPort::Data8))
-            qDebug()<<serial.errorString();
+        if (!serial.setDataBits(QSerialPort::Data8))
+            qDebug() << serial.errorString();
 
-        if(!serial.setParity(QSerialPort::NoParity))
-            qDebug()<<serial.errorString();
+        if (!serial.setParity(QSerialPort::NoParity))
+            qDebug() << serial.errorString();
 
-        if(!serial.setStopBits(QSerialPort::OneStop))
-            qDebug()<<serial.errorString();
+        if (!serial.setStopBits(QSerialPort::OneStop))
+            qDebug() << serial.errorString();
 
-        if(!serial.setFlowControl(QSerialPort::NoFlowControl))
-            qDebug()<<serial.errorString();
+        if (!serial.setFlowControl(QSerialPort::NoFlowControl))
+            qDebug() << serial.errorString();
 
         GetCommand atCommand("AT", serial);
         GetCommand cregCommand("AT+CREG?", serial);
@@ -41,13 +42,13 @@ int main(int argc, char *argv[])
         cregCommand.execute();
         //I have finish alla operation
         serial.close();
-    }else{
-        qDebug()<<"Serial ttyUSB0 not opened. Error: "<<serial.errorString();
+    } else {
+        qDebug() << "Serial ttyUSB0 not opened. Error: " << serial.errorString();
     }
 
     QMainWindow w;
     w.show();
 
-    return a.exec();
+    return QApplication::exec();
 }
 
