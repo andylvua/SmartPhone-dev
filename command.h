@@ -7,17 +7,22 @@
 
 #include <string>
 #include <QSerialPort>
-#pragma once
+#include <vector>
+
 enum commandType{
     getCommand = 0, setCommand = 1, task = 2, oneTimeCommand = 3
 };
-const char* commandTypeStr[] = {"getCommand",  "setCommand", "task","oneTimeCommand"};
+
+const std::vector<std::string> commandTypeStr = {"getCommand",  "setCommand", "task","oneTimeCommand"};
+
 class Command{
 private:
     std::string commandText;
     commandType type;
-    QSerialPort& serial;
+
 public:
+    QSerialPort& serial;
+
     Command(std::string commandText, commandType type, QSerialPort& serial);
 
     const std::string getCommandText();
@@ -29,21 +34,25 @@ public:
     void setType(commandType type);
 };
 class GetCommand : public Command{
+public:
     GetCommand(std::string commandText, QSerialPort& serial);
 
-    std::string execute();
+    void execute();
 };
 class SetCommand : public Command{
+public:
     SetCommand(std::string commandText, QSerialPort& serial);
 
     void execute();
 };
 class Task : public Command{
+public:
     Task(std::string commandText, QSerialPort& serial);
 
     void execute();
 };
 class OneTimeCommand : public Command{
+public:
     OneTimeCommand(std::string commandText, QSerialPort& serial);
 
     void execute();

@@ -6,6 +6,8 @@
 #include <QThread>
 #include <QtSerialPort/QSerialPort>
 #include <QtSerialPort/QSerialPortInfo>
+
+#include "command.h"
 void at(QSerialPort& serial);
 
 int main(int argc, char *argv[])
@@ -33,7 +35,10 @@ int main(int argc, char *argv[])
         if(!serial.setFlowControl(QSerialPort::NoFlowControl))
             qDebug()<<serial.errorString();
 
-        at(serial);
+        GetCommand atCommand("AT", serial);
+        GetCommand cregCommand("AT+CREG?", serial);
+        atCommand.execute();
+        cregCommand.execute();
         //I have finish alla operation
         serial.close();
     }else{
@@ -46,25 +51,3 @@ int main(int argc, char *argv[])
     return a.exec();
 }
 
-void at(QSerialPort& serial){
-    //If any error was returned the serial il correctly configured
-    serial.write("AT\r\n");
-    //the serial must remain opened
-    QThread::msleep(2000);
-    if(serial.waitForReadyRead(2000)){
-        //Data was returned
-        qDebug()<<"Request: "<<serial.readLine();
-    }else{
-        //No data
-        qDebug()<<"Time out";
-    }
-    QThread::msleep(2000);
-    if(serial.waitForReadyRead(2000)){
-        //Data was returned
-        qDebug()<<"Response: "<<serial.readAll();
-//        qDebug()<<"Response2: "<<serial.readAll();
-    }else{
-        //No data
-        qDebug()<<"Time out";
-    }
-}
