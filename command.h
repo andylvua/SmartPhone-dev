@@ -8,58 +8,63 @@
 #include <string>
 #include <QSerialPort>
 #include <vector>
+#include "serial.h"
 
-enum commandType{
+enum commandType {
     getCommand = 0, setCommand = 1, task = 2, oneTimeCommand = 3
 };
 
-const std::vector<std::string> commandTypeStr = {"getCommand",  "setCommand", "task","oneTimeCommand"};
+const std::vector<std::string> commandTypeStr = {"getCommand", "setCommand", "task", "oneTimeCommand"};
 
-class Command{
+class Command {
 private:
     std::string commandText;
     commandType type;
 
 public:
-    QSerialPort& serial;
+    SerialPort &serial;
 
-    Command(std::string commandText, commandType type, QSerialPort& serial);
+    Command(std::string commandText, commandType type, SerialPort &serial);
 
-    const std::string getCommandText();
+    std::string getCommandText();
 
-    const std::string getType();
+    std::string getType();
 
     void setCommandText(std::string);
 
-    void setType(commandType type);
+    void setType(commandType commandType);
+
+    virtual void execute() = 0;
+
+    ~Command() = default;
 };
 
-class GetCommand : public Command{
+class GetCommand : public Command {
 public:
-    GetCommand(std::string commandText, QSerialPort& serial);
+    GetCommand(std::string commandText, SerialPort &serial);
 
-    void execute();
+    void execute() override;
 };
 
-class SetCommand : public Command{
+class SetCommand : public Command {
 public:
-    SetCommand(std::string commandText, QSerialPort& serial);
+    SetCommand(std::string commandText, SerialPort &serial);
 
-    void execute();
+    void execute() override;
 };
 
-class Task : public Command{
+class Task : public Command {
 public:
-    Task(std::string commandText, QSerialPort& serial);
+    Task(std::string commandText, SerialPort &serial);
 
-    void execute();
+    void execute() override;
 };
 
-class OneTimeCommand : public Command{
+class OneTimeCommand : public Command {
 public:
-    OneTimeCommand(std::string commandText, QSerialPort& serial);
+    OneTimeCommand(std::string commandText, SerialPort &serial);
 
-    void execute();
+    void execute() override;
 };
 
 #endif //UNTITLED3_COMMAND_H

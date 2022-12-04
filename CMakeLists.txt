@@ -16,7 +16,7 @@ find_package(Qt5 COMPONENTS
         SerialPort
         REQUIRED)
 
-add_executable(untitled3 main.cpp command.cpp command.h)
+add_executable(untitled3 main.cpp command.cpp command.h commands_list.h serial.cpp serial.h)
 target_link_libraries(untitled3
         Qt5::Core
         Qt5::Widgets

@@ -7,58 +7,68 @@
 #include <QTextStream>
 #include <QThread>
 #include <QDebug>
+#include "serial.h"
 
-Command::Command(std::string commandText, commandType type, QSerialPort &serial) : serial(serial) {
+Command::Command(std::string commandText, commandType type, SerialPort &serial) : serial(serial) {
     this->commandText = std::move(commandText);
     this->type = type;
 }
 
-const std::string Command::getCommandText() {
+std::string Command::getCommandText() {
     return commandText;
 }
 
-const std::string Command::getType() {
+std::string Command::getType() {
     return commandTypeStr[type];
 }
 
 void Command::setCommandText(std::string command) {
-    commandText = std::move(command);
+    this->commandText = std::move(command);
 }
 
-void Command::setType(commandType type) {
-    this->type = type;
+void Command::setType(commandType commandType) {
+    this->type = commandType;
 }
 
-GetCommand::GetCommand(std::string commandText, QSerialPort &serial) : Command(commandText, commandType::getCommand,
-                                                                               serial) {
-}
+GetCommand::GetCommand(std::string commandText, SerialPort &serial) :
+    Command(std::move(commandText), commandType::getCommand,serial) {}
+
 
 void GetCommand::execute() {
+//    serial.write((getCommandText() + "\r\n").c_str());
+//
+//    if (serial.waitForReadyRead(2000)) {
+//        //Data was returned
+//        qDebug() << ("Request: "+getCommandText()).c_str();
+//    } else {
+//        //No data
+//        qDebug() << "Time out";
+//    }
+//
+//    if (serial.waitForReadyRead(2000)) {
+//        //Data was returned
+//        qDebug() << "Response: "<<serial.readAll();
+////        qDebug()<<"Response2: "<<serial.readAll();
+//    } else {
+//        //No data
+//        qDebug() << "Time out";
+//    }
+
+    qDebug() << ("Request: "+getCommandText()).c_str();
     serial.write((getCommandText() + "\r\n").c_str());
-    //the serial must remain opened
-    QThread::msleep(2000);
-    if (serial.waitForReadyRead(2000)) {
-        //Data was returned
-        QThread::usleep(2000);
-        qDebug() << ("Request: "+getCommandText()).c_str();
+
+    if (serial.waitForReadyRead(serial.timeout)) {
+        QByteArray data = serial.readAll();
+        while (serial.waitForReadyRead(serial.timeout))
+            data += serial.readAll();
+        qDebug() << data;
     } else {
-        //No data
-        qDebug() << "Time out";
-    }
-    QThread::msleep(2000);
-    if (serial.waitForReadyRead(2000)) {
-        //Data was returned
-        QThread::usleep(2000);
-        qDebug() << "Response: "<<serial.readAll();
-//        qDebug()<<"Response2: "<<serial.readAll();
-    } else {
-        //No data
-        qDebug() << "Time out";
+        qDebug() << "Timeout";
     }
 }
 
-SetCommand::SetCommand(std::string commandText, QSerialPort &serial) :
-    Command(commandText, commandType::setCommand,serial) {};
+SetCommand::SetCommand(std::string commandText, SerialPort &serial) :
+    Command(std::move(commandText), commandType::setCommand,serial) {}
 
 void SetCommand::execute() {
     serial.write((getCommandText() + "\r\n").c_str());
@@ -82,14 +92,14 @@ void SetCommand::execute() {
     }
 }
 
-Task::Task(std::string commandText, QSerialPort &serial) :
-    Command(commandText, commandType::task, serial) {};
+Task::Task(std::string commandText, SerialPort &serial) :
+    Command(std::move(commandText), commandType::task, serial) {};
 
 void Task::execute() {
 }
 
-OneTimeCommand::OneTimeCommand(std::string commandText, QSerialPort &serial) :
-    Command(commandText,commandType::oneTimeCommand,serial) {};
+OneTimeCommand::OneTimeCommand(std::string commandText, SerialPort &serial) :
+    Command(std::move(commandText),commandType::oneTimeCommand,serial) {};
 
 void OneTimeCommand::execute() {
 }

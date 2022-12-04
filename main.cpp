@@ -8,47 +8,38 @@
 #include <QtSerialPort/QSerialPortInfo>
 
 #include "command.h"
-
+#include "commands_list.h"
+#include "serial.h"
 
 int main(int argc, char *argv[]) {
-    QApplication a(argc, argv);
+    QApplication app(argc, argv);
 
-    QSerialPort serial;
-    serial.setPortName("/dev/ttyUSB0");
-//    serial.setPortName("/dev/tty.usbserial-1420");
+    SerialPort serial("/dev/tty.usbserial-1420",
+                      1000,
+                      QSerialPort::Baud115200,
+                      QSerialPort::Data8,
+                      QSerialPort::NoParity,
+                      QSerialPort::OneStop,
+                      QSerialPort::NoFlowControl);
 
 
-    if (serial.open(QIODevice::ReadWrite)) {
-
-        //Now the serial port is open try to set configuration
-        if (!serial.setBaudRate(QSerialPort::Baud115200))
-            qDebug() << serial.errorString();
-
-        if (!serial.setDataBits(QSerialPort::Data8))
-            qDebug() << serial.errorString();
-
-        if (!serial.setParity(QSerialPort::NoParity))
-            qDebug() << serial.errorString();
-
-        if (!serial.setStopBits(QSerialPort::OneStop))
-            qDebug() << serial.errorString();
-
-        if (!serial.setFlowControl(QSerialPort::NoFlowControl))
-            qDebug() << serial.errorString();
-
-        GetCommand atCommand("AT", serial);
-        GetCommand cregCommand("AT+CREG?", serial);
-        atCommand.execute();
-        cregCommand.execute();
-        //I have finish alla operation
-        serial.close();
-    } else {
-        qDebug() << "Serial ttyUSB0 not opened. Error: " << serial.errorString();
+    if (!serial.open()) {
+        qDebug() << "Serial port was not opened" << serial.errorString();
+        return 1;
     }
 
-    QMainWindow w;
-    w.show();
 
-    return QApplication::exec();
+    GetCommand atCommand(AT, serial);
+    GetCommand cregCommand(AT_CREG"?", serial);
+    atCommand.execute();
+    cregCommand.execute();
+
+    serial.close();
+
+//    QMainWindow window;
+//    window.show();
+
+//    return QApplication::exec();
+    return 0;
 }
 
