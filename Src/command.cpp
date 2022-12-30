@@ -1,13 +1,14 @@
 //
 // Created by paul on 12/1/22.
 //
-#include "command.h"
+#include "../Inc/command.h"
 #include <QtSerialPort/QSerialPort>
 #include <QtSerialPort/QSerialPortInfo>
 #include <QTextStream>
 #include <QThread>
 #include <QDebug>
-#include "serial.h"
+#include "../Inc/serial.h"
+#include <iostream>
 
 Command::Command(std::string commandText, commandType type, SerialPort &serial) : type(type), serial(serial) {
     this->commandText = std::move(commandText);
@@ -28,20 +29,33 @@ void Command::setCommandText(std::string command) {
 void Command::setType(commandType commandType) {
     this->type = commandType;
 }
-// returns actual response from uart dropping echo of command
+
+// Returns actual response from uart, dropping echo of command
 QString uartResponseParser(const QByteArray& response) {
     auto responseString = QString(response);
     QStringList parsedResponse;
     parsedResponse = responseString.split("\r\n");
-    return QString{parsedResponse[1]};
+    return QString{parsedResponse[2]};
 }
+
+// Returns echo of command, dropping actual response from uart
+QString uartEchoParser(const QByteArray& response) {
+    auto responseString = QString(response);
+    QStringList parsedResponse;
+    parsedResponse = responseString.split("\r\n");
+    return QString{parsedResponse[0]};
+}
+
 GetCommand::GetCommand(std::string commandText, SerialPort &serial) :
     Command(std::move(commandText), commandType::getCommand,serial) {}
 
 
 QString GetCommand::execute() {
-    qDebug() << ("Request: "+getCommandText()).c_str();
+    auto request = QString::fromStdString(commandText);
+    qDebug() << ("Request: " + request);
+
     serial.write((getCommandText() + "\r\n").c_str());
+
     QByteArray data;
     if (serial.waitForReadyRead(serial.timeout)) {
         data = serial.readAll();
@@ -50,13 +64,18 @@ QString GetCommand::execute() {
     } else {
         qDebug() << "Timeout";
     }
-    // not tested part
+
     QString response = uartResponseParser(data);
-    if (response.isValidUtf16() && !response.isNull() && !response.isEmpty()){
-        qDebug() << "Response: "+ response;
+
+    if (response.isValidUtf16() && !response.isNull() && !response.isEmpty()) {
+        if (request != uartEchoParser(data)) {
+            qDebug() << "Echo is not equal to request";
+        }
+
+        qDebug() << ("Response: " + response);
     }
     else{
-        qDebug() << "Error occurred";
+        qDebug() << "Error: invalid response";
     }
     return response;
 }
@@ -66,8 +85,11 @@ SetCommand::SetCommand(std::string commandText, SerialPort &serial) :
     Command(std::move(commandText), commandType::setCommand,serial) {}
 
 void SetCommand::execute() {
+    auto request = QString::fromStdString(commandText);
     qDebug() << ("Request: "+getCommandText()).c_str();
+
     serial.write((getCommandText() + "\r\n").c_str());
+
     QByteArray data;
     if (serial.waitForReadyRead(serial.timeout)) {
         data = serial.readAll();
@@ -76,41 +98,64 @@ void SetCommand::execute() {
     } else {
         qDebug() << "Timeout";
     }
-    // not tested part
+
     QString response = uartResponseParser(data);
-    // I don't know if there is only OK answer for such prompts
+
     if (response.isValidUtf16() && !response.isNull() && !response.isEmpty() && response == "OK"){
-        qDebug() << "Response: "+ response;
+        if (request != uartEchoParser(data)) {
+            qDebug() << "Echo is not equal to request";
+        }
+
+        qDebug() << ("Response: " + response);
     }
     else {
-        qDebug() << "Error occurred";
+        qDebug() << "Error: invalid response";
     }
 }
 
 Task::Task(std::string commandText, SerialPort &serial) :
     Command(std::move(commandText), commandType::task, serial) {};
-// should be maintained as async process
-void Task::execute() {
-    // To do
-    qDebug() << ("Request: "+getCommandText()).c_str();
+
+commRes_t Task::execute() {
+    auto request = QString::fromStdString(commandText);
+    qDebug() << ("Request: " + request);
+
     serial.write((getCommandText() + "\r\n").c_str());
+
     QByteArray data;
-    while (true){
-        if (serial.waitForReadyRead(10000)) {
-            data = serial.readAll();
-            while (serial.waitForReadyRead(serial.timeout))
-                data += serial.readAll();
-            QString response = uartResponseParser(data);
-            if (response.contains("Error")){
-                qDebug() << "Timeout";
-                break;
-            }
-        } else {
-            qDebug() << "Timeout";
-            break;
+    if (serial.waitForReadyRead(serial.timeout)) {
+        data = serial.readAll();
+        while (serial.waitForReadyRead(serial.timeout))
+            data += serial.readAll();
+    } else {
+        qDebug() << "Timeout";
+        return commRes_t::CR_TIMEOUT;
+    }
+
+    QString response = uartResponseParser(data);
+
+    if (response.isValidUtf16() && !response.isNull() && !response.isEmpty()) {
+        if (request != uartEchoParser(data)) {
+            qDebug() << "Echo is not equal to request. Actual echo: " << uartEchoParser(data)
+            << " Request: " << request;
+            return commRes_t::CR_ERROR;
         }
+
+        if (response.indexOf("OK") == -1) {
+            qDebug() << "Error: invalid response";
+            return commRes_t::CR_ERROR;
+        }
+
+        qDebug() << ("Response: " + response);
+        return commRes_t::CR_OK;
+    }
+    else {
+        qDebug() << "Error: invalid response";
+        return commRes_t::CR_ERROR;
     }
 }
+
+
 // redundant
 //
 //OneTimeCommand::OneTimeCommand(std::string commandText, SerialPort &serial) :
