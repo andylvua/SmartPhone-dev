@@ -68,3 +68,22 @@ bool Modem::call(const std::string& number) {
         return false;
     }
 }
+
+bool Modem::hangUp() {
+    if (commLineStatus == CLS_FREE) {
+        commLineStatus = CLS_ATCMD;
+        Task task(ATH, serial);
+        commRes_t res = task.execute();
+
+        if (res == CR_OK) {
+            commLineStatus = CLS_FREE;
+            callStatus = CS_IDLE;
+            return true;
+        } else {
+            commLineStatus = CLS_FREE;
+            return false;
+        }
+    } else {
+        return false;
+    }
+}
