@@ -17,24 +17,20 @@ enum commandType {
 const std::vector<std::string> commandTypeStr = {"getCommand", "setCommand", "task", "oneTimeCommand"};
 
 class Command {
-private:
+public:
     std::string commandText;
     commandType type;
-
-public:
     SerialPort &serial;
 
     Command(std::string commandText, commandType type, SerialPort &serial);
 
-    std::string getCommandText();
+    std::string getCommandText() const;
 
-    std::string getType();
+    std::string getType() const;
 
     void setCommandText(std::string);
 
     void setType(commandType commandType);
-
-    virtual void execute() = 0;
 
     ~Command() = default;
 };
@@ -43,28 +39,31 @@ class GetCommand : public Command {
 public:
     GetCommand(std::string commandText, SerialPort &serial);
 
-    void execute() override;
+    QString execute();
+    friend QString uartResponseParser(const QByteArray& response);
 };
 
 class SetCommand : public Command {
 public:
     SetCommand(std::string commandText, SerialPort &serial);
 
-    void execute() override;
+    void execute();
 };
 
 class Task : public Command {
 public:
     Task(std::string commandText, SerialPort &serial);
 
-    void execute() override;
+    void execute();
 };
+//redundant
+//
+//class OneTimeCommand : public Command {
+//public:
+//    OneTimeCommand(std::string commandText, SerialPort &serial);
+//
+//    void execute() override;
+//};
 
-class OneTimeCommand : public Command {
-public:
-    OneTimeCommand(std::string commandText, SerialPort &serial);
-
-    void execute() override;
-};
 
 #endif //UNTITLED3_COMMAND_H
