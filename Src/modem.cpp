@@ -87,3 +87,29 @@ bool Modem::hangUp() {
         return false;
     }
 }
+
+bool Modem::message(const std::string& number, const std::string& message) {
+    if (commLineStatus == CLS_FREE) {
+        commLineStatus = CLS_ATCMD;
+        SetCommand set_message_mode = SetCommand(AT_CMGF"=1", serial);
+        set_message_mode.execute();
+
+        SetCommand set_message = SetCommand(AT_CMGS"=\"" + number + "\"", serial);
+        set_message.execute();
+
+        Task task(message, serial);
+        commRes_t res = task.execute();
+
+        if (res == CR_OK) {
+            SetCommand command = SetCommand(message + char(26), serial);
+            command.execute();
+            commLineStatus = CLS_FREE;
+            return true;
+        } else {
+            commLineStatus = CLS_FREE;
+            return false;
+        }
+    } else {
+        return false;
+    }
+}
