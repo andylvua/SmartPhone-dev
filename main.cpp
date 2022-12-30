@@ -1,15 +1,15 @@
-#include <QMainWindow>
+//#include <QMainWindow>
+//#include <QDebug>
+//#include <QTextStream>
+//#include <QFile>
+//#include <QThread>
 #include <QApplication>
-#include <QDebug>
-#include <QTextStream>
-#include <QFile>
-#include <QThread>
 #include <QtSerialPort/QSerialPort>
 #include <QtSerialPort/QSerialPortInfo>
 
-#include "command.h"
-#include "commands_list.h"
-#include "serial.h"
+#include "Inc/command.h"
+#include "Inc/commands_list.h"
+#include "Inc/serial.h"
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
@@ -38,7 +38,6 @@ int main(int argc, char *argv[]) {
 
 //    QMainWindow window;
 //    window.show();
-
 //    return QApplication::exec();
     return 0;
 }
