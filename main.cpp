@@ -10,11 +10,11 @@
 #include "Inc/command.h"
 #include "Inc/commands_list.h"
 #include "Inc/serial.h"
-
+#include "Inc/modem.h"
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
 
-    SerialPort serial("/dev/tty.usbserial-1420",
+    SerialPort serial("/dev/tty.usbserial-1130",
                       1000,
                       QSerialPort::Baud115200,
                       QSerialPort::Data8,
@@ -28,6 +28,8 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    Modem modem{serial};
+    modem.call("+380980699038");
 
     GetCommand atCommand(AT, serial);
     GetCommand cregCommand(AT_CREG"?", serial);
@@ -35,6 +37,8 @@ int main(int argc, char *argv[]) {
     cregCommand.execute();
 
     serial.close();
+
+
 
 //    QMainWindow window;
 //    window.show();
