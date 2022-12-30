@@ -41,6 +41,25 @@ bool Modem::call(const std::string& number) {
         if (res == CR_OK) {
             commLineStatus = CLS_FREE;
             callStatus = CS_DIALING;
+
+            int timeout = 15000;
+            while (serial.waitForReadyRead(1000)) {
+                auto response = serial.readAll();
+                // TODO: check what message modem send when call is accepted: {call_accepted_message}
+                if (response.contains("{call_accepted_message}")) {
+                    callStatus = CS_ACTIVE;
+                    break;
+                } else if (response.contains("NO CARRIER")) {
+                    callStatus = CS_IDLE;
+                    break;
+                }
+                timeout -= 1000;
+                if (timeout <= 0) {
+                    callStatus = CS_IDLE;
+                    return false;
+                }
+            }
+            return true;
         } else {
             commLineStatus = CLS_FREE;
             return false;
