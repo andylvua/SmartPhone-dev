@@ -1,11 +1,10 @@
 //
 // Created by Andrew Yaroshevych on 02.12.2022.
 //
-#include <QtSerialPort/QSerialPort>
-#include "serial.h"
+#include "../Inc/serial.h"
 
-SerialPort::SerialPort(const char *portName, int timeout, QSerialPort::BaudRate baudRate, QSerialPort::DataBits dataBits,
-                       QSerialPort::Parity parity, QSerialPort::StopBits stopBits,
+SerialPort::SerialPort(const char *portName, int timeout, QSerialPort::BaudRate baudRate,
+                       QSerialPort::DataBits dataBits, QSerialPort::Parity parity, QSerialPort::StopBits stopBits,
                        QSerialPort::FlowControl flowControl) {
     this->portName = portName;
     this->timeout = timeout;

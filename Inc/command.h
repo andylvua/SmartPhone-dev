@@ -14,6 +14,12 @@ enum commandType {
     getCommand = 0, setCommand = 1, task = 2, oneTimeCommand = 3
 };
 
+typedef enum {
+    CR_OK,
+    CR_ERROR,
+    CR_TIMEOUT
+} commRes_t;
+
 const std::vector<std::string> commandTypeStr = {"getCommand", "setCommand", "task", "oneTimeCommand"};
 
 class Command {
@@ -54,7 +60,7 @@ class Task : public Command {
 public:
     Task(std::string commandText, SerialPort &serial);
 
-    void execute();
+    commRes_t execute();
 };
 //redundant
 //
