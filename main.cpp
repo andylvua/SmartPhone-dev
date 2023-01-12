@@ -1,8 +1,3 @@
-//#include <QMainWindow>
-//#include <QDebug>
-//#include <QTextStream>
-//#include <QFile>
-//#include <QThread>
 #include <QApplication>
 #include <QtSerialPort/QSerialPort>
 #include <QtSerialPort/QSerialPortInfo>
@@ -11,10 +6,12 @@
 #include "Inc/commands_list.h"
 #include "Inc/serial.h"
 #include "Inc/modem.h"
+#include <thread>
+
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
 
-    SerialPort serial("/dev/tty.usbserial-1130",
+    SerialPort serial("/dev/ttyUSB0",
                       1000,
                       QSerialPort::Baud115200,
                       QSerialPort::Data8,
@@ -29,6 +26,11 @@ int main(int argc, char *argv[]) {
     }
 
     Modem modem{serial};
+
+    std::thread main_listener_thread([&modem](){
+        modem.main_listening_thread();
+    });
+
     modem.call("+380980699038");
 
     GetCommand atCommand(AT, serial);
@@ -38,11 +40,8 @@ int main(int argc, char *argv[]) {
 
     serial.close();
 
-
-
-//    QMainWindow window;
-//    window.show();
-//    return QApplication::exec();
-    return 0;
+    QMainWindow window;
+    window.show();
+    return QApplication::exec();
 }
 
