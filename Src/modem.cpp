@@ -5,6 +5,7 @@
 #include "../Inc/modem.h"
 #include "../Inc/command.h"
 #include "../Inc/commands_list.h"
+#include <iostream>
 
 Modem::Modem(SerialPort &serial) : serial(serial) {
     commLineStatus = CLS_FREE;
@@ -33,40 +34,53 @@ bool Modem::checkAT() {
 }
 
 bool Modem::call(const std::string& number) {
-    if (commLineStatus == CLS_FREE) {
-        commLineStatus = CLS_ATCMD;
-        Task task(ATD + number + ";", serial);
-        commRes_t res = task.execute();
-
-        if (res == CR_OK) {
-            commLineStatus = CLS_FREE;
-            callStatus = CS_DIALING;
-
-            int timeout = 15000;
-            while (serial.waitForReadyRead(1000)) {
-                auto response = serial.readAll();
-                // TODO: check what message modem send when call is accepted: {call_accepted_message}
-                if (response.contains("{call_accepted_message}")) {
-                    callStatus = CS_ACTIVE;
-                    break;
-                } else if (response.contains("NO CARRIER")) {
-                    callStatus = CS_IDLE;
-                    break;
-                }
-                timeout -= 1000;
-                if (timeout <= 0) {
-                    callStatus = CS_IDLE;
-                    return false;
-                }
-            }
-            return true;
-        } else {
-            commLineStatus = CLS_FREE;
-            return false;
-        }
-    } else {
+    if (commLineStatus != CLS_FREE) {
         return false;
     }
+
+    commLineStatus = CLS_ATCMD;
+    Task task(ATD + number + ";", serial);
+    commRes_t res = task.execute();
+
+    if (res != CR_OK) {
+        commLineStatus = CLS_FREE;
+        std::cout << "Error: " << res << std::endl;
+        return false;
+    }
+
+    callStatus = CS_WAITING;
+
+    int timeout = 15000;
+    while (serial.waitForReadyRead(1000)) {
+        auto response = serial.readAll();
+        if (response.contains("\"SOUNDER\",0")) {
+            callStatus = CS_ACTIVE;
+            std::cout << "Call is active" << std::endl;
+            break;
+        }
+
+        if (response.contains("\"SOUNDER\",1")) {
+            callStatus = CS_DIALING;
+            std::cout << "Call is dialing" << std::endl;
+        }
+
+        if (response.contains("NO CARRIER")
+        || response.contains("BUSY")
+        || response.contains("NO ANSWER")
+        || response.contains("ERROR")) {
+            callStatus = CS_IDLE;
+            std::cout << "Call is idle. Failed to connect" << std::endl;
+            break;
+        }
+
+        timeout -= 1000;
+        if (timeout <= 0) {
+            callStatus = CS_IDLE;
+            std::cout << "Call is idle. Timeout" << std::endl;
+            return false;
+        }
+    }
+    return true;
 }
 
 bool Modem::hangUp() {
