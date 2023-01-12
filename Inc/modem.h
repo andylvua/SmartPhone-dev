@@ -45,5 +45,7 @@ public:
     bool hangUp();
 
     bool message(const std::string& number, const std::string& message);
+
+    [[noreturn]] void main_listening_thread();
 };
 #endif //UNTITLED3_MODEM_H
