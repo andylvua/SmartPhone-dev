@@ -127,3 +127,22 @@ bool Modem::message(const std::string& number, const std::string& message) {
         return false;
     }
 }
+
+[[noreturn]] void Modem::main_listening_thread() {
+    while (true) {
+        if (serial.waitForReadyRead(1000)) {
+            auto response = serial.readAll();
+
+            if (response.contains("RING")) {
+                callStatus = CS_INCOMING;
+                std::cout << "Call is incoming" << std::endl;
+            }
+
+            if (response.contains("\"CALL\",0")) {
+                callStatus = CS_IDLE;
+                std::cout << "Call is idle" << std::endl;
+            }
+
+        }
+    }
+}
