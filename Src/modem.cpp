@@ -180,3 +180,14 @@ bool Modem::initialize() {
     return true;
 }
 
+
+void Modem::worker() {
+    Modem::workerStatus = true;
+
+    while (Modem::workerStatus) {
+        auto output = serial.readAll();
+        QThread::msleep(500);
+        qDebug() << output;
+    }
+}
+
