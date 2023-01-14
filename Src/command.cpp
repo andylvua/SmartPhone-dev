@@ -143,16 +143,20 @@ commRes_t Task::execute() {
 
     QString response = uartResponseParser(data);
 
-    if (response.isValidUtf16() && !response.isNull() && !response.isEmpty()) {
+    if (response.isValidUtf16() && !response.isNull()) {
+        if (response.contains("ERROR")) {
+            qDebug() << "ERROR: Response contains ERROR";
+            return commRes_t::CR_ERROR;
+        }
+
         if (request != uartEchoParser(data)) {
             qDebug() << "Echo is not equal to request. Actual echo: " << uartEchoParser(data)
                      << " Request: " << request;
             return commRes_t::CR_ERROR;
         }
 
-        if (response.indexOf("OK") == -1) {
-            qDebug() << "Error: invalid response";
-            return commRes_t::CR_ERROR;
+        if (response.isEmpty()) {
+            qDebug() << "WARNING: Response is empty";
         }
 
         qDebug() << ("Response: " + response);

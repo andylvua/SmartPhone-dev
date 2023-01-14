@@ -27,10 +27,11 @@ int main(int argc, char *argv[]) {
 
     Modem modem{serial};
     bool modemReady = modem.initialize();
+    // run listen thread to be able to receive messages and input commands
+
     if (modemReady) {
         modem.worker();
     }
-
 
     serial.close();
 
