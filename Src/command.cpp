@@ -114,6 +114,8 @@ commRes_t SetCommand::execute() {
         qDebug() << "Error: invalid response";
         return CR_ERROR;
     }
+
+    return CR_OK;
 }
 
 Task::Task(std::string commandText, SerialPort &serial) :
