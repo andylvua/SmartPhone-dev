@@ -279,6 +279,7 @@ void Modem::listen(){
                 currentCall.startTime = QDateTime::currentDateTime();
                 currentCall.callResult = CR_NO_ANSWER;
                 qDebug() << "Incoming call from: " << number;
+                callStatus = CS_INCOMING;
                 emit callStatusChanged();
             }
         }
@@ -303,11 +304,10 @@ void Modem::listen(){
 
                 saveMessage(number, dateTime, message);
                 qDebug() << "New message from: " << number << " Message: " << message << " Date: " << dateTime;
+                emit newMessage();
             }
         }
     }
 }
 
-void Modem::callStatusChanged() {
-    callStatus = CS_INCOMING;
-}
+

@@ -21,7 +21,7 @@ public slots:
 
     void handleIncomingCall() const;
 
-    static void handleIncomingSMS();
+    void handleIncomingSMS();
 
 };
 
