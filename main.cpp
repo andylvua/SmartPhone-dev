@@ -26,17 +26,13 @@ int main(int argc, char *argv[]) {
     }
 
     Modem modem{serial};
+    modem.initialize();
 
-    std::thread main_listener_thread([&modem](){
-        modem.main_listening_thread();
-    });
 
-    modem.call("+380980699038");
 
-    GetCommand atCommand(AT, serial);
-    GetCommand cregCommand(AT_CREG"?", serial);
-    atCommand.execute();
-    cregCommand.execute();
+
+
+    modem.call("+380679027620");
 
     serial.close();
 
