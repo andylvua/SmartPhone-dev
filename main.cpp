@@ -6,6 +6,7 @@
 #include "Inc/commands_list.h"
 #include "Inc/serial.h"
 #include "Inc/modem.h"
+#include "Inc/cli.h"
 #include <thread>
 
 int main(int argc, char *argv[]) {
@@ -26,6 +27,8 @@ int main(int argc, char *argv[]) {
     }
 
     Modem modem{serial};
+    CLI cli{modem};
+
     bool modemReady = modem.initialize();
     // run listen thread to be able to receive messages and input commands
 

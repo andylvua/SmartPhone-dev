@@ -4,7 +4,13 @@
 
 #include "../Inc/cli.h"
 
-void CLI::handleIncomingCall() {
+CLI::CLI(Modem &modem) : modem(modem) {
+    connect(&modem, SIGNAL(callStatusChanged()), this, SLOT(handleIncomingCall()));
+    connect(&modem, SIGNAL(newMessage()), this, SLOT(handleIncomingSMS()));
+}
+
+void CLI::handleIncomingCall() const {
+    qDebug() << modem.callStatus;
     qDebug() << "Incoming call";
 }
 

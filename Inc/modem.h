@@ -47,7 +47,8 @@ struct Call {
     QDateTime endTime;
 };
 
-class Modem {
+class Modem : public QObject {
+    Q_OBJECT
 public:
     SerialPort &serial;
     commLineState_t commLineStatus;
@@ -82,6 +83,10 @@ public:
     void worker();
 
     void listen();
+
+signals:
+    void callStatusChanged();
+    void newMessage();
 };
 
 #endif //UNTITLED3_MODEM_H
