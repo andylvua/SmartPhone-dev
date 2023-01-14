@@ -53,7 +53,7 @@ class SetCommand : public Command {
 public:
     SetCommand(std::string commandText, SerialPort &serial);
 
-    void execute();
+    commRes_t execute();
 };
 
 class Task : public Command {

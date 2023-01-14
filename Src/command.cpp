@@ -84,7 +84,7 @@ QString GetCommand::execute() {
 SetCommand::SetCommand(std::string commandText, SerialPort &serial) :
     Command(std::move(commandText), commandType::setCommand,serial) {}
 
-void SetCommand::execute() {
+commRes_t SetCommand::execute() {
     auto request = QString::fromStdString(commandText);
     qDebug() << ("Request: "+getCommandText()).c_str();
 
@@ -97,6 +97,7 @@ void SetCommand::execute() {
             data += serial.readAll();
     } else {
         qDebug() << "Timeout";
+        return CR_TIMEOUT;
     }
 
     QString response = uartResponseParser(data);
@@ -104,12 +105,14 @@ void SetCommand::execute() {
     if (response.isValidUtf16() && !response.isNull() && !response.isEmpty() && response == "OK"){
         if (request != uartEchoParser(data)) {
             qDebug() << "Echo is not equal to request";
+            return CR_ERROR;
         }
 
         qDebug() << ("Response: " + response);
     }
     else {
         qDebug() << "Error: invalid response";
+        return CR_ERROR;
     }
 }
 
