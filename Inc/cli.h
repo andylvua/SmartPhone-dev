@@ -14,13 +14,14 @@ Q_OBJECT
 
 public:
 //    CLIState state;
-    Modem modem;
+    CLI(Modem &modem);
+    Modem &modem;
 
 public slots:
 
-    void handleIncomingCall();
+    void handleIncomingCall() const;
 
-    void handleIncomingSMS();
+    static void handleIncomingSMS();
 
 };
 
