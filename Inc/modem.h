@@ -31,6 +31,7 @@ public:
     SerialPort &serial;
     commLineState_t commLineStatus;
     callState_t callStatus;
+    bool workerStatus = false;
 
     explicit Modem(SerialPort &serial);
 
@@ -49,5 +50,7 @@ public:
     bool message(const std::string& number, const std::string& message);
 
     bool initialize();
+
+    void worker();
 };
 #endif //UNTITLED3_MODEM_H
