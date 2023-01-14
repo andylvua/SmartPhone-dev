@@ -10,10 +10,12 @@ CLI::CLI(Modem &modem) : modem(modem) {
 }
 
 void CLI::handleIncomingCall() const {
+
     qDebug() << modem.callStatus;
     qDebug() << "Incoming call";
 }
 
 void CLI::handleIncomingSMS() {
     qDebug() << "Incoming SMS";
+    modem.checkAT();
 }
