@@ -27,20 +27,15 @@ int main(int argc, char *argv[]) {
 
     Modem modem{serial};
     bool modemReady = modem.initialize();
-    if (modemReady){
+    if (modemReady) {
         modem.worker();
     }
 
 
-
-
-
-
-
     serial.close();
 
-    QMainWindow window;
-    window.show();
-    return QApplication::exec();
+//    QMainWindow window;
+//    window.show();
+//    return QApplication::exec();
 }
 

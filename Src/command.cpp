@@ -14,7 +14,7 @@ Command::Command(std::string commandText, commandType type, SerialPort &serial) 
     this->commandText = std::move(commandText);
 }
 
-std::string Command::getCommandText() const{
+std::string Command::getCommandText() const {
     return commandText;
 }
 
@@ -31,23 +31,29 @@ void Command::setType(commandType commandType) {
 }
 
 // Returns actual response from uart, dropping echo of command
-QString uartResponseParser(const QByteArray& response) {
+QString Command::uartResponseParser(const QByteArray &response) {
     auto responseString = QString(response);
+    if (responseString.isEmpty()) {
+        return responseString;
+    }
     QStringList parsedResponse;
     parsedResponse = responseString.split("\r\n");
     return QString{parsedResponse[2]};
 }
 
 // Returns echo of command, dropping actual response from uart
-QString uartEchoParser(const QByteArray& response) {
+QString Command::uartEchoParser(const QByteArray &response) {
     auto responseString = QString(response);
+    if (responseString.isEmpty()) {
+        return responseString;
+    }
     QStringList parsedResponse;
     parsedResponse = responseString.split("\r\n");
     return QString{parsedResponse[0]};
 }
 
 GetCommand::GetCommand(std::string commandText, SerialPort &serial) :
-    Command(std::move(commandText), commandType::getCommand,serial) {}
+        Command(std::move(commandText), commandType::getCommand, serial) {}
 
 
 QString GetCommand::execute() {
@@ -73,8 +79,7 @@ QString GetCommand::execute() {
         }
 
         qDebug() << ("Response: " + response);
-    }
-    else{
+    } else {
         qDebug() << "Error: invalid response";
     }
     return response;
@@ -82,11 +87,11 @@ QString GetCommand::execute() {
 
 
 SetCommand::SetCommand(std::string commandText, SerialPort &serial) :
-    Command(std::move(commandText), commandType::setCommand,serial) {}
+        Command(std::move(commandText), commandType::setCommand, serial) {}
 
 commRes_t SetCommand::execute() {
     auto request = QString::fromStdString(commandText);
-    qDebug() << ("Request: "+getCommandText()).c_str();
+    qDebug() << ("Request: " + getCommandText()).c_str();
 
     serial.write((getCommandText() + "\r\n").c_str());
 
@@ -102,15 +107,14 @@ commRes_t SetCommand::execute() {
 
     QString response = uartResponseParser(data);
 
-    if (response.isValidUtf16() && !response.isNull() && !response.isEmpty() && response == "OK"){
+    if (response.isValidUtf16() && !response.isNull() && !response.isEmpty() && response == "OK") {
         if (request != uartEchoParser(data)) {
             qDebug() << "Echo is not equal to request";
             return CR_ERROR;
         }
 
         qDebug() << ("Response: " + response);
-    }
-    else {
+    } else {
         qDebug() << "Error: invalid response";
         return CR_ERROR;
     }
@@ -119,7 +123,7 @@ commRes_t SetCommand::execute() {
 }
 
 Task::Task(std::string commandText, SerialPort &serial) :
-    Command(std::move(commandText), commandType::task, serial) {};
+        Command(std::move(commandText), commandType::task, serial) {};
 
 commRes_t Task::execute() {
     auto request = QString::fromStdString(commandText);
@@ -142,7 +146,7 @@ commRes_t Task::execute() {
     if (response.isValidUtf16() && !response.isNull() && !response.isEmpty()) {
         if (request != uartEchoParser(data)) {
             qDebug() << "Echo is not equal to request. Actual echo: " << uartEchoParser(data)
-            << " Request: " << request;
+                     << " Request: " << request;
             return commRes_t::CR_ERROR;
         }
 
@@ -153,8 +157,7 @@ commRes_t Task::execute() {
 
         qDebug() << ("Response: " + response);
         return commRes_t::CR_OK;
-    }
-    else {
+    } else {
         qDebug() << "Error: invalid response";
         return commRes_t::CR_ERROR;
     }

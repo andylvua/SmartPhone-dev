@@ -38,6 +38,10 @@ public:
 
     void setType(commandType commandType);
 
+    static QString uartResponseParser(const QByteArray &response);
+
+    static QString uartEchoParser(const QByteArray &response);
+
     ~Command() = default;
 };
 
@@ -46,7 +50,6 @@ public:
     GetCommand(std::string commandText, SerialPort &serial);
 
     QString execute();
-    friend QString uartResponseParser(const QByteArray& response);
 };
 
 class SetCommand : public Command {
