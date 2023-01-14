@@ -158,7 +158,6 @@ commRes_t Task::execute() {
         qDebug() << "Error: invalid response";
         return commRes_t::CR_ERROR;
     }
-    return CR_OK;
 }
 
 
