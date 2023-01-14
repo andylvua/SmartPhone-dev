@@ -20,6 +20,14 @@ void Modem::setCommLineStatus(commLineState_t commLineStatusSet) {
     Modem::commLineStatus = commLineStatusSet;
 }
 
+QString Modem::parseLine(const QByteArray &line) {
+    QString lineString = QString(line);
+    if (lineString.isEmpty())
+        return lineString;
+    QString parsedLine = lineString.replace("\r\n\r\n", "\n").replace("\r\n", "");
+    return parsedLine;
+}
+
 bool Modem::checkAT() {
     if (commLineStatus == CLS_FREE) {
         commLineStatus = CLS_ATCMD;
@@ -56,7 +64,7 @@ bool Modem::checkRegistration() {
     }
 }
 
-bool Modem::call(const std::string& number) {
+bool Modem::call(const std::string &number) {
     if (commLineStatus != CLS_FREE) {
         return false;
     }
@@ -88,9 +96,9 @@ bool Modem::call(const std::string& number) {
         }
 
         if (response.contains("NO CARRIER")
-        || response.contains("BUSY")
-        || response.contains("NO ANSWER")
-        || response.contains("ERROR")) {
+            || response.contains("BUSY")
+            || response.contains("NO ANSWER")
+            || response.contains("ERROR")) {
             callStatus = CS_IDLE;
             std::cout << "Call is idle. Failed to connect" << std::endl;
             break;
@@ -125,7 +133,7 @@ bool Modem::hangUp() {
     }
 }
 
-bool Modem::message(const std::string& number, const std::string& message) {
+bool Modem::message(const std::string &number, const std::string &message) {
     if (commLineStatus == CLS_FREE) {
         commLineStatus = CLS_ATCMD;
         SetCommand set_message_mode = SetCommand(AT_CMGF"=1", serial);
@@ -187,12 +195,14 @@ void Modem::worker() {
     while (Modem::workerStatus) {
         QByteArray data;
 
-        while (serial.waitForReadyRead(100)){
+        while (serial.waitForReadyRead(100)) {
             if (serial.bytesAvailable())
-                data+= serial.readAll();
+                data += serial.readAll();
         }
-        qDebug()<< data;
 
+
+        qDebug() << parseLine(data);
+//            qDebug()<<data;
     }
 }
 

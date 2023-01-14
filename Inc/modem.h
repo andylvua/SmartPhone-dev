@@ -39,18 +39,21 @@ public:
 
     void setCommLineStatus(commLineState_t commLineStatus);
 
+    QString parseLine(const QByteArray &line);
+
     bool checkAT();
 
     bool checkRegistration();
 
-    bool call(const std::string& number);
+    bool call(const std::string &number);
 
     bool hangUp();
 
-    bool message(const std::string& number, const std::string& message);
+    bool message(const std::string &number, const std::string &message);
 
     bool initialize();
 
     void worker();
 };
+
 #endif //UNTITLED3_MODEM_H
