@@ -40,12 +40,14 @@ public:
 
     bool checkAT();
 
+    bool checkRegistration();
+
     bool call(const std::string& number);
 
     bool hangUp();
 
     bool message(const std::string& number, const std::string& message);
 
-    [[noreturn]] void main_listening_thread();
+    bool initialize();
 };
 #endif //UNTITLED3_MODEM_H

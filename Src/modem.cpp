@@ -27,7 +27,30 @@ bool Modem::checkAT() {
         auto response = command.execute();
         commLineStatus = CLS_FREE;
 
-        return response == "OK";
+        if (response.indexOf("OK") != -1) {
+            return true;
+        }
+
+        return false;
+    } else {
+        return false;
+    }
+}
+
+bool Modem::checkRegistration() {
+    if (commLineStatus == CLS_FREE) {
+        commLineStatus = CLS_ATCMD;
+        GetCommand command = GetCommand(AT_CREG"?", serial);
+        auto response = command.execute();
+        commLineStatus = CLS_FREE;
+
+        if (response.indexOf("+CREG: 0,1") != -1
+            || (response.indexOf("+CREG: 0,5") != -1)
+            || (response.indexOf("+CREG: 1,1") != -1)
+            || (response.indexOf("+CREG: 1,5") != -1)) {
+            return true;
+        }
+        return false;
     } else {
         return false;
     }
@@ -128,21 +151,32 @@ bool Modem::message(const std::string& number, const std::string& message) {
     }
 }
 
-[[noreturn]] void Modem::main_listening_thread() {
-    while (true) {
-        if (serial.waitForReadyRead(1000)) {
-            auto response = serial.readAll();
 
-            if (response.contains("RING")) {
-                callStatus = CS_INCOMING;
-                std::cout << "Call is incoming" << std::endl;
-            }
-
-            if (response.contains("\"CALL\",0")) {
-                callStatus = CS_IDLE;
-                std::cout << "Call is idle" << std::endl;
-            }
-
-        }
+bool Modem::initialize() {
+    // Check AT
+    bool atStatus = checkAT();
+    if (!atStatus) {
+        qDebug() << "Error: AT command failed";
+        return false;
     }
+
+    // Set message mode to TEXT
+    SetCommand set_message_mode = SetCommand(AT_CMGF"=1", serial);
+    commRes_t messageModeStatus = set_message_mode.execute();
+
+    if (messageModeStatus != CR_OK) {
+        qDebug() << "Error: message mode failed";
+        return false;
+    }
+
+    // Check registration
+    bool registrationStatus = checkRegistration();
+    if (!registrationStatus) {
+        qDebug() << "Error: registration failed";
+        return false;
+    }
+
+    qDebug() << "Modem initialized";
+    return true;
 }
+
