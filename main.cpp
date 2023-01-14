@@ -26,13 +26,16 @@ int main(int argc, char *argv[]) {
     }
 
     Modem modem{serial};
-    modem.initialize();
+    bool modemReady = modem.initialize();
+    if (modemReady){
+        modem.worker();
+    }
 
 
 
 
 
-    modem.call("+380679027620");
+
 
     serial.close();
 

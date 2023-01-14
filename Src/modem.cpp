@@ -185,9 +185,14 @@ void Modem::worker() {
     Modem::workerStatus = true;
 
     while (Modem::workerStatus) {
-        auto output = serial.readAll();
-        QThread::msleep(500);
-        qDebug() << output;
+        QByteArray data;
+
+        while (serial.waitForReadyRead(100)){
+            if (serial.bytesAvailable())
+                data+= serial.readAll();
+        }
+        qDebug()<< data;
+
     }
 }
 
