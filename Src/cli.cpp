@@ -5,12 +5,12 @@
 #include "../Inc/cli.h"
 
 CLI::CLI(Modem &modem) : modem(modem) {
-    connect(&modem, SIGNAL(callStatusChanged()), this, SLOT(handleIncomingCall()));
-    connect(&modem, SIGNAL(newMessage()), this, SLOT(handleIncomingSMS()));
+    connect(&modem, SIGNAL(incomingCall()), this, SLOT(handleIncomingCall()));
+    connect(&modem, SIGNAL(incomingSMS()), this, SLOT(handleIncomingSMS()));
+    connect(this, SIGNAL(requestCall(QString)), &modem, SLOT(performCall(QString)));
 }
 
 void CLI::handleIncomingCall() const {
-
     qDebug() << modem.callStatus;
     qDebug() << "Incoming call";
 }
