@@ -25,7 +25,47 @@ int main(int argc, char *argv[]) {
     }
 
     Modem modem{serial};
-    CLI cli{modem};
+    Screen mainScreen("Main", nullptr);
+    mainScreen.addScreenOption("0. Exit");
+    mainScreen.addScreenOption("1. Phone");
+    mainScreen.addScreenOption("2. SMS");
+    mainScreen.addScreenOption("3. USSD Console");
+    mainScreen.addScreenOption("4. AT Console");
+    mainScreen.addScreenOption("5. Logs");
+    Screen incomingCallScreen("Incoming Call", &mainScreen);
+    incomingCallScreen.addScreenOption("0. Hang up");
+    incomingCallScreen.addScreenOption("1. Answer");
+    Screen phoneScreen("Phone", &mainScreen);
+    phoneScreen.addScreenOption("0. Back");
+    phoneScreen.addScreenOption("1. Call");
+    phoneScreen.addScreenOption("2. Contacts");
+    Screen callScreen("Call", &phoneScreen);
+    callScreen.addScreenOption("0. Return");
+    callScreen.addScreenOption("1. Make Call");
+    Screen inCallScreen("In Call", &callScreen);
+    inCallScreen.addScreenOption("0. Hang up");
+    Screen contactsScreen("Contacts", &phoneScreen);
+    contactsScreen.addScreenOption("0. Back");
+    contactsScreen.addScreenOption("1. Add Contact");
+    contactsScreen.addScreenOption("2. Remove Contact");
+    contactsScreen.addScreenOption("3. View Contacts");
+    Screen smsScreen("SMS", &mainScreen);
+    smsScreen.addScreenOption("0. Back");
+    smsScreen.addScreenOption("1. Send SMS");
+    smsScreen.addScreenOption("2. Messages");
+    Screen sendSMSScreen("Send SMS", &smsScreen);
+    sendSMSScreen.addScreenOption("0. Back");
+    sendSMSScreen.addScreenOption("1. Write SMS");
+
+    CLI cli{modem, mainScreen};
+    cli.addScreen(mainScreen);
+    cli.addScreen(incomingCallScreen);
+    cli.addScreen(phoneScreen);
+    cli.addScreen(callScreen);
+    cli.addScreen(smsScreen);
+    cli.addScreen(sendSMSScreen);
+    cli.addScreen(inCallScreen);
+    cli.addScreen(contactsScreen);
 
     bool modemReady = modem.initialize();
 
@@ -34,11 +74,11 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    std::thread workerThread([&modem] {
-        modem.worker();
+    std::thread workerThread([&cli] {
+        cli.listen();
     });
 
-    cli.listen();
+    modem.worker();
 
     workerThread.join();
     serial.close();

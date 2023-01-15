@@ -89,19 +89,13 @@ bool Modem::call(const std::string &number) {
 }
 
 bool Modem::hangUp() {
-    if (commLineStatus == CLS_FREE) {
-        commLineStatus = CLS_ATCMD;
-        Task task(ATH, serial);
-        commRes_t res = task.execute();
 
-        if (res == CR_OK) {
-            commLineStatus = CLS_FREE;
-            callStatus = CS_IDLE;
-            return true;
-        } else {
-            commLineStatus = CLS_FREE;
-            return false;
-        }
+    Task task(ATH, serial);
+    commRes_t res = task.execute();
+
+    if (res == CR_OK) {
+        callStatus = CS_IDLE;
+        return true;
     } else {
         return false;
     }
@@ -282,7 +276,7 @@ void Modem::_ciev_call_0Handler(const QString &parsedLine) {
 
     callStatus = CS_IDLE;
     saveCall(currentCall);
-
+    emit callEnded();
     qDebug() << "Call ended";
 }
 
@@ -348,7 +342,45 @@ void Modem::listen() {
     }
 }
 
-void Modem::performCall(const QString &number) {
-    qDebug() << "Performing call: " << number;
-    call(number.toStdString());
+
+void Modem::addContact(const std::string &name, const std::string &number) {
+    std::string data = name + "; " + number;
+    writeToFile("contacts.txt", data);
+}
+
+void Modem::removeContact(const std::string &name) {
+    std::ifstream file("contacts.txt");
+    std::string line;
+    std::string data;
+
+    while (std::getline(file, line)) {
+        if (line.find(name) == std::string::npos)
+            data += line + "\n";
+    }
+
+    file.close();
+
+    std::ofstream contactsFile("contacts.txt");
+    contactsFile << data;
+}
+
+void Modem::listContacts() {
+    std::ifstream file("contacts.txt");
+    std::string line;
+    std::string data;
+
+    while (std::getline(file, line)) {
+        auto contact = QString::fromStdString(line).split("; ");
+        qDebug() << "Name: " << contact[0] << "\n" << " Number: " << contact[1] << "\n";
+    }
+}
+void Modem::listMessages() {
+    std::ifstream file("messages.txt");
+    std::string line;
+    std::string data;
+
+    while (std::getline(file, line)) {
+        auto message = QString::fromStdString(line).split("; ");
+        qDebug() << "Number: " << message[0] << "\n" << " Date: " << message[1] << "\n" << " Message: " << message[2] << "\n";
+    }
 }
