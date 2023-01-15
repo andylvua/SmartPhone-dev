@@ -2,8 +2,6 @@
 #include <QtSerialPort/QSerialPort>
 #include <QtSerialPort/QSerialPortInfo>
 
-#include "Inc/command.h"
-#include "Inc/commands_list.h"
 #include "Inc/serial.h"
 #include "Inc/modem.h"
 #include "Inc/cli.h"
@@ -30,12 +28,19 @@ int main(int argc, char *argv[]) {
     CLI cli{modem};
 
     bool modemReady = modem.initialize();
-    // run listen thread to be able to receive messages and input commands
 
-    if (modemReady) {
-        modem.worker();
+    if (!modemReady) {
+        qDebug() << "Modem initialization failed. Exiting...";
+        return 1;
     }
 
+    std::thread workerThread([&modem] {
+        modem.worker();
+    });
+
+    cli.listen();
+
+    workerThread.join();
     serial.close();
 
 //    QMainWindow window;
