@@ -8,14 +8,22 @@
 
 #include <QObject>
 #include "modem.h"
+#include <readline/readline.h>
+#include <readline/history.h>
 
 class CLI : public QObject {
 Q_OBJECT
 
 public:
-//    CLIState state;
-    CLI(Modem &modem);
+    explicit CLI(Modem &modem);
+
     Modem &modem;
+
+    void listen();
+
+signals:
+
+    void requestCall(const QString &number);
 
 public slots:
 
