@@ -6,9 +6,8 @@
 #define UNTITLED3_MODEM_H
 
 #include "serial.h"
-#include <chrono>
-#include <ctime>
 #include <QDateTime>
+#include <string>
 #include <utility>
 
 typedef enum {
@@ -85,15 +84,23 @@ public:
 
     void listen();
 
+    static void addContact(const std::string &name, const std::string &number);
+
+    static void removeContact(const std::string &name);
+
+    static void listContacts();
+
+    static void listMessages();
+
 signals:
 
     void incomingCall();
 
     void incomingSMS();
 
-public slots:
+    void callEnded();
 
-    void performCall(const QString &number);
+public slots:
 
 
 private:

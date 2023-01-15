@@ -24,6 +24,6 @@ target_link_libraries(phone
         )
 
 
-#set(CMAKE_PREFIX_PATH "/usr/local/opt/readline")
+set(CMAKE_PREFIX_PATH "/usr/share/readline")
 
-#target_link_libraries(phone readline)
+target_link_libraries(phone readline)
