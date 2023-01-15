@@ -10,6 +10,7 @@
 
 Modem::Modem(SerialPort &serial) : serial(serial) {
     commLineStatus = CLS_FREE;
+    callStatus = CS_IDLE;
 }
 
 commLineState_t Modem::getCommLineStatus() const {
@@ -29,39 +30,40 @@ QString Modem::parseLine(const QByteArray &line) {
 }
 
 bool Modem::checkAT() {
-    if (commLineStatus == CLS_FREE) {
-        commLineStatus = CLS_ATCMD;
-        GetCommand command = GetCommand(AT, serial);
-        auto response = command.execute();
-        commLineStatus = CLS_FREE;
-
-        if (response.indexOf("OK") != -1) {
-            return true;
-        }
-
-        return false;
-    } else {
+    if (commLineStatus != CLS_FREE) {
         return false;
     }
+
+    commLineStatus = CLS_ATCMD;
+    GetCommand command = GetCommand(AT, serial);
+    auto response = command.execute();
+    commLineStatus = CLS_FREE;
+
+    if (response.indexOf("OK") != -1) {
+        return true;
+    }
+
+    return false;
 }
 
 bool Modem::checkRegistration() {
-    if (commLineStatus == CLS_FREE) {
-        commLineStatus = CLS_ATCMD;
-        GetCommand command = GetCommand(AT_CREG"?", serial);
-        auto response = command.execute();
-        commLineStatus = CLS_FREE;
-
-        if (response.indexOf("+CREG: 0,1") != -1
-            || (response.indexOf("+CREG: 0,5") != -1)
-            || (response.indexOf("+CREG: 1,1") != -1)
-            || (response.indexOf("+CREG: 1,5") != -1)) {
-            return true;
-        }
-        return false;
-    } else {
+    if (commLineStatus != CLS_FREE) {
         return false;
     }
+
+    commLineStatus = CLS_ATCMD;
+    GetCommand command = GetCommand(AT_CREG"?", serial);
+    auto response = command.execute();
+    commLineStatus = CLS_FREE;
+
+    if (response.indexOf("+CREG: 0,1") != -1
+        || (response.indexOf("+CREG: 0,5") != -1)
+        || (response.indexOf("+CREG: 1,1") != -1)
+        || (response.indexOf("+CREG: 1,5") != -1)) {
+        return true;
+    }
+
+    return false;
 }
 
 bool Modem::call(const std::string &number) {
@@ -72,46 +74,18 @@ bool Modem::call(const std::string &number) {
     commLineStatus = CLS_ATCMD;
     Task task(ATD + number + ";", serial);
     commRes_t res = task.execute();
+    commLineStatus = CLS_FREE;
 
-    if (res != CR_OK) {
-        commLineStatus = CLS_FREE;
-        std::cout << "Error: " << res << std::endl;
-        return false;
+    if (res == CR_OK) {
+        currentCall.callDirection = CD_OUTGOING;
+        currentCall.callResult = CR_NO_ANSWER;
+        currentCall.number = QString::fromStdString(number);
+        currentCall.startTime = QDateTime::currentDateTime();
+        callStatus = CS_DIALING;
+        return true;
     }
 
-    callStatus = CS_WAITING;
-
-    int timeout = 15000;
-    while (serial.waitForReadyRead(1000)) {
-        auto response = serial.readAll();
-        if (response.contains("\"SOUNDER\",0")) {
-            callStatus = CS_ACTIVE;
-            std::cout << "Call is active" << std::endl;
-            break;
-        }
-
-        if (response.contains("\"SOUNDER\",1")) {
-            callStatus = CS_DIALING;
-            std::cout << "Call is dialing" << std::endl;
-        }
-
-        if (response.contains("NO CARRIER")
-            || response.contains("BUSY")
-            || response.contains("NO ANSWER")
-            || response.contains("ERROR")) {
-            callStatus = CS_IDLE;
-            std::cout << "Call is idle. Failed to connect" << std::endl;
-            break;
-        }
-
-        timeout -= 1000;
-        if (timeout <= 0) {
-            callStatus = CS_IDLE;
-            std::cout << "Call is idle. Timeout" << std::endl;
-            return false;
-        }
-    }
-    return true;
+    return false;
 }
 
 bool Modem::hangUp() {
@@ -151,6 +125,7 @@ bool Modem::answer() {
         return false;
     }
 }
+
 bool Modem::message(const std::string &number, const std::string &message) {
     if (commLineStatus == CLS_FREE) {
         commLineStatus = CLS_ATCMD;
@@ -179,7 +154,6 @@ bool Modem::message(const std::string &number, const std::string &message) {
 
 
 bool Modem::initialize() {
-    // check if persistance .txt files exist, if not create them (persistance files must include messages and calls history)
     std::ifstream messagesFile("messages.txt");
 
     if (!messagesFile.is_open()) {
@@ -201,14 +175,12 @@ bool Modem::initialize() {
         createContactsFile.close();
     }
 
-    // Check AT
     bool atStatus = checkAT();
     if (!atStatus) {
         qDebug() << "Error: AT command failed";
         return false;
     }
 
-    // Set message mode to TEXT
     SetCommand set_message_mode = SetCommand(AT_CMGF"=1", serial);
     commRes_t messageModeStatus = set_message_mode.execute();
 
@@ -217,7 +189,6 @@ bool Modem::initialize() {
         return false;
     }
 
-    // Check registration
     bool registrationStatus = checkRegistration();
     if (!registrationStatus) {
         qDebug() << "Error: registration failed";
@@ -226,7 +197,7 @@ bool Modem::initialize() {
 
     SetCommand setNumberIDTrue = SetCommand("AT+CLIP=1", serial);
     commRes_t numberIdentifierStatus = setNumberIDTrue.execute();
-    if (numberIdentifierStatus!=CR_OK){
+    if (numberIdentifierStatus != CR_OK) {
         qDebug() << "Error: number identification failed";
         return false;
     }
@@ -249,9 +220,11 @@ void saveMessage(const QString &number, const QString &dateTime, const QString &
 void saveCall(const Call &call) {
     QString dateTime = call.startTime.toString("dd.MM.yyyy hh:mm:ss");
     QString duration = QString::number(call.startTime.secsTo(call.endTime));
+    std::string callDirection = call.callDirection == CD_INCOMING ? "INCOMING" : "OUTGOING";
     std::string isMissed = call.callResult == CR_NO_ANSWER ? "missed" : "accepted";
+
     std::string data = call.number.toStdString() + "; " + dateTime.toStdString() + "; "
-            + duration.toStdString() + "; " + isMissed;
+                       + duration.toStdString() + "; " + callDirection + "; " + isMissed;
     writeToFile("calls.txt", data);
 }
 
@@ -259,55 +232,123 @@ void Modem::worker() {
     Modem::workerStatus = true;
     Modem::listen();
 }
-void Modem::listen(){
-    while (Modem::workerStatus) {
-        QByteArray data;
 
-        while (serial.waitForReadyRead(100)) {
-            if (serial.bytesAvailable())
-                data += serial.readAll();
+QByteArray Modem::readLine() {
+    QByteArray data;
+
+    while (serial.waitForReadyRead(100)) {
+        if (serial.bytesAvailable())
+            data += serial.readAll();
+    }
+
+    return data;
+}
+
+void Modem::dataInterruptHandler() {
+    QByteArray data;
+
+    serial.buffer.clear();
+    if (serial.waitForReadyRead(serial.timeout)) {
+        data = serial.readAll();
+        while (serial.waitForReadyRead(serial.timeout))
+            data += serial.readAll();
+    }
+
+    serial.buffer = data;
+    serial.interruptDataRead = false;
+}
+
+void Modem::_ringHandler(const QString &parsedLine) {
+    if (parsedLine.contains("CLIP")) {
+        QString number = parsedLine.split("\"")[1];
+        currentCall = Call{};
+        currentCall.callDirection = CD_INCOMING;
+        currentCall.number = number;
+        currentCall.startTime = QDateTime::currentDateTime();
+        currentCall.callResult = CR_NO_ANSWER;
+        qDebug() << "Incoming call from: " << number;
+        callStatus = CS_INCOMING;
+        emit incomingCall();
+    }
+}
+
+void Modem::_ciev_call_0Handler(const QString &parsedLine) {
+    currentCall.endTime = QDateTime::currentDateTime();
+
+    if (parsedLine.contains("BUSY")) {
+        currentCall.callResult = CR_NO_ANSWER;
+        qDebug() << "Call busy";
+    }
+
+    callStatus = CS_IDLE;
+    saveCall(currentCall);
+
+    qDebug() << "Call ended";
+}
+
+
+void Modem::_ciev_call_1Handler() {
+    if (currentCall.callDirection == CD_INCOMING) {
+        currentCall.callResult = CR_ANSWERED;
+        callStatus = CS_ACTIVE;
+        qDebug() << "Call answered";
+    }
+
+    qDebug() << "Outgoing call";
+}
+
+void Modem::_sounder_0Handler() {
+    if (currentCall.callDirection == CD_OUTGOING) {
+        currentCall.callResult = CR_ANSWERED;
+        callStatus = CS_ACTIVE;
+        qDebug() << "Call answered/declined";
+    }
+}
+
+void Modem::_message_1Handler(const QString &parsedLine) {
+    if (parsedLine.contains("CMT")) {
+        QString number = parsedLine.split("\"")[3];
+        QString dateTime = parsedLine.split("\"")[5];
+        QString message = parsedLine.split("\"")[6];
+
+        saveMessage(number, dateTime, message);
+        qDebug() << "New message from: " << number << " Message: " << message << " Date: " << dateTime;
+        emit incomingSMS();
+    }
+}
+
+void Modem::listen() {
+    while (Modem::workerStatus) {
+        if (serial.interruptDataRead) {
+            dataInterruptHandler();
         }
 
+        QByteArray data = readLine();
         QString parsedLine = parseLine(data);
 
         if (parsedLine.contains("RING")) {
-            if (parsedLine.contains("CLIP")) {
-                QString number = parsedLine.split("\"")[1];
-                currentCall = Call{};
-                currentCall.callDirection = CD_INCOMING;
-                currentCall.number = number;
-                currentCall.startTime = QDateTime::currentDateTime();
-                currentCall.callResult = CR_NO_ANSWER;
-                qDebug() << "Incoming call from: " << number;
-                callStatus = CS_INCOMING;
-                emit callStatusChanged();
-            }
+            _ringHandler(parsedLine);
         }
 
         if (parsedLine.contains("CIEV: \"CALL\",1")) {
-            currentCall.callResult = CR_ANSWERED;
-            qDebug() << "Call is active";
+            _ciev_call_1Handler();
+        }
+
+        if (parsedLine.contains("+CIEV: \"SOUNDER\",0")) {
+            _sounder_0Handler();
         }
 
         if (parsedLine.contains("CIEV: \"CALL\",0")) {
-            currentCall.endTime = QDateTime::currentDateTime();
-
-            saveCall(currentCall);
-            qDebug() << "Call is idle";
+            _ciev_call_0Handler(parsedLine);
         }
 
         if (parsedLine.contains("CIEV: \"MESSAGE\",1")) {
-            if (parsedLine.contains("CMT")) {
-                QString number = parsedLine.split("\"")[3];
-                QString dateTime = parsedLine.split("\"")[5];
-                QString message = parsedLine.split("\"")[6];
-
-                saveMessage(number, dateTime, message);
-                qDebug() << "New message from: " << number << " Message: " << message << " Date: " << dateTime;
-                emit newMessage();
-            }
+            _message_1Handler(parsedLine);
         }
     }
 }
 
-
+void Modem::performCall(const QString &number) {
+    qDebug() << "Performing call: " << number;
+    call(number.toStdString());
+}
