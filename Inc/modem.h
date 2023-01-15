@@ -11,14 +11,12 @@
 #include <QDateTime>
 #include <utility>
 
-// commLineState
 typedef enum {
     CLS_FREE,
     CLS_ATCMD,
     CLS_DATA
 } commLineState_t;
 
-// callState
 typedef enum {
     CS_IDLE,
     CS_ACTIVE,
@@ -48,13 +46,12 @@ struct Call {
 };
 
 class Modem : public QObject {
-    Q_OBJECT
+Q_OBJECT
 public:
     SerialPort &serial;
     commLineState_t commLineStatus;
     callState_t callStatus;
     Call currentCall;
-    bool newSMS;
 
     bool workerStatus = false;
 
@@ -82,11 +79,34 @@ public:
 
     void worker();
 
+    QByteArray readLine();
+
+    void dataInterruptHandler();
+
     void listen();
 
 signals:
-    void callStatusChanged();
-    void newMessage();
+
+    void incomingCall();
+
+    void incomingSMS();
+
+public slots:
+
+    void performCall(const QString &number);
+
+
+private:
+
+    void _ringHandler(const QString &parsedLine);
+
+    void _ciev_call_1Handler();
+
+    void _ciev_call_0Handler(const QString &parsedLine);
+
+    void _sounder_0Handler();
+
+    void _message_1Handler(const QString &parsedLine);
 };
 
 #endif //UNTITLED3_MODEM_H
