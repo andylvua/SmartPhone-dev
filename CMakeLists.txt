@@ -16,7 +16,7 @@ find_package(Qt5 COMPONENTS
         SerialPort
         REQUIRED)
 
-add_executable(phone main.cpp Src/command.cpp Inc/command.h Src/serial.cpp Inc/serial.h Inc/modem.h Src/modem.cpp Inc/cli.h Src/cli.cpp Inc/contact.h)
+add_executable(phone main.cpp Src/command.cpp Inc/command.h Src/serial.cpp Inc/serial.h Inc/modem.h Src/modem.cpp Inc/cli.h Src/cli.cpp Inc/contact.h Src/screen.cpp Inc/screen.h)
 target_link_libraries(phone
         Qt5::Core
         Qt5::Widgets
