@@ -19,3 +19,23 @@ void CLI::handleIncomingSMS() {
     qDebug() << "Incoming SMS";
     modem.checkAT();
 }
+
+void CLI::listen() {
+char *line;
+    while ((line = readline(">>> "))) {
+        if (line[0] == '\0') {
+            continue;
+        }
+
+        add_history(line);
+
+        if (strcmp(line, "exit") == 0) {
+            break;
+        }
+
+        if (strcmp(line, "call") == 0) {
+            qDebug() << "Requesting call";
+            emit requestCall("+380679027620");
+        }
+    }
+}
