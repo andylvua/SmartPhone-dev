@@ -1,10 +1,9 @@
 //
 // Created by paul on 12/1/22.
 //
+
 #include "../Inc/command.h"
-#include <QtSerialPort/QSerialPort>
 #include <QtSerialPort/QSerialPortInfo>
-#include <QTextStream>
 #include <QThread>
 #include <QDebug>
 #include "../Inc/serial.h"
@@ -123,40 +122,34 @@ commRes_t SetCommand::execute() {
 }
 
 Task::Task(std::string commandText, SerialPort &serial) :
-        Command(std::move(commandText), commandType::task, serial) {};
+        Command(std::move(commandText), commandType::task, serial) {}
 
 commRes_t Task::execute() {
     auto request = QString::fromStdString(commandText);
     qDebug() << ("Request: " + request);
 
+    serial.interruptDataRead = true;
+
     serial.write((getCommandText() + "\r\n").c_str());
 
-    QByteArray data;
-    if (serial.waitForReadyRead(serial.timeout)) {
-        data = serial.readAll();
-        while (serial.waitForReadyRead(serial.timeout))
-            data += serial.readAll();
-    } else {
+    while (serial.interruptDataRead) {
+        QThread::msleep(100);
+    }
+
+    QByteArray data = serial.buffer;
+
+    if (data.isEmpty()) {
         qDebug() << "Timeout";
-        return commRes_t::CR_TIMEOUT;
+        return CR_TIMEOUT;
     }
 
     QString response = uartResponseParser(data);
+    qDebug() << ("Unparsed response: " + QString(data));
 
     if (response.isValidUtf16() && !response.isNull()) {
         if (response.contains("ERROR")) {
             qDebug() << "ERROR: Response contains ERROR";
             return commRes_t::CR_ERROR;
-        }
-
-        if (request != uartEchoParser(data)) {
-            qDebug() << "Echo is not equal to request. Actual echo: " << uartEchoParser(data)
-                     << " Request: " << request;
-            return commRes_t::CR_ERROR;
-        }
-
-        if (response.isEmpty()) {
-            qDebug() << "WARNING: Response is empty";
         }
 
         qDebug() << ("Response: " + response);
@@ -166,12 +159,3 @@ commRes_t Task::execute() {
         return commRes_t::CR_ERROR;
     }
 }
-
-
-// redundant
-//
-//OneTimeCommand::OneTimeCommand(std::string commandText, SerialPort &serial) :
-//    Command(std::move(commandText),commandType::oneTimeCommand,serial) {};
-//
-//void OneTimeCommand::execute() {
-//}
