@@ -37,7 +37,13 @@ QString Command::uartResponseParser(const QByteArray &response) {
     }
     QStringList parsedResponse;
     parsedResponse = responseString.split("\r\n");
-    return QString{parsedResponse[2]};
+
+    if (parsedResponse.size() > 2) {
+        return QString{parsedResponse[2]};
+    } else {
+        qDebug() << "WARNING: Response from UART was not parsed correctly";
+        return QString{};
+    }
 }
 
 // Returns echo of command, dropping actual response from uart

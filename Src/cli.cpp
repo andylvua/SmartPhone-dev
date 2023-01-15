@@ -14,10 +14,13 @@ void CLI::addScreen(Screen &screen) {
     screens.push_back(screen);
 }
 void CLI::renderScreen() {
-    QProcess::execute("clear");
-    qDebug() << currentScreen.screenName;
+    // Clear the screen
+//    std::cout << "\033[2J\033[1;1H";
+    system("clear");
+
+    std::cout << currentScreen.screenName.toStdString() << std::endl;
     for (auto &option : currentScreen.screenOptions) {
-        qDebug() << option;
+        std::cout << option.toStdString() << std::endl;
     }
 }
 void CLI::changeScreen(Screen &screen) {
@@ -200,7 +203,7 @@ void CLI::contactsScreenHandler(char *line) {
         qDebug() << "Listing contacts";
         Modem::listContacts();
         changeScreen("Contacts");
-        renderScreen();
+//        renderScreen();
     }
 }
 void CLI::sendSMSScreenHandler(char *line) {
@@ -223,7 +226,7 @@ void CLI::sendSMSScreenHandler(char *line) {
 void CLI::listen() {
     char *line;
     renderScreen();
-    qDebug() << ">>> ";
+    std::cout << ">>> ";
 
     while ((line = readline(""))) {
         if (line[0] == '\0') {
@@ -274,7 +277,7 @@ void CLI::listen() {
             qDebug() << "Unknown screen";
         }
 
-        qDebug() << ">>> ";
+        std::cout << ">>> ";
 
         //        if ((strcmp(line, "exit") == 0) || (strcmp(line, "quit") == 0)|| (strcmp(line, "0") == 0)) {
         //            if (currentScreen.parentScreen != nullptr) {

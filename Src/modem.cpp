@@ -242,9 +242,9 @@ void Modem::dataInterruptHandler() {
     QByteArray data;
 
     serial.buffer.clear();
-    if (serial.waitForReadyRead(serial.timeout)) {
+    if (serial.waitForReadyRead(100)) {
         data = serial.readAll();
-        while (serial.waitForReadyRead(serial.timeout))
+        while (serial.waitForReadyRead(100))
             data += serial.readAll();
     }
 
@@ -287,8 +287,6 @@ void Modem::_ciev_call_1Handler() {
         callStatus = CS_ACTIVE;
         qDebug() << "Call answered";
     }
-
-    qDebug() << "Outgoing call";
 }
 
 void Modem::_sounder_0Handler() {
