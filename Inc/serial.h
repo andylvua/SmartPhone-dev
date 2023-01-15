@@ -24,6 +24,8 @@ class SerialPort : public QSerialPort {
 
 public:
     int timeout;
+    bool interruptDataRead = false;
+    QByteArray buffer;
 
     SerialPort(const char *portName, int timeout, QSerialPort::BaudRate baudRate, QSerialPort::DataBits dataBits,
                QSerialPort::Parity parity, QSerialPort::StopBits stopBits, QSerialPort::FlowControl flowControl);
