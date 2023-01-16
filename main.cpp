@@ -10,7 +10,14 @@
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
 
-    SerialPort serial("/dev/ttyUSB0",
+    // For debugging purposes only
+    #ifdef __APPLE__
+        const char* portName = "/dev/tty.usbserial-1410";
+    #elif __linux__
+        const char* portName = "/dev/ttyUSB0";
+    #endif
+
+    SerialPort serial(portName,
                       1000,
                       QSerialPort::Baud115200,
                       QSerialPort::Data8,
