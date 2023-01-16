@@ -63,7 +63,7 @@ class Task : public Command {
 public:
     Task(std::string commandText, SerialPort &serial);
 
-    commRes_t execute();
+    commRes_t execute(bool parseResponse = true);
 };
 //redundant
 //

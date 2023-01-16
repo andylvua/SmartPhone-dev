@@ -153,7 +153,7 @@ commRes_t SetCommand::execute() {
 Task::Task(std::string commandText, SerialPort &serial) :
         Command(std::move(commandText), commandType::task, serial) {}
 
-commRes_t Task::execute() {
+commRes_t Task::execute(bool parseResponse) {
     auto request = QString::fromStdString(commandText);
     qDebug() << ("Request: " + request);
 
@@ -170,6 +170,10 @@ commRes_t Task::execute() {
     if (data.isEmpty()) {
         qDebug() << "Timeout";
         return CR_TIMEOUT;
+    }
+
+    if (!parseResponse) {
+        return CR_OK;
     }
 
     QString response = uartResponseParser(data);
