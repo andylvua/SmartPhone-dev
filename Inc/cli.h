@@ -69,7 +69,7 @@ signals:
 
 public slots:
 
-    void handleIncomingCall();
+    void handleIncomingCall(QString number);
 
     void handleIncomingSMS();
 
