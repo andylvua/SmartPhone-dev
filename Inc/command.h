@@ -49,7 +49,7 @@ class GetCommand : public Command {
 public:
     GetCommand(std::string commandText, SerialPort &serial);
 
-    QString execute();
+    QString execute(bool enableInterruptDataRead = true, bool parseResponse = true);
 };
 
 class SetCommand : public Command {
