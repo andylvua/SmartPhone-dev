@@ -28,7 +28,7 @@ public:
 
     void changeScreen(Screen &screen);
 
-    void changeScreen(QString screenName);
+    void changeScreen(const QString &screenName);
 
     void listen();
 

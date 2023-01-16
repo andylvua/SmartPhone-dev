@@ -26,8 +26,9 @@ void CLI::renderScreen() {
 void CLI::changeScreen(Screen &screen) {
     currentScreen = screen;
 }
-void CLI::changeScreen(QString screenName) {
-    for (auto &screen : screens) {
+
+void CLI::changeScreen(const QString &screenName) {
+    for (auto &screen: screens) {
         if (screen.screenName == screenName) {
             currentScreen = screen;
         }
