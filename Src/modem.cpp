@@ -9,16 +9,7 @@
 #include <fstream>
 
 Modem::Modem(SerialPort &serial) : serial(serial) {
-    commLineStatus = CLS_FREE;
     callStatus = CS_IDLE;
-}
-
-commLineState_t Modem::getCommLineStatus() const {
-    return commLineStatus;
-}
-
-void Modem::setCommLineStatus(commLineState_t commLineStatusSet) {
-    Modem::commLineStatus = commLineStatusSet;
 }
 
 QString Modem::parseLine(const QByteArray &line) {
@@ -29,15 +20,31 @@ QString Modem::parseLine(const QByteArray &line) {
     return parsedLine;
 }
 
-bool Modem::checkAT() {
-    if (commLineStatus != CLS_FREE) {
-        return false;
-    }
+void writeToFile(const std::string &fileName, const std::string &data) {
+    std::ofstream file(fileName, std::ios::app);
+    file << data << std::endl;
+    file.close();
+}
 
-    commLineStatus = CLS_ATCMD;
+void saveMessage(const QString &number, const QString &dateTime, const QString &message) {
+    std::string data = number.toStdString() + "; " + dateTime.toStdString() + "; " + message.toStdString();
+    writeToFile("messages.txt", data);
+}
+
+void saveCall(const Call &call) {
+    QString dateTime = call.startTime.toString("dd.MM.yyyy hh:mm:ss");
+    QString duration = QString::number(call.startTime.secsTo(call.endTime));
+    std::string callDirection = call.callDirection == CD_INCOMING ? "INCOMING" : "OUTGOING";
+    std::string isMissed = call.callResult == CR_NO_ANSWER ? "missed" : "accepted";
+
+    std::string data = call.number.toStdString() + "; " + dateTime.toStdString() + "; "
+                       + duration.toStdString() + "; " + callDirection + "; " + isMissed;
+    writeToFile("calls.txt", data);
+}
+
+bool Modem::checkAT() {
     GetCommand command = GetCommand(AT, serial);
-    auto response = command.execute();
-    commLineStatus = CLS_FREE;
+    auto response = command.execute(false);
 
     if (response.indexOf("OK") != -1) {
         return true;
@@ -47,14 +54,8 @@ bool Modem::checkAT() {
 }
 
 bool Modem::checkRegistration() {
-    if (commLineStatus != CLS_FREE) {
-        return false;
-    }
-
-    commLineStatus = CLS_ATCMD;
     GetCommand command = GetCommand(AT_CREG"?", serial);
-    auto response = command.execute();
-    commLineStatus = CLS_FREE;
+    auto response = command.execute(false);
 
     if (response.indexOf("+CREG: 0,1") != -1
         || (response.indexOf("+CREG: 0,5") != -1)
@@ -67,14 +68,8 @@ bool Modem::checkRegistration() {
 }
 
 bool Modem::call(const std::string &number) {
-    if (commLineStatus != CLS_FREE) {
-        return false;
-    }
-
-    commLineStatus = CLS_ATCMD;
     Task task(ATD + number + ";", serial);
     commRes_t res = task.execute();
-    commLineStatus = CLS_FREE;
 
     if (res == CR_OK) {
         currentCall.callDirection = CD_OUTGOING;
@@ -102,48 +97,38 @@ bool Modem::hangUp() {
 }
 
 bool Modem::answer() {
-    if (commLineStatus == CLS_FREE) {
-        commLineStatus = CLS_ATCMD;
-        Task task(ATA, serial);
-        commRes_t res = task.execute();
+    Task task(ATA, serial);
+    commRes_t res = task.execute();
 
-        if (res == CR_OK) {
-            commLineStatus = CLS_FREE;
-            callStatus = CS_ACTIVE;
-            return true;
-        } else {
-            commLineStatus = CLS_FREE;
-            return false;
-        }
+    if (res == CR_OK) {
+        callStatus = CS_ACTIVE;
+        return true;
     } else {
         return false;
     }
 }
 
 bool Modem::message(const std::string &number, const std::string &message) {
-    if (commLineStatus == CLS_FREE) {
-        commLineStatus = CLS_ATCMD;
-        SetCommand set_message_mode = SetCommand(AT_CMGF"=1", serial);
-        set_message_mode.execute();
+    GetCommand set_message = GetCommand(AT_CMGS"=\"" + number + "\"", serial);
+    auto response = set_message.execute(true, false);
 
-        SetCommand set_message = SetCommand(AT_CMGS"=\"" + number + "\"", serial);
-        set_message.execute();
-
-        Task task(message, serial);
-        commRes_t res = task.execute();
+    if (response.indexOf(">") != -1) {
+        Task task(message + char(26), serial);  // 26 is Ctrl+Z
+        commRes_t res = task.execute(false);
 
         if (res == CR_OK) {
-            SetCommand command = SetCommand(message + char(26), serial);
-            command.execute();
-            commLineStatus = CLS_FREE;
+            qDebug() << "Message sent";
+            saveMessage(QString::fromStdString(number),
+                        QDateTime::currentDateTime().toString("yyyy/MM/dd,hh:mm:ss+02"),
+                        QString::fromStdString(message)
+                        );
             return true;
-        } else {
-            commLineStatus = CLS_FREE;
-            return false;
         }
     } else {
+        qDebug() << "Error sending message. No > prompt received.";
         return false;
     }
+    qDebug() << response;
 }
 
 
@@ -200,28 +185,6 @@ bool Modem::initialize() {
     return true;
 }
 
-void writeToFile(const std::string &fileName, const std::string &data) {
-    std::ofstream file(fileName, std::ios::app);
-    file << data << std::endl;
-    file.close();
-}
-
-void saveMessage(const QString &number, const QString &dateTime, const QString &message) {
-    std::string data = number.toStdString() + "; " + dateTime.toStdString() + "; " + message.toStdString();
-    writeToFile("messages.txt", data);
-}
-
-void saveCall(const Call &call) {
-    QString dateTime = call.startTime.toString("dd.MM.yyyy hh:mm:ss");
-    QString duration = QString::number(call.startTime.secsTo(call.endTime));
-    std::string callDirection = call.callDirection == CD_INCOMING ? "INCOMING" : "OUTGOING";
-    std::string isMissed = call.callResult == CR_NO_ANSWER ? "missed" : "accepted";
-
-    std::string data = call.number.toStdString() + "; " + dateTime.toStdString() + "; "
-                       + duration.toStdString() + "; " + callDirection + "; " + isMissed;
-    writeToFile("calls.txt", data);
-}
-
 void Modem::worker() {
     Modem::workerStatus = true;
     Modem::listen();
@@ -262,7 +225,7 @@ void Modem::_ringHandler(const QString &parsedLine) {
         currentCall.callResult = CR_NO_ANSWER;
         qDebug() << "Incoming call from: " << number;
         callStatus = CS_INCOMING;
-        emit incomingCall();
+        emit incomingCall(number);
     }
 }
 
