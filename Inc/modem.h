@@ -11,12 +11,6 @@
 #include <utility>
 
 typedef enum {
-    CLS_FREE,
-    CLS_ATCMD,
-    CLS_DATA
-} commLineState_t;
-
-typedef enum {
     CS_IDLE,
     CS_ACTIVE,
     CS_HELD,
@@ -48,17 +42,12 @@ class Modem : public QObject {
 Q_OBJECT
 public:
     SerialPort &serial;
-    commLineState_t commLineStatus;
     callState_t callStatus;
     Call currentCall;
 
     bool workerStatus = false;
 
     explicit Modem(SerialPort &serial);
-
-    commLineState_t getCommLineStatus() const;
-
-    void setCommLineStatus(commLineState_t commLineStatus);
 
     static QString parseLine(const QByteArray &line);
 
@@ -94,14 +83,11 @@ public:
 
 signals:
 
-    void incomingCall();
+    void incomingCall(QString number);
 
     void incomingSMS();
 
     void callEnded();
-
-public slots:
-
 
 private:
 
