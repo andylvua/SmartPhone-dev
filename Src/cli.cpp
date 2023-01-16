@@ -48,7 +48,11 @@ void CLI::handleCallEnded() {
     changeScreen("Main");
     renderScreen();
 }
-void CLI::mainScreenHandler(char* line) {
+
+void CLI::mainScreenHandler(char *line) {
+    if (strcmp(line, "0") == 0) {
+        exit(0);
+    }
     if (strcmp(line, "1") == 0) {
         //modem.shutdown();
         changeScreen("Phone");
