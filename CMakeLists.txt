@@ -6,6 +6,8 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+
 #set(CMAKE_PREFIX_PATH "/home/paul/Qt/5.15.2/gcc_64")
 #set(CMAKE_PREFIX_PATH "/Users/andrew/Qt/5.15.2/clang_64")
 #set(CMAKE_PREFIX_PATH "/usr/local/qt5pi/")
@@ -24,6 +26,5 @@ target_link_libraries(phone
         )
 
 
-set(CMAKE_PREFIX_PATH "/usr/share/readline")
-
+set(CMAKE_PREFIX_PATH "/usr/share")
 target_link_libraries(phone readline)
