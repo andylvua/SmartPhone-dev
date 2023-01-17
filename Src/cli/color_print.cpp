@@ -4,6 +4,10 @@
 
 #include "../../Inc/cli/color_print.h"
 
-void printColored(const char* color, std::string text, std::ostream &outStream) {
-    outStream << color << text << RESET << std::endl;
+void printColored(const char* color, std::string text, bool newLine, std::ostream &outStream) {
+    if (newLine) {
+        outStream << color << text << RESET << std::endl;
+    } else {
+        outStream << color << text << RESET;
+    }
 }

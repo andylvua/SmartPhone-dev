@@ -151,7 +151,8 @@ bool Modem::message(const std::string &number, const std::string &message) {
         commRes_t res = task.execute(false);
 
         if (res == CR_OK) {
-            qDebug() << "Message sent";
+            printColored(GREEN, "Message sent successfully");
+            //qDebug() << "Message sent";
             SPDLOG_LOGGER_INFO(modem_logger, "Message sent");
             saveMessage(QString::fromStdString(number),
                         QDateTime::currentDateTime().toString("yyyy/MM/dd,hh:mm:ss+02"),
@@ -160,7 +161,8 @@ bool Modem::message(const std::string &number, const std::string &message) {
             return true;
         }
     } else {
-        qDebug() << "Error sending message. No > prompt received.";
+        printColored(RED, "Message sending failed. No > prompt received.");
+        //qDebug() << "Error sending message. No > prompt received.";
         SPDLOG_LOGGER_WARN(modem_logger, "Error sending message. No > prompt received.");
         return false;
     }
@@ -197,7 +199,8 @@ bool Modem::initialize() {
     SPDLOG_LOGGER_INFO(modem_logger, "Checking AT...");
     bool atStatus = checkAT();
     if (!atStatus) {
-        qDebug() << "Error: AT command failed";
+        printColored(RED, "AT command failed");
+        // qDebug() << "Error: AT command failed";
         SPDLOG_LOGGER_ERROR(modem_logger, "AT command failed");
         return false;
     }
@@ -209,7 +212,8 @@ bool Modem::initialize() {
     commRes_t messageModeStatus = set_message_mode.execute(false);
 
     if (messageModeStatus != CR_OK) {
-        qDebug() << "Error: message mode failed";
+        printColored(RED, "Error setting SMS mode to text");
+        // qDebug() << "Error: message mode failed";
         SPDLOG_LOGGER_ERROR(modem_logger, "Message mode failed");
         return false;
     }
@@ -219,7 +223,8 @@ bool Modem::initialize() {
     SPDLOG_LOGGER_INFO(modem_logger, "Checking registration...");
     bool registrationStatus = checkRegistration();
     if (!registrationStatus) {
-        qDebug() << "Error: registration failed";
+        // qDebug() << "Error: registration failed";
+        printColored(RED, "Error: Registration failed");
         SPDLOG_LOGGER_ERROR(modem_logger, "Registration failed");
         return false;
     }
@@ -229,14 +234,16 @@ bool Modem::initialize() {
     SetCommand setNumberIDTrue = SetCommand("AT+CLIP=1", serial);
     commRes_t numberIdentifierStatus = setNumberIDTrue.execute(false);
     if (numberIdentifierStatus != CR_OK) {
-        qDebug() << "Error: number identification failed";
+        //qDebug() << "Error: number identification failed";
+        printColored(RED, "Error: Number identification failed");
         SPDLOG_LOGGER_ERROR(modem_logger, "Number identification failed");
         return false;
     }
     SPDLOG_LOGGER_INFO(modem_logger, "Number identification OK");
 
     SPDLOG_LOGGER_INFO(modem_logger, "Modem initialized successfully");
-    qDebug() << "Modem initialized";
+    //qDebug() << "Modem initialized";
+    printColored(GREEN, "Modem initialized");
     return true;
 }
 
@@ -280,7 +287,7 @@ void Modem::_ringHandler(const QString &parsedLine) {
         currentCall.number = number;
         currentCall.startTime = QDateTime::currentDateTime();
         currentCall.callResult = CR_NO_ANSWER;
-        qDebug() << "Incoming call from: " << number;
+        //qDebug() << "Incoming call from: " << number;
         SPDLOG_LOGGER_INFO(modem_logger, "Incoming call from: {}", number.toStdString());
         callStatus = CS_INCOMING;
         emit incomingCall(number);
@@ -292,7 +299,8 @@ void Modem::_ciev_call_0Handler(const QString &parsedLine) {
     SPDLOG_LOGGER_INFO(modem_logger, "CALL 0 received. Saving call");
     if (parsedLine.contains("BUSY")) {
         currentCall.callResult = CR_NO_ANSWER;
-        qDebug() << "Call busy";
+        printColored(YELLOW, "Call ended: BUSY");
+        //qDebug() << "Call busy";
         SPDLOG_LOGGER_INFO(modem_logger, "Call busy");
     }
 
@@ -301,7 +309,8 @@ void Modem::_ciev_call_0Handler(const QString &parsedLine) {
     SPDLOG_LOGGER_INFO(modem_logger, "Call saved");
     emit callEnded();
     SPDLOG_LOGGER_INFO(modem_logger, "Call ended signal emitted");
-    qDebug() << "Call ended";
+    //qDebug() << "Call ended";
+    printColored(GREEN, "Call ended");
 }
 
 
@@ -309,7 +318,8 @@ void Modem::_ciev_call_1Handler() {
     if (currentCall.callDirection == CD_INCOMING) {
         currentCall.callResult = CR_ANSWERED;
         callStatus = CS_ACTIVE;
-        qDebug() << "Call answered";
+        //qDebug() << "Call answered";
+        printColored(GREEN, "Call answered");
         SPDLOG_LOGGER_INFO(modem_logger, "Call answered");
     }
 }
@@ -318,7 +328,8 @@ void Modem::_sounder_0Handler() {
     if (currentCall.callDirection == CD_OUTGOING) {
         currentCall.callResult = CR_ANSWERED;
         callStatus = CS_ACTIVE;
-        qDebug() << "Call answered/declined";
+        //qDebug() << "Call answered/declined";
+        printColored(YELLOW, "Call answered/declined");
         SPDLOG_LOGGER_INFO(modem_logger, "Call answered/declined");
     }
 }
@@ -419,7 +430,7 @@ void Modem::listContacts() {
 
     while (std::getline(file, line)) {
         auto contact = QString::fromStdString(line).split("; ");
-        qDebug() << "Name: " << contact[0] << "\n" << " Number: " << contact[1] << "\n";
+        std::cout << "Name: " << contact[0].toStdString() << "\n" << " Number: " << contact[1].toStdString() << "\n";
     }
 }
 
@@ -431,7 +442,7 @@ void Modem::listMessages() {
 
     while (std::getline(file, line)) {
         auto message = QString::fromStdString(line).split("; ");
-        qDebug() << "Number: " << message[0] << "\n" << " Date: " << message[1] << "\n" << " Message: " << message[2]
+        std::cout << "Number: " << message[0].toStdString() << "\n" << " Date: " << message[1].toStdString() << "\n" << " Message: " << message[2].toStdString()
                  << "\n";
     }
 }
