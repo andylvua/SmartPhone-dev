@@ -9,7 +9,7 @@
 
 auto cli_logger = spdlog::basic_logger_mt("cli", "../logs/log.txt", true);
 
-CLI::CLI(Modem &modem, Screen* currentScreen) : modem(modem), currentScreen(currentScreen) {
+CLI::CLI(Modem &modem, Screen *currentScreen) : modem(modem), currentScreen(currentScreen) {
     connect(&modem, SIGNAL(incomingCall(QString)),
             this, SLOT(handleIncomingCall(QString)));
     connect(&modem, SIGNAL(incomingSMS()), this, SLOT(handleIncomingSMS()));
@@ -26,7 +26,7 @@ void CLI::renderScreen() {
 
     std::cout << currentScreen->screenName.toStdString() << std::endl;
 
-    for (auto notification : currentScreen->notifications) {
+    for (auto notification: currentScreen->notifications) {
         std::cout << notification.toStdString() << std::endl;
     }
 
@@ -35,7 +35,7 @@ void CLI::renderScreen() {
     }
 }
 
-void CLI::changeScreen(Screen* screen) {
+void CLI::changeScreen(Screen *screen) {
     currentScreen = screen;
 }
 
@@ -185,11 +185,19 @@ void CLI::atScreenHandler(char *line) {
     }
     if (strcmp(line, "1") == 0) {
         modem.enableConsoleMode();
-        std::string at;
+        std::cout << "AT Console mode enabled. To exit, type 'exit'" << std::endl;
+        std::string at{};
+
         qDebug() << "Enter AT";
-        std::cin >> at;
-        modem.sendConsoleCommand(QString::fromStdString(at));
-        changeScreen("AT Console");
+        while (true) {
+            std::cin >> at;
+            if (at == "exit") {
+                break;
+            }
+            modem.sendConsoleCommand(QString::fromStdString(at));
+        }
+
+        modem.disableConsoleMode();
         renderScreen();
     }
 }
