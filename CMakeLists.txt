@@ -18,7 +18,7 @@ find_package(Qt5 COMPONENTS
         SerialPort
         REQUIRED)
 
-add_executable(phone main.cpp Src/command.cpp Inc/command.h Src/serial.cpp Inc/serial.h Inc/modem.h Src/modem.cpp Inc/cli.h Src/cli.cpp Inc/contact.h Src/screen.cpp Inc/screen.h)
+add_executable(phone main.cpp Src/command/command.cpp Inc/command/command.h Src/modem/serial.cpp Inc/modem/serial.h Inc/modem/modem.h Src/modem/modem.cpp Inc/cli/cli.h Src/cli/cli.cpp Src/cli/screen.cpp Inc/cli/screen.h Inc/logging.h)
 target_link_libraries(phone
         Qt5::Core
         Qt5::Widgets
@@ -28,3 +28,10 @@ target_link_libraries(phone
 
 set(CMAKE_PREFIX_PATH "/usr/share")
 target_link_libraries(phone readline)
+
+if(NOT TARGET spdlog)
+    # Stand-alone build
+    find_package(spdlog REQUIRED)
+endif()
+
+target_link_libraries(phone spdlog::spdlog)
