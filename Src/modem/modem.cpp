@@ -17,11 +17,15 @@ Modem::Modem(SerialPort &serial) : serial(serial) {
 
 void Modem::enableConsoleMode() {
     SPDLOG_LOGGER_INFO(modem_logger, "Console mode enabled");
+    SetCommand disableEchoCommand = SetCommand("ATE0", serial);
+    disableEchoCommand.execute();
     consoleMode = true;
 }
 
 void Modem::disableConsoleMode() {
     SPDLOG_LOGGER_INFO(modem_logger, "Console mode disabled");
+    SetCommand enableEchoCommand = SetCommand("ATE1", serial);
+    enableEchoCommand.execute();
     consoleMode = false;
 }
 
