@@ -9,6 +9,7 @@
 #include <QDateTime>
 #include <string>
 #include <utility>
+#include <iostream>
 
 #define CONTACTS_FILEPATH "../module_cache/contacts.txt"
 #define MESSAGES_FILEPATH "../module_cache/messages.txt"
@@ -50,8 +51,16 @@ public:
     Call currentCall;
 
     bool workerStatus = false;
+    bool consoleMode = false;
+    std::ostream &outStream = std::cout;
 
     explicit Modem(SerialPort &serial);
+
+    void sendConsoleCommand(const QString &command);
+
+    void enableConsoleMode();
+
+    void disableConsoleMode();
 
     static QString parseLine(const QByteArray &line);
 

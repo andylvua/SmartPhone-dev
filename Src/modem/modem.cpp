@@ -15,6 +15,21 @@ Modem::Modem(SerialPort &serial) : serial(serial) {
     callStatus = CS_IDLE;
 }
 
+void Modem::enableConsoleMode() {
+    SPDLOG_LOGGER_INFO(modem_logger, "Console mode enabled");
+    consoleMode = true;
+}
+
+void Modem::disableConsoleMode() {
+    SPDLOG_LOGGER_INFO(modem_logger, "Console mode disabled");
+    consoleMode = false;
+}
+
+void Modem::sendConsoleCommand(const QString &command) {
+    SPDLOG_LOGGER_INFO(modem_logger, "sendConsoleCommand: {}", command.toStdString());
+    serial.write((command.toStdString() + "\r\n").c_str());
+}
+
 QString Modem::parseLine(const QByteArray &line) {
     QString lineString = QString(line);
     if (lineString.isEmpty())
@@ -326,6 +341,11 @@ void Modem::listen() {
 
         QByteArray data = readLine();
         QString parsedLine = parseLine(data);
+
+        if (consoleMode) {
+            outStream << parsedLine.toStdString() << std::endl;
+            continue;
+        }
 
         if (parsedLine.contains("RING")) {
             SPDLOG_LOGGER_INFO(modem_logger, "RING received");

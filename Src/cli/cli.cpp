@@ -179,15 +179,16 @@ void CLI::ussdScreenHandler(char *line) {
 
 void CLI::atScreenHandler(char *line) {
     if (strcmp(line, "0") == 0) {
+        modem.disableConsoleMode();
         changeScreen(currentScreen->parentScreen);
         renderScreen();
     }
     if (strcmp(line, "1") == 0) {
-        qDebug() << "Requesting AT";
+        modem.enableConsoleMode();
         std::string at;
         qDebug() << "Enter AT";
         std::cin >> at;
-//        modem.sendAT(at);
+        modem.sendConsoleCommand(QString::fromStdString(at));
         changeScreen("AT Console");
         renderScreen();
     }
