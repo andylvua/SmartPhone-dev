@@ -74,15 +74,15 @@ int main(int argc, char *argv[]) {
     sendSMSScreen.addScreenOption("0. Back");
     sendSMSScreen.addScreenOption("1. Write SMS");
 
-    CLI cli{modem, mainScreen};
-    cli.addScreen(mainScreen);
-    cli.addScreen(incomingCallScreen);
-    cli.addScreen(phoneScreen);
-    cli.addScreen(callScreen);
-    cli.addScreen(smsScreen);
-    cli.addScreen(sendSMSScreen);
-    cli.addScreen(inCallScreen);
-    cli.addScreen(contactsScreen);
+    CLI cli{modem, &mainScreen};
+    cli.addScreen(&mainScreen);
+    cli.addScreen(&incomingCallScreen);
+    cli.addScreen(&phoneScreen);
+    cli.addScreen(&callScreen);
+    cli.addScreen(&smsScreen);
+    cli.addScreen(&sendSMSScreen);
+    cli.addScreen(&inCallScreen);
+    cli.addScreen(&contactsScreen);
 
     bool modemReady = modem.initialize();
 
