@@ -21,6 +21,13 @@ void Screen::addScreenOption(QString option) {
 void Screen::removeScreenOption(QString option) {
     screenOptions.erase(std::remove(screenOptions.begin(), screenOptions.end(), option), screenOptions.end());
 }
+void Screen::addNotification(QString notification) {
+    notifications.push_back(notification);
+}
+
+void Screen::removeNotification(QString notification) {
+    notifications.erase(std::remove(notifications.begin(), notifications.end(), notification), notifications.end());
+}
 
 void Screen::removeScreenOption(int index) {
     screenOptions.erase(screenOptions.begin() + index);

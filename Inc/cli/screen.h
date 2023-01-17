@@ -14,6 +14,7 @@ public:
     Screen* parentScreen;
     QString screenName;
     std::vector<QString> screenOptions;
+    std::vector<QString> notifications = {};
 
     Screen(QString name, Screen* parentScreen);
 
@@ -26,6 +27,10 @@ public:
     void removeScreenOption(QString option);
 
     void removeScreenOption(int index);
+
+    void addNotification(QString notification);
+
+    void removeNotification(QString notification);
 
 };
 #endif //PHONE_SCREEN_H

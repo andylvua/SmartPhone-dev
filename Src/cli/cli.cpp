@@ -8,14 +8,14 @@
 
 auto cli_logger = spdlog::basic_logger_mt("cli", "../logs/log.txt", true);
 
-CLI::CLI(Modem &modem, Screen currentScreen) : modem(modem), currentScreen(currentScreen) {
+CLI::CLI(Modem &modem, Screen* currentScreen) : modem(modem), currentScreen(currentScreen) {
     connect(&modem, SIGNAL(incomingCall(QString)),
             this, SLOT(handleIncomingCall(QString)));
     connect(&modem, SIGNAL(incomingSMS()), this, SLOT(handleIncomingSMS()));
     connect(&modem, SIGNAL(callEnded()), this, SLOT(handleCallEnded()));
 }
 
-void CLI::addScreen(Screen &screen) {
+void CLI::addScreen(Screen *screen) {
     screens.push_back(screen);
 }
 
@@ -23,19 +23,24 @@ void CLI::renderScreen() {
     // Clear the screen
     system("clear");
 
-    std::cout << currentScreen.screenName.toStdString() << std::endl;
-    for (auto &option: currentScreen.screenOptions) {
+    std::cout << currentScreen->screenName.toStdString() << std::endl;
+
+    for (auto notification : currentScreen->notifications) {
+        std::cout << notification.toStdString() << std::endl;
+    }
+
+    for (auto &option: currentScreen->screenOptions) {
         std::cout << option.toStdString() << std::endl;
     }
 }
 
-void CLI::changeScreen(Screen &screen) {
+void CLI::changeScreen(Screen* screen) {
     currentScreen = screen;
 }
 
 void CLI::changeScreen(const QString &screenName) {
-    for (auto &screen: screens) {
-        if (screen.screenName == screenName) {
+    for (auto screen: screens) {
+        if (screen->screenName == screenName) {
             currentScreen = screen;
         }
     }
@@ -43,17 +48,31 @@ void CLI::changeScreen(const QString &screenName) {
 
 void CLI::handleIncomingCall(QString number) {
     // TODO: Pass number to screen renderer
+    for (auto screen: screens) {
+        if (screen->screenName == "Incoming Call" || screen->screenName == "In Call") {
+            screen->addNotification("Incoming call from +" + number);
+        }
+    }
     changeScreen("Incoming Call");
     renderScreen();
 }
 
 void CLI::handleIncomingSMS() {
     qDebug() << "Incoming SMS";
-    modem.checkAT();
+    for (auto screen: screens) {
+        if (screen->screenName == "Main" && screen->notifications.empty()) {
+            screen->addNotification("    *New SMS");
+        }
+    }
+    renderScreen();
 }
 
 void CLI::handleCallEnded() {
-    qDebug() << "Call Ended";
+    for (auto screen: screens) {
+        if (screen->screenName == "In Call" || screen->screenName == "Incoming Call") {
+            screen->notifications.clear();
+        }
+    }
     changeScreen("Main");
     renderScreen();
 }
@@ -95,6 +114,11 @@ void CLI::incomingCallScreenHandler(char *line) {
     if (strcmp(line, "0") == 0) {
         qDebug() << "Rejecting call";
         modem.hangUp();
+        for (auto screen: screens) {
+            if (screen->screenName == "Incoming Call" || screen->screenName == "In Call") {
+                screen->notifications.clear();
+            }
+        }
         changeScreen("Main");
         renderScreen();
     }
@@ -102,7 +126,7 @@ void CLI::incomingCallScreenHandler(char *line) {
 
 void CLI::phoneScreenHandler(char *line) {
     if (strcmp(line, "0") == 0) {
-        changeScreen(*currentScreen.parentScreen);
+        changeScreen(currentScreen->parentScreen);
         renderScreen();
     }
     if (strcmp(line, "1") == 0) {
@@ -118,7 +142,7 @@ void CLI::phoneScreenHandler(char *line) {
 
 void CLI::smsScreenHandler(char *line) {
     if (strcmp(line, "0") == 0) {
-        changeScreen(*currentScreen.parentScreen);
+        changeScreen(currentScreen->parentScreen);
         renderScreen();
     }
     if (strcmp(line, "1") == 0) {
@@ -126,13 +150,18 @@ void CLI::smsScreenHandler(char *line) {
         renderScreen();
     }
     if (strcmp(line, "2") == 0) {
+        for (auto screen: screens) {
+            if (screen->screenName == "Main") {
+                screen->removeNotification("    *New SMS");
+            }
+        }
         Modem::listMessages();
     }
 }
 
 void CLI::ussdScreenHandler(char *line) {
     if (strcmp(line, "0") == 0) {
-        changeScreen(*currentScreen.parentScreen);
+        changeScreen(currentScreen->parentScreen);
         renderScreen();
     }
     if (strcmp(line, "1") == 0) {
@@ -148,7 +177,7 @@ void CLI::ussdScreenHandler(char *line) {
 
 void CLI::atScreenHandler(char *line) {
     if (strcmp(line, "0") == 0) {
-        changeScreen(*currentScreen.parentScreen);
+        changeScreen(currentScreen->parentScreen);
         renderScreen();
     }
     if (strcmp(line, "1") == 0) {
@@ -164,14 +193,14 @@ void CLI::atScreenHandler(char *line) {
 
 void CLI::logsScreenHandler(char *line) {
     if (strcmp(line, "0") == 0) {
-        changeScreen(*currentScreen.parentScreen);
+        changeScreen(currentScreen->parentScreen);
         renderScreen();
     }
 }
 
 void CLI::callScreenHandler(char *line) {
     if (strcmp(line, "0") == 0) {
-        changeScreen(*currentScreen.parentScreen);
+        changeScreen(currentScreen->parentScreen);
         renderScreen();
     }
     if (strcmp(line, "1") == 0) {
@@ -180,7 +209,11 @@ void CLI::callScreenHandler(char *line) {
         qDebug() << "Enter number";
         std::cin >> number;
         modem.call(number);
-        // TODO: Pass number to screen renderer
+        for (auto screen: screens) {
+            if (screen->screenName == "In Call") {
+                screen->addNotification("Calling " + QString::fromStdString(number));
+            }
+        }
         changeScreen("In Call");
         renderScreen();
     }
@@ -189,6 +222,11 @@ void CLI::callScreenHandler(char *line) {
 void CLI::inCallScreenHandler(char *line) {
     if (strcmp(line, "0") == 0) {
         modem.hangUp();
+        for (auto screen: screens) {
+            if (screen->screenName == "Incoming Call" || screen->screenName == "In Call") {
+                screen->notifications.clear();
+            }
+        }
         qDebug() << "Hanging up";
         changeScreen("Main");
         renderScreen();
@@ -197,7 +235,7 @@ void CLI::inCallScreenHandler(char *line) {
 
 void CLI::contactsScreenHandler(char *line) {
     if (strcmp(line, "0") == 0) {
-        changeScreen(*currentScreen.parentScreen);
+        changeScreen(currentScreen->parentScreen);
         renderScreen();
     } else if (strcmp(line, "1") == 0) {
         qDebug() << "Adding contact";
@@ -227,7 +265,7 @@ void CLI::contactsScreenHandler(char *line) {
 
 void CLI::sendSMSScreenHandler(char *line) {
     if (strcmp(line, "0") == 0) {
-        changeScreen(*currentScreen.parentScreen);
+        changeScreen(currentScreen->parentScreen);
         renderScreen();
     } else if (strcmp(line, "1") == 0) {
 
@@ -255,37 +293,37 @@ void CLI::listen() {
             continue;
         }
 
-        if (currentScreen.screenName == "Main") {
+        if (currentScreen->screenName == "Main") {
             mainScreenHandler(line);
-        } else if (currentScreen.screenName == "Incoming Call") {
+        } else if (currentScreen->screenName == "Incoming Call") {
             incomingCallScreenHandler(line);
-        } else if (currentScreen.screenName == "Phone") {
+        } else if (currentScreen->screenName == "Phone") {
             phoneScreenHandler(line);
-        } else if (currentScreen.screenName == "Call") {
+        } else if (currentScreen->screenName == "Call") {
             callScreenHandler(line);
-        } else if (currentScreen.screenName == "In Call") {
+        } else if (currentScreen->screenName == "In Call") {
             inCallScreenHandler(line);
-        } else if (currentScreen.screenName == "Contacts") {
+        } else if (currentScreen->screenName == "Contacts") {
             contactsScreenHandler(line);
-        } else if (currentScreen.screenName == "SMS") {
+        } else if (currentScreen->screenName == "SMS") {
             smsScreenHandler(line);
-        } else if (currentScreen.screenName == "Send SMS") {
+        } else if (currentScreen->screenName == "Send SMS") {
             sendSMSScreenHandler(line);
-        } else if (currentScreen.screenName == "USSD Console") {
+        } else if (currentScreen->screenName == "USSD Console") {
             ussdScreenHandler(line);
-        } else if (currentScreen.screenName == "AT Console") {
+        } else if (currentScreen->screenName == "AT Console") {
             atScreenHandler(line);
-        } else if (currentScreen.screenName == "Logs") {
+        } else if (currentScreen->screenName == "Logs") {
             logsScreenHandler(line);
-        } else if (currentScreen.screenName == "SMS") {
+        } else if (currentScreen->screenName == "SMS") {
             smsScreenHandler(line);
-        } else if (currentScreen.screenName == "USSD Console") {
+        } else if (currentScreen->screenName == "USSD Console") {
             ussdScreenHandler(line);
-        } else if (currentScreen.screenName == "AT Console") {
+        } else if (currentScreen->screenName == "AT Console") {
             atScreenHandler(line);
-        } else if (currentScreen.screenName == "Logs") {
+        } else if (currentScreen->screenName == "Logs") {
             logsScreenHandler(line);
-        } else if (currentScreen.screenName == "Send SMS") {
+        } else if (currentScreen->screenName == "Send SMS") {
             sendSMSScreenHandler(line);
         } else {
             qDebug() << "Unknown screen";
