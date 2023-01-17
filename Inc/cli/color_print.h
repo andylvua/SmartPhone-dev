@@ -22,6 +22,6 @@
 #define BOLDWHITE   "\033[1m\033[37m"      /* Bold White */
 
 
-void printColored(const char* color, std::string text, std::ostream &outStream = std::cout);
+void printColored(const char* color, std::string text, bool newLine = true, std::ostream &outStream = std::cout);
 
 #endif //PHONE_COLOR_PRINT_H
