@@ -3,7 +3,10 @@
 //
 
 #include <QProcess>
-#include "../Inc/cli.h"
+#include "../../Inc/cli/cli.h"
+#include "../../Inc/logging.h"
+
+auto cli_logger = spdlog::basic_logger_mt("cli", "../logs/log.txt", true);
 
 CLI::CLI(Modem &modem, Screen currentScreen) : modem(modem), currentScreen(currentScreen) {
     connect(&modem, SIGNAL(incomingCall(QString)),
@@ -240,6 +243,9 @@ void CLI::sendSMSScreenHandler(char *line) {
 }
 
 void CLI::listen() {
+    cli_logger->flush_on(spdlog::level::debug);
+    SPDLOG_LOGGER_INFO(cli_logger, "CLI listener started.");
+
     char *line;
     renderScreen();
     std::cout << ">>> ";

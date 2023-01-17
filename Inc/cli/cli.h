@@ -8,7 +8,7 @@
 
 #include <QObject>
 #include <iostream>
-#include "modem.h"
+#include "../modem/modem.h"
 #include "screen.h"
 #include <readline/readline.h>
 #include <readline/history.h>
