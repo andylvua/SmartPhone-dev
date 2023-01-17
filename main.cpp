@@ -79,7 +79,9 @@ int main(int argc, char *argv[]) {
     Screen ussdScreen("USSD Console", &mainScreen);
     ussdScreen.addScreenOption("0. Back");
     ussdScreen.addScreenOption("1. Send USSD");
-
+    Screen atScreen("AT Console", &mainScreen);
+    atScreen.addScreenOption("0. Back");
+    atScreen.addScreenOption("1. Send AT Command");
     CLI cli{modem, &mainScreen};
     cli.addScreen(&mainScreen);
     cli.addScreen(&incomingCallScreen);
@@ -91,6 +93,7 @@ int main(int argc, char *argv[]) {
     cli.addScreen(&contactsScreen);
     cli.addScreen(&logScreen);
     cli.addScreen(&ussdScreen);
+    cli.addScreen(&atScreen);
 
     bool modemReady = modem.initialize();
 

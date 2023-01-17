@@ -343,7 +343,9 @@ void Modem::listen() {
         QString parsedLine = parseLine(data);
 
         if (consoleMode) {
-            outStream << parsedLine.toStdString() << std::endl;
+            if (!parsedLine.isEmpty()) {
+                outStream << parsedLine.toStdString() << std::endl;
+            }
             continue;
         }
 

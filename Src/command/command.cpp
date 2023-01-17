@@ -50,6 +50,7 @@ QString Command::uartResponseParser(const QByteArray &response) {
         SPDLOG_LOGGER_WARN(command_logger, "Response from UART was not parsed correctly, returning empty string");
         return QString{};
     }
+    return QString{};
 }
 
 // Returns echo of command, dropping actual response from uart
