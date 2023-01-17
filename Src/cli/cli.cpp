@@ -6,6 +6,7 @@
 #include "../../Inc/cli/cli.h"
 #include "../../Inc/logging.h"
 
+
 auto cli_logger = spdlog::basic_logger_mt("cli", "../logs/log.txt", true);
 
 CLI::CLI(Modem &modem, Screen* currentScreen) : modem(modem), currentScreen(currentScreen) {
@@ -165,13 +166,14 @@ void CLI::ussdScreenHandler(char *line) {
         renderScreen();
     }
     if (strcmp(line, "1") == 0) {
-        qDebug() << "Requesting USSD";
-        std::string ussd;
-        qDebug() << "Enter USSD";
-        std::cin >> ussd;
+        qDebug() << "In development";
+//        qDebug() << "Requesting USSD";
+//        std::string ussd;
+//        qDebug() << "Enter USSD";
+//        std::cin >> ussd;
 //        modem.sendUSSD(ussd);
-        changeScreen("USSD Console");
-        renderScreen();
+//        changeScreen("USSD Console");
+//        renderScreen();
     }
 }
 
@@ -195,6 +197,10 @@ void CLI::logsScreenHandler(char *line) {
     if (strcmp(line, "0") == 0) {
         changeScreen(currentScreen->parentScreen);
         renderScreen();
+    }
+    if (strcmp(line, "1") == 0) {
+        qDebug() << "Opening logs";
+        system("xdg-open ./../logs/log.txt");
     }
 }
 
@@ -315,16 +321,6 @@ void CLI::listen() {
             atScreenHandler(line);
         } else if (currentScreen->screenName == "Logs") {
             logsScreenHandler(line);
-        } else if (currentScreen->screenName == "SMS") {
-            smsScreenHandler(line);
-        } else if (currentScreen->screenName == "USSD Console") {
-            ussdScreenHandler(line);
-        } else if (currentScreen->screenName == "AT Console") {
-            atScreenHandler(line);
-        } else if (currentScreen->screenName == "Logs") {
-            logsScreenHandler(line);
-        } else if (currentScreen->screenName == "Send SMS") {
-            sendSMSScreenHandler(line);
         } else {
             qDebug() << "Unknown screen";
         }

@@ -73,6 +73,12 @@ int main(int argc, char *argv[]) {
     Screen sendSMSScreen("Send SMS", &smsScreen);
     sendSMSScreen.addScreenOption("0. Back");
     sendSMSScreen.addScreenOption("1. Write SMS");
+    Screen logScreen("Logs", &mainScreen);
+    logScreen.addScreenOption("0. Back");
+    logScreen.addScreenOption("1. View Logs");
+    Screen ussdScreen("USSD Console", &mainScreen);
+    ussdScreen.addScreenOption("0. Back");
+    ussdScreen.addScreenOption("1. Send USSD");
 
     CLI cli{modem, &mainScreen};
     cli.addScreen(&mainScreen);
@@ -83,6 +89,8 @@ int main(int argc, char *argv[]) {
     cli.addScreen(&sendSMSScreen);
     cli.addScreen(&inCallScreen);
     cli.addScreen(&contactsScreen);
+    cli.addScreen(&logScreen);
+    cli.addScreen(&ussdScreen);
 
     bool modemReady = modem.initialize();
 
