@@ -56,7 +56,7 @@ class SetCommand : public Command {
 public:
     SetCommand(std::string commandText, SerialPort &serial);
 
-    commRes_t execute();
+    commRes_t execute(bool enableInterruptDataRead = true);
 };
 
 class Task : public Command {

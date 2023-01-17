@@ -132,7 +132,8 @@ QString GetCommand::execute(bool enableInterruptDataRead, bool parseResponse) {
 SetCommand::SetCommand(std::string commandText, SerialPort &serial) :
         Command(std::move(commandText), commandType::setCommand, serial) {}
 
-commRes_t SetCommand::execute() {
+commRes_t SetCommand::execute(bool enableInterruptDataRead) {
+    SPDLOG_LOGGER_INFO(command_logger, "Executing SET command: {}", commandText);
     auto request = QString::fromStdString(commandText);
     qDebug() << ("Request: " + getCommandText()).c_str();
 

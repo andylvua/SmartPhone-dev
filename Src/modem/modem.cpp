@@ -6,6 +6,7 @@
 #include "../../Inc/command/command.h"
 #include "../../Inc/command/commands_list.h"
 #include "../../Inc/logging.h"
+#include "../../Inc/cli/color_print.h"
 #include <iostream>
 #include <fstream>
 
@@ -17,15 +18,14 @@ Modem::Modem(SerialPort &serial) : serial(serial) {
 
 void Modem::enableConsoleMode() {
     SPDLOG_LOGGER_INFO(modem_logger, "Console mode enabled");
-    SetCommand disableEchoCommand = SetCommand("ATE0", serial);
-    disableEchoCommand.execute();
+    serial.write("ATE0\r\n");
+    QThread::msleep(500);
     consoleMode = true;
 }
 
 void Modem::disableConsoleMode() {
     SPDLOG_LOGGER_INFO(modem_logger, "Console mode disabled");
-    SetCommand enableEchoCommand = SetCommand("ATE1", serial);
-    enableEchoCommand.execute();
+    serial.write("ATE1\r\n");
     consoleMode = false;
 }
 
@@ -206,7 +206,7 @@ bool Modem::initialize() {
 
     SPDLOG_LOGGER_INFO(modem_logger, "Setting SMS mode to text...");
     SetCommand set_message_mode = SetCommand(AT_CMGF"=1", serial);
-    commRes_t messageModeStatus = set_message_mode.execute();
+    commRes_t messageModeStatus = set_message_mode.execute(false);
 
     if (messageModeStatus != CR_OK) {
         qDebug() << "Error: message mode failed";
@@ -227,7 +227,7 @@ bool Modem::initialize() {
 
     SPDLOG_LOGGER_INFO(modem_logger, "Setting number identification...");
     SetCommand setNumberIDTrue = SetCommand("AT+CLIP=1", serial);
-    commRes_t numberIdentifierStatus = setNumberIDTrue.execute();
+    commRes_t numberIdentifierStatus = setNumberIDTrue.execute(false);
     if (numberIdentifierStatus != CR_OK) {
         qDebug() << "Error: number identification failed";
         SPDLOG_LOGGER_ERROR(modem_logger, "Number identification failed");
@@ -349,7 +349,11 @@ void Modem::listen() {
         if (consoleMode) {
             if (!parsedLine.isEmpty()) {
                 SPDLOG_LOGGER_INFO(modem_logger, "Console mode: {}", parsedLine.toStdString());
-                outStream << parsedLine.toStdString() << std::endl;
+                if (parsedLine.contains("ERROR")) {
+                    printColored(RED, parsedLine.toStdString());
+                } else {
+                    printColored(GREEN, parsedLine.toStdString());
+                }
             }
             continue;
         }
