@@ -8,7 +8,7 @@
 #include <string>
 #include <QSerialPort>
 #include <vector>
-#include "serial.h"
+#include "../modem/serial.h"
 
 enum commandType {
     getCommand = 0, setCommand = 1, task = 2, oneTimeCommand = 3

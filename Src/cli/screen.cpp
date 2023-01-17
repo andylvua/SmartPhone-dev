@@ -2,7 +2,7 @@
 // Created by paul on 1/15/23.
 //
 
-#include "../Inc/screen.h"
+#include "../../Inc/cli/screen.h"
 
 Screen::Screen(QString name, Screen* parentScreen) : screenName(name), parentScreen(parentScreen) {}
 

@@ -10,6 +10,10 @@
 #include <string>
 #include <utility>
 
+#define CONTACTS_FILEPATH "../module_cache/contacts.txt"
+#define MESSAGES_FILEPATH "../module_cache/messages.txt"
+#define CALLS_FILEPATH "../module_cache/calls.txt"
+
 typedef enum {
     CS_IDLE,
     CS_ACTIVE,

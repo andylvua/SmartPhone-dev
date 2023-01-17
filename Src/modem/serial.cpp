@@ -1,7 +1,7 @@
 //
 // Created by Andrew Yaroshevych on 02.12.2022.
 //
-#include "../Inc/serial.h"
+#include "../../Inc/modem/serial.h"
 
 SerialPort::SerialPort(const char *portName, int timeout, QSerialPort::BaudRate baudRate,
                        QSerialPort::DataBits dataBits, QSerialPort::Parity parity, QSerialPort::StopBits stopBits,
