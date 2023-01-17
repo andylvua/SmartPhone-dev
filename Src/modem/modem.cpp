@@ -344,6 +344,7 @@ void Modem::listen() {
 
         if (consoleMode) {
             if (!parsedLine.isEmpty()) {
+                SPDLOG_LOGGER_INFO(modem_logger, "Console mode: {}", parsedLine.toStdString());
                 outStream << parsedLine.toStdString() << std::endl;
             }
             continue;
