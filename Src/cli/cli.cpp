@@ -20,6 +20,26 @@ CLI::CLI(Modem &modem) : modem(modem) {
     connect(&modem, SIGNAL(callEnded()), this, SLOT(handleCallEnded()));
 }
 
+bool checkNumber(std::string &number) {
+    if (number[0] != '+') {
+        number = '+' + number;
+    }
+
+    if (number.length() != 13) {
+        printColored(RED, "Invalid number");
+        return false;
+    }
+
+    for (int i = 1; i < number.length(); ++i) {
+        if (!isdigit(number[i])) {
+            printColored(RED, "Invalid number");
+            return false;
+        }
+    }
+
+    return true;
+}
+
 void CLI::renderScreen() const {
     system("clear");
 
@@ -215,6 +235,10 @@ void CLI::callScreenHandler(const char *line) {
         std::string number;
         printColored(YELLOW, "Enter number");
         std::cin >> number;
+        if (!checkNumber(number)) {
+            return;
+        }
+
         printColored(YELLOW, "Calling...");
         modem.call(number);
 
