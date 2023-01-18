@@ -174,7 +174,9 @@ bool Modem::message(const std::string &number, const std::string &message) {
 
 bool Modem::initialize() {
     SPDLOG_LOGGER_INFO(modem_logger, "Initializing modem");
-    printColored(GREEN, "Performing modem initialization. Please wait...");
+    printColored(GREEN, "Performing modem initialization. Please wait", false);
+    outStream.flush();
+
     std::ifstream messagesFile(MESSAGES_FILEPATH);
     SPDLOG_LOGGER_INFO(modem_logger, "Checking messages file...");
     if (!messagesFile.is_open()) {
@@ -207,6 +209,9 @@ bool Modem::initialize() {
         return false;
     }
 
+    printColored(GREEN, ".", false);
+    outStream.flush();
+
     SPDLOG_LOGGER_INFO(modem_logger, "AT OK");
 
     SPDLOG_LOGGER_INFO(modem_logger, "Setting SMS mode to text...");
@@ -219,6 +224,9 @@ bool Modem::initialize() {
         return false;
     }
 
+    printColored(GREEN, ".", false);
+    outStream.flush();
+
     SPDLOG_LOGGER_INFO(modem_logger, "SMS mode OK");
 
     SPDLOG_LOGGER_INFO(modem_logger, "Checking registration...");
@@ -230,6 +238,9 @@ bool Modem::initialize() {
     }
     SPDLOG_LOGGER_INFO(modem_logger, "Registration OK");
 
+    printColored(GREEN, ".", false);
+    outStream.flush();
+
     SPDLOG_LOGGER_INFO(modem_logger, "Setting number identification...");
     auto setNumberIDTrue = SetCommand("AT+CLIP=1", serial);
     commRes_t numberIdentifierStatus = setNumberIDTrue.execute(false);
@@ -240,8 +251,11 @@ bool Modem::initialize() {
     }
     SPDLOG_LOGGER_INFO(modem_logger, "Number identification OK");
 
+    printColored(GREEN, " ✓", false);
+    outStream.flush();
+
+    QThread::msleep(300);
     SPDLOG_LOGGER_INFO(modem_logger, "Modem initialized successfully");
-    printColored(GREEN, "Modem initialized");
     return true;
 }
 
