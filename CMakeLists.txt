@@ -6,7 +6,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread ")
 
 #set(CMAKE_PREFIX_PATH "/home/paul/Qt/5.15.2/gcc_64")
 #set(CMAKE_PREFIX_PATH "/Users/andrew/Qt/5.15.2/clang_64")
@@ -18,7 +18,9 @@ find_package(Qt5 COMPONENTS
         SerialPort
         REQUIRED)
 
-add_executable(phone main.cpp Src/command/command.cpp Inc/command/command.h Src/modem/serial.cpp Inc/modem/serial.h Inc/modem/modem.h Src/modem/modem.cpp Inc/cli/cli.h Src/cli/cli.cpp Src/cli/screen.cpp Inc/cli/screen.h Inc/logging.h Src/cli/cli.cpp Src/cli/cli.cpp Src/cli/cli.cpp Inc/cli/color_print.h Src/cli/color_print.cpp)
+find_package(wiringPi REQUIRED)
+
+add_executable(phone main.cpp Src/command/command.cpp Inc/command/command.h Src/modem/serial.cpp Inc/modem/serial.h Inc/modem/modem.h Src/modem/modem.cpp Inc/cli/cli.h Src/cli/cli.cpp Src/cli/screen.cpp Inc/cli/screen.h Inc/logging.h Src/cli/cli.cpp Src/cli/cli.cpp Src/cli/cli.cpp Inc/cli/color_print.h Src/cli/color_print.cpp Inc/rotary_reader/rotary_dial.h Src/rotary_reader/rotary_dial.cpp)
 target_link_libraries(phone
         Qt5::Core
         Qt5::Widgets
@@ -35,3 +37,4 @@ if(NOT TARGET spdlog)
 endif()
 
 target_link_libraries(phone spdlog::spdlog)
+target_link_libraries(wiringPi)
