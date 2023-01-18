@@ -167,6 +167,10 @@ void CLI::phoneScreenHandler(const char *line) {
         changeScreen("Contacts");
         renderScreen();
     }
+    if (strcmp(line, "3") == 0) {
+        printColored(YELLOW, "Listing call history");
+        Modem::listCalls();
+    }
 }
 
 void CLI::smsScreenHandler(const char *line) {
@@ -435,6 +439,7 @@ void CLI::prepareScreens() {
     phoneScreen->addScreenOption("0. Back");
     phoneScreen->addScreenOption("1. Call");
     phoneScreen->addScreenOption("2. Contacts");
+    phoneScreen->addScreenOption("3. Call history");
 
     auto callScreen = std::make_shared<Screen>("Call", phoneScreen);
     callScreen->addScreenOption("0. Return");

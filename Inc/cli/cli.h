@@ -40,6 +40,8 @@ public:
 
     void callScreenHandler(const char* line);
 
+    void callHistoryScreenHandler(const char* line);
+
     void inCallScreenHandler(const char* line);
 
     void contactsScreenHandler(const char* line);
