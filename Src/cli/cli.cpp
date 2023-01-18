@@ -50,7 +50,14 @@ void CLI::renderScreen() const {
     }
 
     for (auto const &option: currentScreen->screenOptions) {
-        printColored(WHITE, option.toStdString());
+        if (option.contains("enter")) {
+            std::string optionString = option.split("enter")[0].toStdString();
+            printColored(WHITE, optionString, false);
+            printColored(GREEN, "enter", false);
+            printColored(WHITE, ")");
+        } else {
+            printColored(WHITE, option.toStdString());
+        }
     }
 }
 
@@ -124,7 +131,7 @@ void CLI::mainScreenHandler(const char *line) {
 }
 
 void CLI::incomingCallScreenHandler(const char *line) {
-    if (strcmp(line, "1") == 0) {
+    if (strcmp(line, "1") == 0 || line[0] == '\0') {
         printColored(YELLOW, "Answering call");
         modem.answer();
         changeScreen("In Call");
@@ -196,7 +203,7 @@ void CLI::atScreenHandler(const char *line) {
         changeScreen(currentScreen->parentScreen);
         renderScreen();
     }
-    if (strcmp(line, "1") == 0) {
+    if (strcmp(line, "1") == 0 || line[0] == '\0') {
         modem.enableConsoleMode();
         printColored(GREEN, "AT Console mode enabled. To exit, type 'exit'");
         std::string at{};
@@ -220,7 +227,7 @@ void CLI::logsScreenHandler(const char *line) {
         changeScreen(currentScreen->parentScreen);
         renderScreen();
     }
-    if (strcmp(line, "1") == 0) {
+    if (strcmp(line, "1") == 0 || line[0] == '\0') {
         printColored(GREEN, "Opening logs");
         system("xdg-open ./../logs/log.txt");
     }
@@ -231,7 +238,7 @@ void CLI::callScreenHandler(const char *line) {
         changeScreen(currentScreen->parentScreen);
         renderScreen();
     }
-    if (strcmp(line, "1") == 0) {
+    if (strcmp(line, "1") == 0 || line[0] == '\0') {
         std::string number;
         printColored(YELLOW, "Enter number");
         std::cin >> number;
@@ -253,7 +260,7 @@ void CLI::callScreenHandler(const char *line) {
 }
 
 void CLI::inCallScreenHandler(const char *line) {
-    if (strcmp(line, "0") == 0) {
+    if (strcmp(line, "0") == 0 || line[0] == '\0') {
         modem.hangUp();
         for (const auto& screen: screens) {
             if (screen->screenName == "Incoming Call" || screen->screenName == "In Call") {
@@ -303,8 +310,7 @@ void CLI::sendSMSScreenHandler(const char *line) {
     if (strcmp(line, "0") == 0) {
         changeScreen(currentScreen->parentScreen);
         renderScreen();
-    } else if (strcmp(line, "1") == 0) {
-
+    } else if (strcmp(line, "1") == 0 || line[0] == '\0') {
         std::string number;
         std::string message;
         printColored(YELLOW, "Enter number: ");
@@ -325,9 +331,10 @@ void CLI::listen() {
     renderScreen();
     printColored(BOLDWHITE, ">>> ", false);
 
+    // if escape is pressed, print to QDebug about it
     while ((line = readline(""))) {
-        if (line[0] == '\0') {
-            continue;
+        if (strcmp(line, "exit") == 0) {
+            exit(0);
         }
 
         if (currentScreen->screenName == "Main") {
@@ -371,7 +378,7 @@ void CLI::prepareScreens() {
 
     auto incomingCallScreen = std::make_shared<Screen>("Incoming Call", mainScreen);
     incomingCallScreen->addScreenOption("0. Hang up");
-    incomingCallScreen->addScreenOption("1. Answer");
+    incomingCallScreen->addScreenOption("1. Answer (enter)");
 
     auto phoneScreen = std::make_shared<Screen>("Phone", mainScreen);
     phoneScreen->addScreenOption("0. Back");
@@ -380,10 +387,10 @@ void CLI::prepareScreens() {
 
     auto callScreen = std::make_shared<Screen>("Call", phoneScreen);
     callScreen->addScreenOption("0. Return");
-    callScreen->addScreenOption("1. Make Call");
+    callScreen->addScreenOption("1. Make Call (enter)");
 
     auto inCallScreen = std::make_shared<Screen>("In Call", callScreen);
-    inCallScreen->addScreenOption("0. Hang up");
+    inCallScreen->addScreenOption("0. Hang up (enter)");
 
     auto contactsScreen = std::make_shared<Screen>("Contacts", phoneScreen);
     contactsScreen->addScreenOption("0. Back");
@@ -398,19 +405,19 @@ void CLI::prepareScreens() {
 
     auto sendSMSScreen = std::make_shared<Screen>("Send SMS", smsScreen);
     sendSMSScreen->addScreenOption("0. Back");
-    sendSMSScreen->addScreenOption("1. Write SMS");
+    sendSMSScreen->addScreenOption("1. Write SMS (enter)");
 
     auto logScreen = std::make_shared<Screen>("Logs", mainScreen);
     logScreen->addScreenOption("0. Back");
-    logScreen->addScreenOption("1. View Logs");
+    logScreen->addScreenOption("1. View Logs (enter)");
 
     auto ussdScreen = std::make_shared<Screen>("USSD Console", mainScreen);
     ussdScreen->addScreenOption("0. Back");
-    ussdScreen->addScreenOption("1. Send USSD");
+    ussdScreen->addScreenOption("1. Send USSD (enter)");
 
     auto atScreen = std::make_shared<Screen>("AT Console", mainScreen);
     atScreen->addScreenOption("0. Back");
-    atScreen->addScreenOption("1. Send AT Command");
+    atScreen->addScreenOption("1. Send AT Command (enter)");
 
     screens.push_back(mainScreen);
     screens.push_back(incomingCallScreen);
