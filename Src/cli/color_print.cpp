@@ -4,7 +4,7 @@
 
 #include "../../Inc/cli/color_print.h"
 
-void printColored(const char* color, std::string text, bool newLine, std::ostream &outStream) {
+void printColored(const char* color, const std::string &text, bool newLine, std::ostream &outStream) {
     if (newLine) {
         outStream << color << text << RESET << std::endl;
     } else {

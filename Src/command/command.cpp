@@ -5,31 +5,15 @@
 #include "../../Inc/command/command.h"
 #include <QtSerialPort/QSerialPortInfo>
 #include <QThread>
-#include <QDebug>
-#include "../../Inc/modem/serial.h"
-#include <iostream>
+#include <utility>
 #include "../../Inc/logging.h"
 
-auto command_logger = spdlog::basic_logger_mt("command", "../logs/log.txt", true);
+const auto command_logger = spdlog::basic_logger_mt("command", "../logs/log.txt", true);
 
-Command::Command(std::string commandText, commandType type, SerialPort &serial) : type(type), serial(serial) {
-    this->commandText = std::move(commandText);
-}
+Command::Command(std::string commandText, SerialPort &serial) : commandText(std::move(commandText)), serial(serial) {}
 
 std::string Command::getCommandText() const {
     return commandText;
-}
-
-std::string Command::getType() const {
-    return commandTypeStr[type];
-}
-
-void Command::setCommandText(std::string command) {
-    this->commandText = std::move(command);
-}
-
-void Command::setType(commandType commandType) {
-    this->type = commandType;
 }
 
 // Returns actual response from uart, dropping echo of command
@@ -50,7 +34,6 @@ QString Command::uartResponseParser(const QByteArray &response) {
         SPDLOG_LOGGER_WARN(command_logger, "Response from UART was not parsed correctly, returning empty string");
         return QString{};
     }
-    return QString{};
 }
 
 // Returns echo of command, dropping actual response from uart
@@ -64,14 +47,12 @@ QString Command::uartEchoParser(const QByteArray &response) {
     return QString{parsedResponse[0]};
 }
 
-GetCommand::GetCommand(std::string commandText, SerialPort &serial) :
-        Command(std::move(commandText), commandType::getCommand, serial) {}
-
+GetCommand::GetCommand(const std::string &commandText, SerialPort &serial) :
+        Command(commandText, serial) {}
 
 QString GetCommand::execute(bool enableInterruptDataRead, bool parseResponse) {
     SPDLOG_LOGGER_INFO(command_logger, "Executing GET command: {}", commandText);
     auto request = QString::fromStdString(commandText);
-    qDebug() << ("Request: " + request);
 
     if (enableInterruptDataRead) {
         SPDLOG_LOGGER_INFO(command_logger, "Interrupt data read enabled");
@@ -118,7 +99,6 @@ QString GetCommand::execute(bool enableInterruptDataRead, bool parseResponse) {
             SPDLOG_LOGGER_WARN(command_logger, "Echo of command does not match request");
         }
 
-        qDebug() << ("Response: " + response);
         SPDLOG_LOGGER_INFO(command_logger, "Response: {}", response.toStdString());
     } else {
         qDebug() << "Error: invalid response";
@@ -128,14 +108,12 @@ QString GetCommand::execute(bool enableInterruptDataRead, bool parseResponse) {
     return response;
 }
 
+SetCommand::SetCommand(const std::string &commandText, SerialPort &serial) :
+        Command(commandText, serial) {}
 
-SetCommand::SetCommand(std::string commandText, SerialPort &serial) :
-        Command(std::move(commandText), commandType::setCommand, serial) {}
-
-commRes_t SetCommand::execute(bool enableInterruptDataRead) {
+commRes_t SetCommand::execute([[maybe_unused]] bool enableInterruptDataRead) {
     SPDLOG_LOGGER_INFO(command_logger, "Executing SET command: {}", commandText);
     auto request = QString::fromStdString(commandText);
-    qDebug() << ("Request: " + getCommandText()).c_str();
 
     serial.write((getCommandText() + "\r\n").c_str());
 
@@ -146,7 +124,7 @@ commRes_t SetCommand::execute(bool enableInterruptDataRead) {
             data += serial.readAll();
     } else {
         qDebug() << "Timeout";
-        return CR_TIMEOUT;
+        return commRes::CR_TIMEOUT;
     }
 
     QString response = uartResponseParser(data);
@@ -154,25 +132,21 @@ commRes_t SetCommand::execute(bool enableInterruptDataRead) {
     if (response.isValidUtf16() && !response.isNull() && !response.isEmpty() && response == "OK") {
         if (request != uartEchoParser(data)) {
             qDebug() << "Echo is not equal to request";
-            return CR_ERROR;
+            return commRes::CR_ERROR;
         }
-
-        qDebug() << ("Response: " + response);
     } else {
         qDebug() << "Error: invalid response";
-        return CR_ERROR;
+        return commRes::CR_ERROR;
     }
 
-    return CR_OK;
+    return commRes::CR_OK;
 }
 
-Task::Task(std::string commandText, SerialPort &serial) :
-        Command(std::move(commandText), commandType::task, serial) {}
+Task::Task(const std::string &commandText, SerialPort &serial) :
+        Command(commandText, serial) {}
 
 commRes_t Task::execute(bool parseResponse) {
     SPDLOG_LOGGER_INFO(command_logger, "Executing task: {}", commandText);
-    auto request = QString::fromStdString(commandText);
-    qDebug() << ("Request: " + request);
 
     serial.interruptDataRead = true;
     SPDLOG_LOGGER_INFO(command_logger, "Interrupt data read enabled");
@@ -189,15 +163,14 @@ commRes_t Task::execute(bool parseResponse) {
     if (data.isEmpty()) {
         qDebug() << "Timeout";
         SPDLOG_LOGGER_WARN(command_logger, "Timeout");
-        return CR_TIMEOUT;
+        return commRes::CR_TIMEOUT;
     }
 
     if (!parseResponse) {
-        return CR_OK;
+        return commRes::CR_OK;
     }
 
     QString response = uartResponseParser(data);
-    qDebug() << ("Unparsed response: " + QString(data));
     SPDLOG_LOGGER_INFO(command_logger, "Unparsed response: {}", QString(data).toStdString());
 
     if (response.isValidUtf16() && !response.isNull()) {
@@ -207,7 +180,6 @@ commRes_t Task::execute(bool parseResponse) {
             return commRes_t::CR_ERROR;
         }
 
-        qDebug() << ("Response: " + response);
         SPDLOG_LOGGER_INFO(command_logger, "Response: {}", response.toStdString());
         return commRes_t::CR_OK;
     } else {
