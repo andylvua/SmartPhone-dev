@@ -4,7 +4,7 @@
 
 #include "../../Inc/rotary_reader/rotary_dial.h"
 
-#include <iostream>		// Include all needed libraries here
+#include <string>
 #include <wiringPi.h>
 
 void RotaryDial::setup(){
@@ -15,7 +15,7 @@ void RotaryDial::setup(){
     pullUpDnControl(pinPulse, PUD_UP);
 }
 
-char * RotaryDial::listen_for_number(){
+char * RotaryDial::listen_for_number(std::ostream &outStream) {
     int numbers_typed = 0;
     int count = 0;
     while (numbers_typed < 12) {
@@ -33,13 +33,15 @@ char * RotaryDial::listen_for_number(){
             delay(20);
             if(count){
                 if(count >= 10){count=0;}
+
                 phone_number[numbers_typed++] = '0' + count;
-                //~ std::cout << count << std::endl;
+                outStream << count;
             }
         }
     }
     return phone_number;
 }
+
 
 void RotaryDial::print_number(){
     for (int i = 0; i < 12; i++){
