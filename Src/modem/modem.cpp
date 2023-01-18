@@ -475,3 +475,19 @@ void Modem::listMessages() {
     removeNewMessageNotification();
 }
 
+void Modem::listCalls() {
+    SPDLOG_LOGGER_INFO(modem_logger, "Listing calls");
+    std::ifstream file(CALLS_FILEPATH);
+    std::string line;
+    std::string data;
+
+    while (std::getline(file, line)) {
+        auto call = QString::fromStdString(line).split("; ");
+        std::cout << "Number: " << call[0].toStdString() << "\n"
+                  << " Date: " << call[1].toStdString() << "\n"
+                  << " Duration: " << call[2].toStdString() << "\n"
+                  << " Direction: " << call[3].toStdString() << "\n"
+                  << " Call result: " << call[4].toStdString()
+                  << "\n";
+    }
+}

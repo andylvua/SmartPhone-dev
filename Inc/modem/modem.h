@@ -83,6 +83,8 @@ public:
 
     static void listMessages();
 
+    static void listCalls();
+
 signals:
 
     void incomingCall(QString number);
