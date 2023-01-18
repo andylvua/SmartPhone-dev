@@ -5,7 +5,6 @@
 #ifndef PHONE_CLI_H
 #define PHONE_CLI_H
 
-
 #include <QObject>
 #include <iostream>
 #include "../modem/modem.h"
@@ -20,53 +19,49 @@ public:
     explicit CLI(Modem &modem);
 
     Modem &modem;
-    Screen *currentScreen{};
-    std::vector<Screen*> screens;
+    std::shared_ptr<Screen> currentScreen{};
+    std::vector<std::shared_ptr<Screen>> screens;
 
-    void renderScreen();
+    void renderScreen() const;
 
-    void changeScreen(Screen *screen);
+    void changeScreen(std::shared_ptr<Screen> screen);
 
     void changeScreen(const QString &screenName);
 
     void listen();
 
-    void addScreen(Screen *screen);
+    void mainScreenHandler(const char* line);
 
+    void incomingCallScreenHandler(const char* line);
 
-    void mainScreenHandler(char* line);
+    void phoneScreenHandler(const char* line);
 
-    void incomingCallScreenHandler(char* line);
+    void callScreenHandler(const char* line);
 
-    void phoneScreenHandler(char* line);
+    void inCallScreenHandler(const char* line);
 
-    void callScreenHandler(char* line);
+    void contactsScreenHandler(const char* line);
 
-    void inCallScreenHandler(char* line);
+    void smsScreenHandler(const char* line);
 
-    void contactsScreenHandler(char* line);
+    void sendSMSScreenHandler(const char* line);
 
-    void smsScreenHandler(char* line);
+    void ussdScreenHandler(const char* line);
 
-    void sendSMSScreenHandler(char* line);
+    void atScreenHandler(const char* line);
 
-    void ussdScreenHandler(char* line);
-
-    void atScreenHandler(char* line);
-
-    void logsScreenHandler(char* line);
+    void logsScreenHandler(const char* line);
 
     void prepareScreens();
 
 public slots:
 
-    void handleIncomingCall(QString number);
+    void handleIncomingCall(const QString& number);
 
     void handleIncomingSMS();
 
     void handleCallEnded();
 
 };
-
 
 #endif //PHONE_CLI_H

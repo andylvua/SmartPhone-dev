@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
                       QSerialPort::NoFlowControl);
 
 
-    if (!serial.open()) {
+    if (!serial.openSerialPort()) {
         qDebug() << "Serial port was not opened" << serial.errorString();
         SPDLOG_LOGGER_ERROR(main_logger, "Serial port was not opened: \"{}\"", serial.errorString().toStdString());
         return 1;

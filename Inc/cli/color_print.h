@@ -7,21 +7,17 @@
 
 #include <iostream>
 
-#define RESET   "\033[0m"
-#define BLACK   "\033[30m"      /* Black */
-#define RED     "\033[31m"      /* Red */
-#define GREEN   "\033[32m"      /* Green */
-#define YELLOW  "\033[33m"      /* Yellow */
-#define BLUE    "\033[34m"      /* Blue */
-#define WHITE   "\033[37m"      /* White */
-#define BOLDBLACK   "\033[1m\033[30m"      /* Bold Black */
-#define BOLDRED     "\033[1m\033[31m"      /* Bold Red */
-#define BOLDGREEN   "\033[1m\033[32m"      /* Bold Green */
-#define BOLDYELLOW  "\033[1m\033[33m"      /* Bold Yellow */
-#define BOLDBLUE    "\033[1m\033[34m"      /* Bold Blue */
-#define BOLDWHITE   "\033[1m\033[37m"      /* Bold White */
+constexpr const char* RESET = "\033[0m";
+constexpr const char* RED = "\033[31m";
+constexpr const char* GREEN = "\033[32m";
+constexpr const char* YELLOW = "\033[33m";
+constexpr const char* WHITE = "\033[37m";
+constexpr const char* BOLDRED = "\033[1m\033[31m";
+constexpr const char* BOLDGREEN = "\033[1m\033[32m";
+constexpr const char* BOLDYELLOW = "\033[1m\033[33m";
+constexpr const char* BOLDWHITE = "\033[1m\033[37m";
 
 
-void printColored(const char* color, std::string text, bool newLine = true, std::ostream &outStream = std::cout);
+void printColored(const char *color, const std::string &text, bool newLine = true, std::ostream &outStream = std::cout);
 
 #endif //PHONE_COLOR_PRINT_H

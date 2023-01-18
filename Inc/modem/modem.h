@@ -11,29 +11,19 @@
 #include <utility>
 #include <iostream>
 
-#define CONTACTS_FILEPATH "../module_cache/contacts.txt"
-#define MESSAGES_FILEPATH "../module_cache/messages.txt"
-#define CALLS_FILEPATH "../module_cache/calls.txt"
+constexpr const char* CONTACTS_FILEPATH = "../module_cache/contacts.txt";
+constexpr const char* MESSAGES_FILEPATH = "../module_cache/messages.txt";
+constexpr const char* CALLS_FILEPATH = "../module_cache/calls.txt";
 
-typedef enum {
-    CS_IDLE,
-    CS_ACTIVE,
-    CS_HELD,
-    CS_DIALING,
-    CS_ALERTING,
-    CS_INCOMING,
-    CS_WAITING
-} callState_t;
-
-typedef enum {
+using callResult_t = enum class callResult {
     CR_ANSWERED,
     CR_NO_ANSWER
-} callResult_t;
+};
 
-typedef enum {
+using callDirection_t = enum class callDirection {
     CD_INCOMING,
     CD_OUTGOING
-} callDirection_t;
+};
 
 struct Call {
     callResult_t callResult;
@@ -47,12 +37,11 @@ class Modem : public QObject {
 Q_OBJECT
 public:
     SerialPort &serial;
-    callState_t callStatus;
     Call currentCall;
 
     bool workerStatus = false;
     bool consoleMode = false;
-    std::ostream &outStream = std::cout;
+    __attribute__((unused)) std::ostream &outStream = std::cout;
 
     explicit Modem(SerialPort &serial);
 

@@ -11,26 +11,23 @@
 class Screen {
 public:
     std::vector<Screen> childScreens;
-    Screen* parentScreen;
+    std::shared_ptr<Screen> parentScreen;
     QString screenName;
     std::vector<QString> screenOptions;
     std::vector<QString> notifications = {};
 
-    Screen(QString name, Screen* parentScreen);
+    Screen(QString name, std::shared_ptr<Screen> parentScreen);
 
-    void addChildScreen(Screen &screen);
+    void addScreenOption(const QString &option);
 
-    void addParentScreen(Screen* screen);
-
-    void addScreenOption(QString option);
-
-    void removeScreenOption(QString option);
+    void removeScreenOption(const QString &option);
 
     void removeScreenOption(int index);
 
-    void addNotification(QString notification);
+    void addNotification(const QString &notification);
 
-    void removeNotification(QString notification);
+    void removeNotification(const QString &notification);
 
 };
+
 #endif //PHONE_SCREEN_H

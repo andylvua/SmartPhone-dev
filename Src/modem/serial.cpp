@@ -3,19 +3,19 @@
 //
 #include "../../Inc/modem/serial.h"
 
-SerialPort::SerialPort(const char *portName, int timeout, QSerialPort::BaudRate baudRate,
-                       QSerialPort::DataBits dataBits, QSerialPort::Parity parity, QSerialPort::StopBits stopBits,
-                       QSerialPort::FlowControl flowControl) {
-    this->portName = portName;
-    this->timeout = timeout;
-    this->baudRate = baudRate;
-    this->dataBits = dataBits;
-    this->parity = parity;
-    this->stopBits = stopBits;
-    this->flowControl = flowControl;
-}
+SerialPort::SerialPort(const char *portName,
+                       int timeout,
+                       QSerialPort::BaudRate baudRate,
+                       QSerialPort::DataBits dataBits,
+                       QSerialPort::Parity parity,
+                       QSerialPort::StopBits stopBits,
+                       QSerialPort::FlowControl flowControl
+                       ) : portName(portName), baudRate(baudRate),
+                           dataBits(dataBits), parity(parity),
+                           stopBits(stopBits), flowControl(flowControl),
+                           timeout(timeout) {}
 
-bool SerialPort::open() {
+bool SerialPort::openSerialPort() {
     setPortName(portName);
     if (QSerialPort::open(QIODevice::ReadWrite)) {
         if (!setBaudRate(baudRate))
