@@ -11,12 +11,13 @@
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
-    auto main_logger = spdlog::basic_logger_mt("main", "../logs/log.txt", true);
+    auto main_logger = spdlog::basic_logger_mt("main",
+                                               "../logs/log.txt",
+                                               true);
 
     spdlog::flush_on(spdlog::level::debug);
     spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] [%n] [function %!] [line %#] %v");
 
-    // For debugging purposes only
     #ifdef __APPLE__
         const char* portName = "/dev/tty.usbserial-1410";
     #elif __linux__
@@ -42,58 +43,7 @@ int main(int argc, char *argv[]) {
 
 
     Modem modem{serial};
-    Screen mainScreen("Main", nullptr);
-    mainScreen.addScreenOption("0. Exit");
-    mainScreen.addScreenOption("1. Phone");
-    mainScreen.addScreenOption("2. SMS");
-    mainScreen.addScreenOption("3. USSD Console");
-    mainScreen.addScreenOption("4. AT Console");
-    mainScreen.addScreenOption("5. Logs");
-    Screen incomingCallScreen("Incoming Call", &mainScreen);
-    incomingCallScreen.addScreenOption("0. Hang up");
-    incomingCallScreen.addScreenOption("1. Answer");
-    Screen phoneScreen("Phone", &mainScreen);
-    phoneScreen.addScreenOption("0. Back");
-    phoneScreen.addScreenOption("1. Call");
-    phoneScreen.addScreenOption("2. Contacts");
-    Screen callScreen("Call", &phoneScreen);
-    callScreen.addScreenOption("0. Return");
-    callScreen.addScreenOption("1. Make Call");
-    Screen inCallScreen("In Call", &callScreen);
-    inCallScreen.addScreenOption("0. Hang up");
-    Screen contactsScreen("Contacts", &phoneScreen);
-    contactsScreen.addScreenOption("0. Back");
-    contactsScreen.addScreenOption("1. Add Contact");
-    contactsScreen.addScreenOption("2. Remove Contact");
-    contactsScreen.addScreenOption("3. View Contacts");
-    Screen smsScreen("SMS", &mainScreen);
-    smsScreen.addScreenOption("0. Back");
-    smsScreen.addScreenOption("1. Send SMS");
-    smsScreen.addScreenOption("2. Messages");
-    Screen sendSMSScreen("Send SMS", &smsScreen);
-    sendSMSScreen.addScreenOption("0. Back");
-    sendSMSScreen.addScreenOption("1. Write SMS");
-    Screen logScreen("Logs", &mainScreen);
-    logScreen.addScreenOption("0. Back");
-    logScreen.addScreenOption("1. View Logs");
-    Screen ussdScreen("USSD Console", &mainScreen);
-    ussdScreen.addScreenOption("0. Back");
-    ussdScreen.addScreenOption("1. Send USSD");
-    Screen atScreen("AT Console", &mainScreen);
-    atScreen.addScreenOption("0. Back");
-    atScreen.addScreenOption("1. Send AT Command");
-    CLI cli{modem, &mainScreen};
-    cli.addScreen(&mainScreen);
-    cli.addScreen(&incomingCallScreen);
-    cli.addScreen(&phoneScreen);
-    cli.addScreen(&callScreen);
-    cli.addScreen(&smsScreen);
-    cli.addScreen(&sendSMSScreen);
-    cli.addScreen(&inCallScreen);
-    cli.addScreen(&contactsScreen);
-    cli.addScreen(&logScreen);
-    cli.addScreen(&ussdScreen);
-    cli.addScreen(&atScreen);
+    CLI cli{modem};
 
     bool modemReady = modem.initialize();
 
@@ -114,8 +64,6 @@ int main(int argc, char *argv[]) {
     workerThread.join();
     serial.close();
 
-//    QMainWindow window;
-//    window.show();
-//    return QApplication::exec();
+    return 0;
 }
 

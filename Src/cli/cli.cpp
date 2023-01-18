@@ -10,7 +10,9 @@
 
 auto cli_logger = spdlog::basic_logger_mt("cli", "../logs/log.txt", true);
 
-CLI::CLI(Modem &modem, Screen *currentScreen) : modem(modem), currentScreen(currentScreen) {
+CLI::CLI(Modem &modem) : modem(modem) {
+    prepareScreens();
+
     connect(&modem, SIGNAL(incomingCall(QString)),
             this, SLOT(handleIncomingCall(QString)));
     connect(&modem, SIGNAL(incomingSMS()), this, SLOT(handleIncomingSMS()));
@@ -326,7 +328,6 @@ void CLI::listen() {
     char *line;
     renderScreen();
     printColored(BOLDWHITE, ">>> ", false);
-    // std::cout << ">>> ";
 
     while ((line = readline(""))) {
         if (line[0] == '\0') {
@@ -357,25 +358,75 @@ void CLI::listen() {
             logsScreenHandler(line);
         } else {
             printColored(RED, "Unknown screen");
-            //qDebug() << "Unknown screen";
         }
-        printColored(BOLDWHITE, ">>> ", false);
-      //  std::cout << ">>> ";
 
-        //        if ((strcmp(line, "exit") == 0) || (strcmp(line, "quit") == 0)|| (strcmp(line, "0") == 0)) {
-        //            if (currentScreen.parentScreen != nullptr) {
-        //                changeScreen(*currentScreen.parentScreen);
-        //                renderScreen();
-        //            }
-        //        }
-        //        if ((strcmp(line, "1") == 0)||(strcmp(line, "Phone") == 0)) {
-        //            changeScreen("Phone");
-        //            renderScreen();
-        //        }
-        //
-        //        if (strcmp(line, "call") == 0) {
-        //            qDebug() << "Requesting call";
-        //            modem.call("+380679027620");
-        //        }
+        printColored(BOLDWHITE, ">>> ", false);
     }
+}
+
+void CLI::prepareScreens() {
+    auto mainScreen = new Screen("Main", nullptr);
+    mainScreen->addScreenOption("0. Exit");
+    mainScreen->addScreenOption("1. Phone");
+    mainScreen->addScreenOption("2. SMS");
+    mainScreen->addScreenOption("3. USSD Console");
+    mainScreen->addScreenOption("4. AT Console");
+    mainScreen->addScreenOption("5. Logs");
+
+    auto incomingCallScreen = new Screen("Incoming Call", mainScreen);
+    incomingCallScreen->addScreenOption("0. Hang up");
+    incomingCallScreen->addScreenOption("1. Answer");
+
+    auto phoneScreen = new Screen("Phone", mainScreen);
+    phoneScreen->addScreenOption("0. Back");
+    phoneScreen->addScreenOption("1. Call");
+    phoneScreen->addScreenOption("2. Contacts");
+
+    auto callScreen = new Screen("Call", phoneScreen);
+    callScreen->addScreenOption("0. Return");
+    callScreen->addScreenOption("1. Make Call");
+
+    auto inCallScreen = new Screen("In Call", callScreen);
+    inCallScreen->addScreenOption("0. Hang up");
+
+    auto contactsScreen = new Screen("Contacts", phoneScreen);
+    contactsScreen->addScreenOption("0. Back");
+    contactsScreen->addScreenOption("1. Add Contact");
+    contactsScreen->addScreenOption("2. Remove Contact");
+    contactsScreen->addScreenOption("3. View Contacts");
+
+    auto smsScreen = new Screen("SMS", mainScreen);
+    smsScreen->addScreenOption("0. Back");
+    smsScreen->addScreenOption("1. Send SMS");
+    smsScreen->addScreenOption("2. Messages");
+
+    auto sendSMSScreen = new Screen("Send SMS", smsScreen);
+    sendSMSScreen->addScreenOption("0. Back");
+    sendSMSScreen->addScreenOption("1. Write SMS");
+
+    auto logScreen = new Screen("Logs", mainScreen);
+    logScreen->addScreenOption("0. Back");
+    logScreen->addScreenOption("1. View Logs");
+
+    auto ussdScreen = new Screen("USSD Console", mainScreen);
+    ussdScreen->addScreenOption("0. Back");
+    ussdScreen->addScreenOption("1. Send USSD");
+
+    auto atScreen = new Screen("AT Console", mainScreen);
+    atScreen->addScreenOption("0. Back");
+    atScreen->addScreenOption("1. Send AT Command");
+
+    screens.push_back(mainScreen);
+    screens.push_back(incomingCallScreen);
+    screens.push_back(phoneScreen);
+    screens.push_back(callScreen);
+    screens.push_back(inCallScreen);
+    screens.push_back(contactsScreen);
+    screens.push_back(smsScreen);
+    screens.push_back(sendSMSScreen);
+    screens.push_back(logScreen);
+    screens.push_back(ussdScreen);
+    screens.push_back(atScreen);
+
+    currentScreen = screens[0];
 }
