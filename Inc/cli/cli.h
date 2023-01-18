@@ -17,10 +17,10 @@ class CLI : public QObject {
 Q_OBJECT
 
 public:
-    explicit CLI(Modem &modem, Screen* currentScreen);
+    explicit CLI(Modem &modem);
 
     Modem &modem;
-    Screen *currentScreen;
+    Screen *currentScreen{};
     std::vector<Screen*> screens;
 
     void renderScreen();
@@ -56,15 +56,7 @@ public:
 
     void logsScreenHandler(char* line);
 
-
-
-
-    void call(QString number);
-
-
-
-signals:
-
+    void prepareScreens();
 
 public slots:
 
