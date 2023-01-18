@@ -2,13 +2,10 @@
 // Created by Yaroslav Korch on 17.01.2023.
 //
 
-#include "rotary_dial.h"
+#include "../../Inc/rotary_reader/rotary_dial.h"
 
 #include <iostream>		// Include all needed libraries here
 #include <wiringPi.h>
-
-
-
 
 void RotaryDial::setup(){
     wiringPiSetup();
