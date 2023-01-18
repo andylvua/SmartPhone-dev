@@ -9,5 +9,6 @@ void printColored(const char* color, const std::string &text, bool newLine, std:
         outStream << color << text << RESET << std::endl;
     } else {
         outStream << color << text << RESET;
+        outStream.flush();
     }
 }
