@@ -5,7 +5,7 @@
 #ifndef LEARNGIT_ROTARY_DIAL_H
 #define LEARNGIT_ROTARY_DIAL_H
 #include <iostream>
-
+#include "../cli/color_print.h"
 class RotaryDial {
     const int pinDial = 4;  // blue
     const int pinPulse = 5;  // yellow
