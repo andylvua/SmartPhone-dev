@@ -287,6 +287,10 @@ void CLI::contactsScreenHandler(const char *line) {
         printColored(YELLOW, "Enter number");
         std::cin >> number;
 
+        if (!checkNumber(number)) {
+            return;
+        }
+
         Modem::addContact(name, number);
         changeScreen("Contacts");
         renderScreen();
@@ -315,6 +319,11 @@ void CLI::sendSMSScreenHandler(const char *line) {
         std::string message;
         printColored(YELLOW, "Enter number: ");
         std::cin >> number;
+
+        if (!checkNumber(number)) {
+            return;
+        }
+
         printColored(YELLOW, "Enter message: ");
         std::getline(std::cin >> std::ws, message);
         printColored(YELLOW, "Sending SMS");
