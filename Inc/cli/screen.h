@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <QString>
+#include <memory>
 
 class Screen {
 public:
