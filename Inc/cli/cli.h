@@ -12,6 +12,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "../rotary_reader/rotary_dial.h"
+#include <memory>
 
 class CLI : public QObject {
 Q_OBJECT
