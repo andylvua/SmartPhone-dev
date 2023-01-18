@@ -15,20 +15,21 @@
 #include <QtSerialPort/QSerialPortInfo>
 
 class SerialPort : public QSerialPort {
+public:
     const char *portName;
     QSerialPort::BaudRate baudRate;
     QSerialPort::DataBits dataBits;
     QSerialPort::Parity parity;
     QSerialPort::StopBits stopBits;
     QSerialPort::FlowControl flowControl;
-
-public:
     int timeout;
+    bool interruptDataRead = false;
+    QByteArray buffer;
 
     SerialPort(const char *portName, int timeout, QSerialPort::BaudRate baudRate, QSerialPort::DataBits dataBits,
                QSerialPort::Parity parity, QSerialPort::StopBits stopBits, QSerialPort::FlowControl flowControl);
 
-    bool open();
+    bool openSerialPort();
 };
 
 #endif //UNTITLED3_SERIAL_H
