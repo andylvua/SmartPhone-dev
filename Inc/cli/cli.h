@@ -11,6 +11,7 @@
 #include "screen.h"
 #include <readline/readline.h>
 #include <readline/history.h>
+#include "../rotary_reader/rotary_dial.h"
 
 class CLI : public QObject {
 Q_OBJECT

@@ -10,9 +10,11 @@
 
 
 const auto cli_logger = spdlog::basic_logger_mt("cli", "../logs/log.txt", true);
+RotaryDial rtx;
 
 CLI::CLI(Modem &modem) : modem(modem) {
     prepareScreens();
+    rtx.setup();
 
     connect(&modem, SIGNAL(incomingCall(QString)),
             this, SLOT(handleIncomingCall(QString)));
@@ -241,7 +243,8 @@ void CLI::callScreenHandler(const char *line) {
     if (strcmp(line, "1") == 0 || line[0] == '\0') {
         std::string number;
         printColored(YELLOW, "Enter number");
-        std::cin >> number;
+        number = rtx.listen_for_number();
+
         if (!checkNumber(number)) {
             return;
         }
@@ -285,7 +288,7 @@ void CLI::contactsScreenHandler(const char *line) {
         printColored(YELLOW, "Enter name");
         std::cin >> name;
         printColored(YELLOW, "Enter number");
-        std::cin >> number;
+        number = rtx.listen_for_number();
 
         if (!checkNumber(number)) {
             return;
@@ -318,7 +321,7 @@ void CLI::sendSMSScreenHandler(const char *line) {
         std::string number;
         std::string message;
         printColored(YELLOW, "Enter number: ");
-        std::cin >> number;
+        number = rtx.listen_for_number();
 
         if (!checkNumber(number)) {
             return;
