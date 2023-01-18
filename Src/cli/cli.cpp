@@ -249,7 +249,7 @@ void CLI::callScreenHandler(const char *line) {
 
         if (input == 'r') {
             printColored(YELLOW, "Reading from rotary dial");
-            number = rtx.listen_for_number();
+            number = rtx.listen_for_number(modem.outStream);
         } else if (input == 'k') {
             printColored(YELLOW, "Reading from keyboard");
             std::cin >> number;
@@ -307,7 +307,7 @@ void CLI::contactsScreenHandler(const char *line) {
 
         if (input == 'r') {
             printColored(YELLOW, "Reading from rotary dial");
-            number = rtx.listen_for_number();
+            number = rtx.listen_for_number(modem.outStream);
         } else if (input == 'k') {
             printColored(YELLOW, "Reading from keyboard");
             std::cin >> number;
@@ -353,7 +353,7 @@ void CLI::sendSMSScreenHandler(const char *line) {
 
         if (input == 'r') {
             printColored(YELLOW, "Reading from rotary dial");
-            number = rtx.listen_for_number();
+            number = rtx.listen_for_number(modem.outStream);
         } else if (input == 'k') {
             printColored(YELLOW, "Reading from keyboard");
             std::cin >> number;
