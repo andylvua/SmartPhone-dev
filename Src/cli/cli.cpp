@@ -243,7 +243,20 @@ void CLI::callScreenHandler(const char *line) {
     if (strcmp(line, "1") == 0 || line[0] == '\0') {
         std::string number;
         printColored(YELLOW, "Enter number");
-        number = rtx.listen_for_number();
+        printColored(YELLOW, "Read from rotary dial or keyboard? (r/k)");
+        char input;
+        std::cin >> input;
+
+        if (input == 'r') {
+            printColored(YELLOW, "Reading from rotary dial");
+            number = rtx.listen_for_number();
+        } else if (input == 'k') {
+            printColored(YELLOW, "Reading from keyboard");
+            std::cin >> number;
+        } else {
+            printColored(RED, "Invalid input");
+            return;
+        }
 
         if (!checkNumber(number)) {
             return;
@@ -288,7 +301,20 @@ void CLI::contactsScreenHandler(const char *line) {
         printColored(YELLOW, "Enter name");
         std::cin >> name;
         printColored(YELLOW, "Enter number");
-        number = rtx.listen_for_number();
+        printColored(YELLOW, "Read from rotary dial or keyboard? (r/k)");
+        char input;
+        std::cin >> input;
+
+        if (input == 'r') {
+            printColored(YELLOW, "Reading from rotary dial");
+            number = rtx.listen_for_number();
+        } else if (input == 'k') {
+            printColored(YELLOW, "Reading from keyboard");
+            std::cin >> number;
+        } else {
+            printColored(RED, "Invalid input");
+            return;
+        }
 
         if (!checkNumber(number)) {
             return;
@@ -321,7 +347,20 @@ void CLI::sendSMSScreenHandler(const char *line) {
         std::string number;
         std::string message;
         printColored(YELLOW, "Enter number: ");
-        number = rtx.listen_for_number();
+        printColored(YELLOW, "Read from rotary dial or keyboard? (r/k)");
+        char input;
+        std::cin >> input;
+
+        if (input == 'r') {
+            printColored(YELLOW, "Reading from rotary dial");
+            number = rtx.listen_for_number();
+        } else if (input == 'k') {
+            printColored(YELLOW, "Reading from keyboard");
+            std::cin >> number;
+        } else {
+            printColored(RED, "Invalid input");
+            return;
+        }
 
         if (!checkNumber(number)) {
             return;
