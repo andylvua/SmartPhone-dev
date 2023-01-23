@@ -13,6 +13,12 @@
 #include <readline/history.h>
 #include "../rotary_reader/rotary_dial.h"
 #include <memory>
+#include <ncurses.h>
+#include <unordered_map>
+#include "../../Inc/cli/option.h"
+
+#define ScreenSharedPtr(name, parentScreen) std::make_shared<Screen>(name, parentScreen)
+using ScreenMap = std::unordered_map<QString, std::shared_ptr<Screen>>;
 
 class CLI : public QObject {
 Q_OBJECT
@@ -23,44 +29,25 @@ public:
     Modem &modem;
     std::shared_ptr<Screen> currentScreen{};
     std::vector<std::shared_ptr<Screen>> screens;
+    ScreenMap screenMap;
+
+    void incrementActiveOption() const;
+
+    void decrementActiveOption() const;
 
     void renderScreen() const;
 
-    void changeScreen(std::shared_ptr<Screen> screen);
-
     void changeScreen(const QString &screenName);
 
-    void listen();
+    void gotoParentScreen();
 
-    void mainScreenHandler(const char* line);
-
-    void incomingCallScreenHandler(const char* line);
-
-    void phoneScreenHandler(const char* line);
-
-    void callScreenHandler(const char* line);
-
-    void callHistoryScreenHandler(const char* line);
-
-    void inCallScreenHandler(const char* line);
-
-    void contactsScreenHandler(const char* line);
-
-    void smsScreenHandler(const char* line);
-
-    void sendSMSScreenHandler(const char* line);
-
-    void ussdScreenHandler(const char* line);
-
-    void atScreenHandler(const char* line);
-
-    void logsScreenHandler(const char* line);
+    void listen() const;
 
     void prepareScreens();
 
 public slots:
 
-    void handleIncomingCall(const QString& number);
+    void handleIncomingCall(const QString &number);
 
     void handleIncomingSMS();
 
