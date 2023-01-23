@@ -11,11 +11,15 @@
 #define GO_BACK [&](){gotoParentScreen();}
 
 const auto cli_logger = spdlog::basic_logger_mt("cli", "../logs/log.txt", true);
-//RotaryDial rtx;
+#ifdef BUILD_ON_RASPBERRY
+RotaryDial rtx;
+#endif
 
 CLI::CLI(Modem &modem) : modem(modem) {
     prepareScreens();
-//    rtx.setup();
+#ifdef BUILD_ON_RASPBERRY
+    rtx.setup();
+#endif
 
     connect(&modem, SIGNAL(incomingCall(QString)),
             this, SLOT(handleIncomingCall(QString)));
@@ -217,13 +221,14 @@ void CLI::prepareScreens() {
     callScreen->addScreenOption("Call", [this]() {
         std::string number;
         printColored(YELLOW, "Enter number");
+#ifdef BUILD_ON_RASPBERRY
         printColored(YELLOW, "Read from rotary dial or keyboard? (r/k)");
         char input;
         std::cin >> input;
 
         if (input == 'r') {
             printColored(YELLOW, "Reading from rotary dial");
-//            number = rtx.listen_for_number(modem.outStream);
+            number = rtx.listen_for_number(modem.outStream);
         } else if (input == 'k') {
             printColored(YELLOW, "Reading from keyboard");
             std::cin >> number;
@@ -231,6 +236,9 @@ void CLI::prepareScreens() {
             printColored(RED, "Invalid input");
             return;
         }
+#else
+        std::cin >> number;
+#endif
 
         if (!checkNumber(number)) {
             return;
@@ -268,13 +276,14 @@ void CLI::prepareScreens() {
         printColored(YELLOW, "Enter name");
         std::cin >> name;
         printColored(YELLOW, "Enter number");
+#ifdef BUILD_ON_RASPBERRY
         printColored(YELLOW, "Read from rotary dial or keyboard? (r/k)");
         char input;
         std::cin >> input;
 
         if (input == 'r') {
             printColored(YELLOW, "Reading from rotary dial");
-//            number = rtx.listen_for_number(modem.outStream);
+            number = rtx.listen_for_number(modem.outStream);
         } else if (input == 'k') {
             printColored(YELLOW, "Reading from keyboard");
             std::cin >> number;
@@ -282,6 +291,9 @@ void CLI::prepareScreens() {
             printColored(RED, "Invalid input");
             return;
         }
+#else
+        std::cin >> number;
+#endif
 
         if (!checkNumber(number)) {
             return;
