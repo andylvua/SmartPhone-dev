@@ -199,7 +199,7 @@ void CLI::ussdScreenHandler(const char *line) {
         renderScreen();
     }
     if (strcmp(line, "1") == 0) {
-        printColored(BOLDYELLOW, "In development");
+        printColored(BOLDYELLOW, "In development(Coming soon)");
     }
 }
 
@@ -267,14 +267,18 @@ void CLI::callScreenHandler(const char *line) {
         }
 
         printColored(YELLOW, "Calling...");
-        modem.call(number);
-
-        for (const auto& screen: screens) {
-            if (screen->screenName == "In Call") {
-                screen->addNotification("Calling " + QString::fromStdString(number));
+        if (modem.call(number)) {
+            for (const auto &screen: screens) {
+                if (screen->screenName == "In Call") {
+                    screen->addNotification("Calling " + QString::fromStdString(number));
+                }
             }
+            changeScreen("In Call");
         }
-        changeScreen("In Call");
+        else{
+            printColored(RED, "Call failed");
+        }
+
         renderScreen();
     }
 }
