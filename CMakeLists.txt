@@ -30,6 +30,9 @@ add_executable(phone main.cpp Src/command/command.cpp Inc/command/command.h Src/
 
 if(ON_RASPBERRY)
     target_compile_definitions(phone PUBLIC BUILD_ON_RASPBERRY)
+
+    set(CMAKE_PREFIX_PATH "/usr/local/bin")
+    target_link_libraries(phone wiringPi)
 endif()
 
 target_link_libraries(phone
@@ -55,6 +58,3 @@ if(NOT TARGET spdlog)
 endif()
 
 target_link_libraries(phone spdlog::spdlog)
-
-set(CMAKE_PREFIX_PATH "/usr/local/bin")
-#target_link_libraries(phone wiringPi)
