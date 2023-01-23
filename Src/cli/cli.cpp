@@ -66,7 +66,6 @@ void CLI::renderScreen() const {
 }
 
 void CLI::changeScreen(const QString &screenName) {
-    qDebug() << "Changing screen to " << screenName;
     currentScreen = screenMap[screenName];
     renderScreen();
 }
