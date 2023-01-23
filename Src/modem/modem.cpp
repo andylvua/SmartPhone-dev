@@ -6,7 +6,7 @@
 #include "../../Inc/command/command.h"
 #include "../../Inc/command/commands_list.h"
 #include "../../Inc/logging.h"
-#include "../../Inc/cli/color_print.h"
+#include "../../Inc/cli/ncurses_io.h"
 #include <iostream>
 #include <fstream>
 

@@ -19,7 +19,7 @@ find_package(Qt5 COMPONENTS
         SerialPort
         REQUIRED)
 
-add_executable(phone main.cpp Src/command/command.cpp Inc/command/command.h Src/modem/serial.cpp Inc/modem/serial.h Inc/modem/modem.h Src/modem/modem.cpp Inc/cli/cli.h Src/cli/cli.cpp Src/cli/screen.cpp Inc/cli/screen.h Inc/logging.h Src/cli/cli.cpp Src/cli/cli.cpp Src/cli/cli.cpp Inc/cli/color_print.h Src/cli/color_print.cpp Inc/rotary_reader/rotary_dial.h Src/rotary_reader/rotary_dial.cpp Inc/cli/option.h Src/cli/option.cpp)
+add_executable(phone main.cpp Src/command/command.cpp Inc/command/command.h Src/modem/serial.cpp Inc/modem/serial.h Inc/modem/modem.h Src/modem/modem.cpp Inc/cli/cli.h Src/cli/cli.cpp Src/cli/screen.cpp Inc/cli/screen.h Inc/logging.h Src/cli/cli.cpp Src/cli/cli.cpp Src/cli/cli.cpp Inc/cli/ncurses_io.h Src/cli/ncurses_io.cpp Inc/rotary_reader/rotary_dial.h Src/rotary_reader/rotary_dial.cpp Inc/cli/option.h Src/cli/option.cpp)
 
 if(ON_RASPBERRY)
     target_compile_definitions(phone PUBLIC BUILD_ON_RASPBERRY)
