@@ -1,6 +1,5 @@
 #include <QApplication>
 #include <QtSerialPort/QSerialPort>
-#include <QtSerialPort/QSerialPortInfo>
 
 #include "Inc/modem/serial.h"
 #include "Inc/modem/modem.h"
@@ -8,6 +7,7 @@
 #include "Inc/logging.h"
 #include <thread>
 
+#define DEBUG
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
                       QSerialPort::OneStop,
                       QSerialPort::NoFlowControl);
 
-
+    #ifndef DEBUG
     if (!serial.openSerialPort()) {
         qDebug() << "Serial port was not opened" << serial.errorString();
         SPDLOG_LOGGER_ERROR(main_logger, "Serial port was not opened: \"{}\"", serial.errorString().toStdString());
@@ -40,11 +40,13 @@ int main(int argc, char *argv[]) {
     } else {
         SPDLOG_LOGGER_INFO(main_logger, "Serial port was opened successfully. Starting modem");
     }
+    #endif
 
 
     Modem modem{serial};
     CLI cli{modem};
 
+    #ifndef DEBUG
     bool modemReady = modem.initialize();
 
     if (!modemReady) {
@@ -53,6 +55,7 @@ int main(int argc, char *argv[]) {
     } else {
         SPDLOG_LOGGER_INFO(main_logger, "Modem initialization was successful. Preparing CLI");
     }
+    #endif
 
     std::thread workerThread([&cli, &main_logger] {
         SPDLOG_LOGGER_INFO(main_logger, "CLI listener thread started successfully");
