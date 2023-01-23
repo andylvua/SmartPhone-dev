@@ -2,8 +2,8 @@
 // Created by Andrew Yaroshevych on 17.01.2023.
 //
 
-#ifndef PHONE_COLOR_PRINT_H
-#define PHONE_COLOR_PRINT_H
+#ifndef PHONE_NCURSES_IO_H
+#define PHONE_NCURSES_IO_H
 
 #include <iostream>
 #include <ncurses.h>
@@ -25,4 +25,6 @@ public:
 
 void printColored(int color, const std::string &text, bool newLine = true, bool bold = false);
 
-#endif //PHONE_COLOR_PRINT_H
+std::string readString(size_t bufferSize = 256);
+
+#endif //PHONE_NCURSES_IO_H
