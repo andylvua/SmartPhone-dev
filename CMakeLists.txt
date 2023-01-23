@@ -8,6 +8,14 @@ set(CMAKE_AUTOUIC ON)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -W -Wall -Wextra")
 
+cmake_host_system_information(RESULT _host_name QUERY HOSTNAME)
+
+if(_host_name STREQUAL "raspberrypi")
+    set(ON_RASPBERRY ON)
+else()
+    set(ON_RASPBERRY OFF)
+endif()
+
 set(ON_RASPBERRY OFF)
 #set(CMAKE_PREFIX_PATH "/home/paul/Qt/5.15.2/gcc_64")
 #set(CMAKE_PREFIX_PATH "/Users/andrew/Qt/5.15.2/clang_64")
