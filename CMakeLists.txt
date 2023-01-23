@@ -16,7 +16,6 @@ else()
     set(ON_RASPBERRY OFF)
 endif()
 
-set(ON_RASPBERRY OFF)
 #set(CMAKE_PREFIX_PATH "/home/paul/Qt/5.15.2/gcc_64")
 #set(CMAKE_PREFIX_PATH "/Users/andrew/Qt/5.15.2/clang_64")
 #set(CMAKE_PREFIX_PATH "/usr/local/qt5pi/")
