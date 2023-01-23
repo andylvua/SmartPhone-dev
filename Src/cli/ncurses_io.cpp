@@ -2,7 +2,7 @@
 // Created by Andrew Yaroshevych on 17.01.2023.
 //
 
-#include "../../Inc/cli/color_print.h"
+#include "../../Inc/cli/ncurses_io.h"
 
 void ColorPrint::initColors() {
     start_color();
@@ -28,4 +28,12 @@ void printColored(int color, const std::string &text, bool newLine, bool bold) {
 
     attroff(COLOR_PAIR(color));
     attroff(A_BOLD);
+}
+
+std::string readString(size_t bufferSize) {
+    echo();
+    char buffer[bufferSize];
+    getstr(buffer);
+    noecho();
+    return {buffer};
 }
