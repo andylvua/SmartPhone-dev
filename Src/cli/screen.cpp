@@ -5,7 +5,7 @@
 #include <utility>
 #include <ncurses.h>
 #include "../../Inc/cli/screen.h"
-#include "../../Inc/cli/color_print.h"
+#include "../../Inc/cli/ncurses_io.h"
 
 Screen::Screen(QString name, std::shared_ptr<Screen> parentScreen) : screenName(std::move(name)),
                                                                      parentScreen(std::move(parentScreen)) {}

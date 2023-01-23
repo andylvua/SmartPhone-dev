@@ -5,7 +5,7 @@
 #ifndef LEARNGIT_ROTARY_DIAL_H
 #define LEARNGIT_ROTARY_DIAL_H
 #include <iostream>
-#include "../cli/color_print.h"
+#include "../cli/ncurses_io.h"
 
 #ifdef BUILD_ON_RASPBERRY
 class RotaryDial {
