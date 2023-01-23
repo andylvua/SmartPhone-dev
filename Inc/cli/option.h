@@ -7,6 +7,7 @@
 
 #include <QString>
 #include <memory>
+#include <functional>
 
 class Screen;
 
