@@ -8,6 +8,7 @@ set(CMAKE_AUTOUIC ON)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -W -Wall -Wextra")
 
+set(ON_RASPBERRY OFF)
 #set(CMAKE_PREFIX_PATH "/home/paul/Qt/5.15.2/gcc_64")
 #set(CMAKE_PREFIX_PATH "/Users/andrew/Qt/5.15.2/clang_64")
 #set(CMAKE_PREFIX_PATH "/usr/local/qt5pi/")
@@ -19,6 +20,11 @@ find_package(Qt5 COMPONENTS
         REQUIRED)
 
 add_executable(phone main.cpp Src/command/command.cpp Inc/command/command.h Src/modem/serial.cpp Inc/modem/serial.h Inc/modem/modem.h Src/modem/modem.cpp Inc/cli/cli.h Src/cli/cli.cpp Src/cli/screen.cpp Inc/cli/screen.h Inc/logging.h Src/cli/cli.cpp Src/cli/cli.cpp Src/cli/cli.cpp Inc/cli/color_print.h Src/cli/color_print.cpp Inc/rotary_reader/rotary_dial.h Src/rotary_reader/rotary_dial.cpp Inc/cli/option.h Src/cli/option.cpp)
+
+if(ON_RASPBERRY)
+    target_compile_definitions(phone PUBLIC BUILD_ON_RASPBERRY)
+endif()
+
 target_link_libraries(phone
         Qt5::Core
         Qt5::Widgets
