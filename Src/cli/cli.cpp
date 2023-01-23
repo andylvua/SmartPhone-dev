@@ -8,9 +8,8 @@
 #include "../../Inc/logging.h"
 #include <string>
 
-#define GO_BACK [&](){gotoParentScreen();}
-
 const auto cli_logger = spdlog::basic_logger_mt("cli", "../logs/log.txt", true);
+
 #ifdef BUILD_ON_RASPBERRY
 RotaryDial rtx;
 #endif
@@ -33,7 +32,7 @@ bool checkNumber(std::string &number) {
     }
 
     if (number.length() != 13) {
-        printColored(RED, "Invalid number");
+        printColored(RED, "Invalid number: " + number);
         return false;
     }
 
@@ -67,6 +66,7 @@ void CLI::renderScreen() const {
 }
 
 void CLI::changeScreen(const QString &screenName) {
+    qDebug() << "Changing screen to " << screenName;
     currentScreen = screenMap[screenName];
     renderScreen();
 }
@@ -79,32 +79,19 @@ void CLI::gotoParentScreen() {
 }
 
 void CLI::handleIncomingCall(const QString& number) {
-    for (const auto& screen: screens) {
-        if (screen->screenName == "Incoming Call" || screen->screenName == "In Call") {
-            screen->addNotification("Incoming call from +" + number);
-        }
-    }
+    CLI::screenMap["Incoming Call"]->addNotification("Incoming call from +" + number);
+    CLI::screenMap["In Call"]->addNotification("Incoming call from +" + number);
     changeScreen("Incoming Call");
 }
 
 void CLI::handleIncomingSMS() {
-    qDebug() << "Incoming SMS";
-
-    for (const auto& screen: screens) {
-        if (screen->screenName == "Main" && screen->notifications.empty()) {
-            screen->addNotification("    *New SMS");
-        }
-    }
+    CLI::screenMap["Main"]->addNotification("    *New SMS");
     renderScreen();
 }
 
 void CLI::handleCallEnded() {
-    for (const auto& screen: screens) {
-        if (screen->screenName == "In Call" || screen->screenName == "Incoming Call") {
-            screen->notifications.clear();
-        }
-    }
-
+    CLI::screenMap["Incoming Call"]->notifications.clear();
+    CLI::screenMap["In Call"]->notifications.clear();
     changeScreen("Main");
 }
 
@@ -155,6 +142,189 @@ void CLI::listen() const {
     }
 }
 
+void CLI::_rejectCall() {
+    printColored(YELLOW, "Rejecting call");
+    modem.hangUp();
+    CLI::screenMap["Incoming Call"]->notifications.clear();
+    CLI::screenMap["In Call"]->notifications.clear();
+    changeScreen("Main");
+}
+
+void CLI::_answerCall() {
+    printColored(YELLOW, "Answering call");
+    modem.answer();
+
+    changeScreen("In Call");
+}
+
+void CLI::_viewCallHistory() {
+    printColored(YELLOW, "Call history:");
+    Modem::listCalls();
+}
+
+void CLI::_call() {
+    std::string number;
+    printColored(YELLOW, "Enter number");
+#ifdef BUILD_ON_RASPBERRY
+    printColored(YELLOW, "Read from rotary dial or keyboard? (r/k)");
+    char input;
+    input = readString();
+
+    if (input == 'r') {
+        printColored(YELLOW, "Reading from rotary dial");
+        number = rtx.listen_for_number(modem.outStream);
+    } else if (input == 'k') {
+        printColored(YELLOW, "Reading from keyboard");
+        number = readString();
+    } else {
+        printColored(RED, "Invalid input");
+        return;
+    }
+#else
+    number = readString();
+#endif
+
+    if (!checkNumber(number)) {
+        return;
+    }
+
+    printColored(YELLOW, "Calling...");
+    modem.call(number);
+
+    CLI::screenMap["In Call"]->addNotification("Calling " + QString::fromStdString(number));
+
+    changeScreen("In Call");
+}
+
+void CLI::_hangUp() {
+    modem.hangUp();
+    CLI::screenMap["In Call"]->notifications.clear();
+
+    printColored(YELLOW, "Hanging up");
+    changeScreen("Main");
+}
+
+void CLI::_addContact() {
+    printColored(YELLOW, "Adding contact");
+    std::string name;
+    std::string number;
+    printColored(YELLOW, "Enter name");
+    name = readString();
+    printColored(YELLOW, "Enter number");
+#ifdef BUILD_ON_RASPBERRY
+    printColored(YELLOW, "Read from rotary dial or keyboard? (r/k)");
+    char input;
+    input = readString();
+
+    if (input == 'r') {
+        printColored(YELLOW, "Reading from rotary dial");
+        number = rtx.listen_for_number(modem.outStream);
+    } else if (input == 'k') {
+        printColored(YELLOW, "Reading from keyboard");
+        number = readString();
+    } else {
+        printColored(RED, "Invalid input");
+        return;
+    }
+#else
+    number = readString();
+#endif
+
+    if (!checkNumber(number)) {
+        return;
+    }
+
+    Modem::addContact(name, number);
+    changeScreen("Contacts");
+}
+
+void CLI::_deleteContact() {
+    printColored(YELLOW, "Deleting contact");
+    std::string name;
+    printColored(YELLOW, "Enter name");
+    name = readString();
+
+    Modem::removeContact(name);
+    changeScreen("Contacts");
+}
+
+void CLI::_viewContacts() {
+    printColored(YELLOW, "Listing contacts");
+    Modem::listContacts();
+}
+
+void CLI::_viewMessages() {
+    CLI::screenMap["Main"]->notifications.clear();
+    printColored(YELLOW, "Listing messages");
+    Modem::listMessages();
+}
+
+void CLI::_sendMessage() {
+    std::string number;
+    std::string message;
+    printColored(YELLOW, "Enter number: ");
+#ifdef BUILD_ON_RASPBERRY
+    printColored(YELLOW, "Read from rotary dial or keyboard? (r/k)");
+    char input;
+    input = readString();
+
+    if (input == 'r') {
+        printColored(YELLOW, "Reading from rotary dial");
+        number = rtx.listen_for_number(modem.outStream);
+    } else if (input == 'k') {
+        printColored(YELLOW, "Reading from keyboard");
+        number = readString();
+    } else {
+        printColored(RED, "Invalid input");
+        return;
+    }
+#else
+    number = readString();
+#endif
+
+    if (!checkNumber(number)) {
+        return;
+    }
+
+    printColored(YELLOW, "Enter message: ");
+    message = readString();
+    printColored(YELLOW, "Sending SMS");
+
+    modem.message(number, message);
+}
+
+void CLI::_viewLogs() {
+    printColored(GREEN, "Opening logs");
+    system("xdg-open ./../logs/log.txt");
+}
+
+void CLI::_sendUSSD() {
+    printColored(YELLOW, "In development...\n");
+}
+
+void CLI::_sendATCommand() {
+    modem.enableConsoleMode();
+    printColored(GREEN, "AT Console mode enabled. To exit, type 'exit'");
+    std::string at{};
+
+    printColored(WHITE, "Enter commands:");
+    while (true) {
+        at = readString();
+        if (at == "exit") {
+            break;
+        }
+        modem.sendConsoleCommand(QString::fromStdString(at));
+    }
+
+    modem.disableConsoleMode();
+    renderScreen();
+}
+
+void CLI::_disableATConsole() {
+    modem.disableConsoleMode();
+    gotoParentScreen();
+}
+
 void CLI::prepareScreens() {
     auto mainScreen = ScreenSharedPtr("Main", nullptr);
     auto incomingCallScreen = ScreenSharedPtr("Incoming Call", mainScreen);
@@ -171,244 +341,62 @@ void CLI::prepareScreens() {
     mainScreen->addScreenOption("Exit", []() {
         exit(0);
     });
-    mainScreen->addScreenOption("Phone", [this]() {
-        changeScreen("Phone");
-    });
-    mainScreen->addScreenOption("SMS", [this]() {
-        changeScreen("SMS");
-    });
-    mainScreen->addScreenOption("USSD Console", [this]() {
-        changeScreen("USSD Console");
-    });
-    mainScreen->addScreenOption("AT Console", [this]() {
-        changeScreen("AT Console");
-    });
-    mainScreen->addScreenOption("Logs", [this]() {
-        changeScreen("Logs");
-    });
+    mainScreen->addScreenOption("Phone", CHANGE_SCREEN("Phone"));
+    mainScreen->addScreenOption("SMS", CHANGE_SCREEN("SMS"));
+    mainScreen->addScreenOption("USSD Console", CHANGE_SCREEN("USSD Console"));
+    mainScreen->addScreenOption("AT Console", CHANGE_SCREEN("AT Console"));
+    mainScreen->addScreenOption("Logs", CHANGE_SCREEN("Logs"));
 
-    incomingCallScreen->addScreenOption("Hang up", [this]() {
-        printColored(YELLOW, "Rejecting call");
-        modem.hangUp();
-        for (const auto& screen: screens) {
-            if (screen->screenName == "Incoming Call" || screen->screenName == "In Call") {
-                screen->notifications.clear();
-            }
-        }
-        changeScreen("Main");
-    });
-    incomingCallScreen->addScreenOption("Answer", [this]() {
-        printColored(YELLOW, "Answering call");
-        modem.answer();
+    incomingCallScreen->addScreenOption("Reject call", EXECUTE_METHOD(_rejectCall));
 
-        changeScreen("In Call");
-    });
+    incomingCallScreen->addScreenOption("Answer", EXECUTE_METHOD(_answerCall));
 
     phoneScreen->addScreenOption("Back", GO_BACK);
-    phoneScreen->addScreenOption("Call", [this]() {
-        changeScreen("Call");
-    });
-    phoneScreen->addScreenOption("Contacts", [this]() {
-        changeScreen("Contacts");
-    });
-    phoneScreen->addScreenOption("Call history", []() {
-        printColored(YELLOW, "Call history:");
-        Modem::listCalls();
-    });
+    phoneScreen->addScreenOption("Call", CHANGE_SCREEN("Call"));
+    phoneScreen->addScreenOption("Contacts", CHANGE_SCREEN("Contacts"));
+    phoneScreen->addScreenOption("Call history", EXECUTE_METHOD(_viewCallHistory));
 
     callScreen->addScreenOption("Return", GO_BACK);
 
-    callScreen->addScreenOption("Call", [this]() {
-        std::string number;
-        printColored(YELLOW, "Enter number");
-#ifdef BUILD_ON_RASPBERRY
-        printColored(YELLOW, "Read from rotary dial or keyboard? (r/k)");
-        char input;
-        std::cin >> input;
+    callScreen->addScreenOption("Call", EXECUTE_METHOD(_call));
 
-        if (input == 'r') {
-            printColored(YELLOW, "Reading from rotary dial");
-            number = rtx.listen_for_number(modem.outStream);
-        } else if (input == 'k') {
-            printColored(YELLOW, "Reading from keyboard");
-            std::cin >> number;
-        } else {
-            printColored(RED, "Invalid input");
-            return;
-        }
-#else
-        std::cin >> number;
-#endif
-
-        if (!checkNumber(number)) {
-            return;
-        }
-
-        printColored(YELLOW, "Calling...");
-        modem.call(number);
-
-        for (const auto& screen: screens) {
-            if (screen->screenName == "In Call") {
-                screen->addNotification("Calling " + QString::fromStdString(number));
-            }
-        }
-
-        changeScreen("In Call");
-    });
-
-    inCallScreen->addScreenOption("Hang up", [this]() {
-        modem.hangUp();
-        for (const auto& screen: screens) {
-            if (screen->screenName == "Incoming Call" || screen->screenName == "In Call") {
-                screen->notifications.clear();
-            }
-        }
-
-        printColored(YELLOW, "Hanging up");
-        changeScreen("Main");
-    });
+    inCallScreen->addScreenOption("Hang up", EXECUTE_METHOD(_hangUp));
 
     contactsScreen->addScreenOption("Back", GO_BACK);
-    contactsScreen->addScreenOption("Add Contact", [this]() {
-        printColored(YELLOW, "Adding contact");
-        std::string name;
-        std::string number;
-        printColored(YELLOW, "Enter name");
-        std::cin >> name;
-        printColored(YELLOW, "Enter number");
-#ifdef BUILD_ON_RASPBERRY
-        printColored(YELLOW, "Read from rotary dial or keyboard? (r/k)");
-        char input;
-        std::cin >> input;
+    contactsScreen->addScreenOption("Add Contact", EXECUTE_METHOD(_addContact));
+    contactsScreen->addScreenOption("Delete Contact", EXECUTE_METHOD(_deleteContact));
 
-        if (input == 'r') {
-            printColored(YELLOW, "Reading from rotary dial");
-            number = rtx.listen_for_number(modem.outStream);
-        } else if (input == 'k') {
-            printColored(YELLOW, "Reading from keyboard");
-            std::cin >> number;
-        } else {
-            printColored(RED, "Invalid input");
-            return;
-        }
-#else
-        std::cin >> number;
-#endif
-
-        if (!checkNumber(number)) {
-            return;
-        }
-
-        Modem::addContact(name, number);
-        changeScreen("Contacts");
-    });
-    contactsScreen->addScreenOption("Remove Contact", [this]() {
-        printColored(YELLOW, "Deleting contact");
-        std::string name;
-        printColored(YELLOW, "Enter name");
-        std::cin >> name;
-
-        Modem::removeContact(name);
-        changeScreen("Contacts");
-    });
-    contactsScreen->addScreenOption("View Contacts", []() {
-        printColored(YELLOW, "Listing contacts");
-        Modem::listContacts();
-    });
+    contactsScreen->addScreenOption("View Contacts", EXECUTE_METHOD(_viewContacts));
 
     smsScreen->addScreenOption("Back", GO_BACK);
-    smsScreen->addScreenOption("Messages", [this]() {
-        for (const auto& screen: screens) {
-            if (screen->screenName == "Main") {
-                screen->removeNotification("    *New SMS");
-            }
-        }
-        printColored(YELLOW, "Listing messages");
-        Modem::listMessages();
-    });
-    smsScreen->addScreenOption("Send SMS", [this]() {
-        changeScreen("Send SMS");
-    });
-
+    smsScreen->addScreenOption("Messages", EXECUTE_METHOD(_viewMessages));
+    smsScreen->addScreenOption("Send SMS", CHANGE_SCREEN("Send SMS"));
     sendSMSScreen->addScreenOption("Back", GO_BACK);
-    sendSMSScreen->addScreenOption("Write SMS", [this]() {
-        std::string number;
-        std::string message;
-        printColored(YELLOW, "Enter number: ");
-        printColored(YELLOW, "Read from rotary dial or keyboard? (r/k)");
-        char input;
-        std::cin >> input;
-
-        if (input == 'r') {
-            printColored(YELLOW, "Reading from rotary dial");
-//            number = rtx.listen_for_number(modem.outStream);
-        } else if (input == 'k') {
-            printColored(YELLOW, "Reading from keyboard");
-            std::cin >> number;
-        } else {
-            printColored(RED, "Invalid input");
-            return;
-        }
-
-        if (!checkNumber(number)) {
-            return;
-        }
-
-        printColored(YELLOW, "Enter message: ");
-        std::getline(std::cin >> std::ws, message);
-        printColored(YELLOW, "Sending SMS");
-
-        modem.message(number, message);
-    });
+    sendSMSScreen->addScreenOption("Write SMS", EXECUTE_METHOD(_sendMessage));
 
     logScreen->addScreenOption("Back", GO_BACK);
-    logScreen->addScreenOption("View Logs", []() {
-        printColored(GREEN, "Opening logs");
-        system("xdg-open ./../logs/log.txt");
-    });
+    logScreen->addScreenOption("View Logs", EXECUTE_METHOD(_viewLogs));
 
     ussdScreen->addScreenOption("Back", GO_BACK);
-    ussdScreen->addScreenOption("Send USSD Command", []() {
-        printColored(YELLOW, "In development...\n");
-    });
+    ussdScreen->addScreenOption("Send USSD Command", EXECUTE_METHOD(_sendUSSD));
 
-    atScreen->addScreenOption("Back", [this]() {
-        modem.disableConsoleMode();
-        gotoParentScreen();
-    });
-    atScreen->addScreenOption("Send AT Command", [this]() {
-        modem.enableConsoleMode();
-        printColored(GREEN, "AT Console mode enabled. To exit, type 'exit'");
-        std::string at{};
+    atScreen->addScreenOption("Back", EXECUTE_METHOD(_disableATConsole));
+    atScreen->addScreenOption("Send AT Command", EXECUTE_METHOD(_sendATCommand));
 
-        printColored(WHITE, "Enter commands:");
-        while (true) {
-            std::cin >> at;
-            if (at == "exit") {
-                break;
-            }
-            modem.sendConsoleCommand(QString::fromStdString(at));
-        }
 
-        modem.disableConsoleMode();
-        renderScreen();
-    });
+    CLI::screenMap = {
+            {"Main", mainScreen},
+            {"Incoming Call", incomingCallScreen},
+            {"Phone", phoneScreen},
+            {"Call", callScreen},
+            {"In Call", inCallScreen},
+            {"Contacts", contactsScreen},
+            {"SMS", smsScreen},
+            {"Send SMS", sendSMSScreen},
+            {"Logs", logScreen},
+            {"USSD Console", ussdScreen},
+            {"AT Console", atScreen}
+    };
 
-    screens.push_back(mainScreen);
-    screens.push_back(incomingCallScreen);
-    screens.push_back(phoneScreen);
-    screens.push_back(callScreen);
-    screens.push_back(inCallScreen);
-    screens.push_back(contactsScreen);
-    screens.push_back(smsScreen);
-    screens.push_back(sendSMSScreen);
-    screens.push_back(logScreen);
-    screens.push_back(ussdScreen);
-    screens.push_back(atScreen);
-
-    for (const auto& screen : screens) {
-        CLI::screenMap[screen->screenName] = screen;
-    }
-
-    currentScreen = screens[0];
+    currentScreen = mainScreen;
 }

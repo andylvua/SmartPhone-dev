@@ -18,6 +18,9 @@
 #include "../../Inc/cli/option.h"
 
 #define ScreenSharedPtr(name, parentScreen) std::make_shared<Screen>(name, parentScreen)
+#define GO_BACK [&](){gotoParentScreen();}
+#define CHANGE_SCREEN(screenName) [&](){changeScreen(screenName);}
+#define EXECUTE_METHOD(method) [&](){method();}
 using ScreenMap = std::unordered_map<QString, std::shared_ptr<Screen>>;
 
 class CLI : public QObject {
@@ -28,7 +31,6 @@ public:
 
     Modem &modem;
     std::shared_ptr<Screen> currentScreen{};
-    std::vector<std::shared_ptr<Screen>> screens;
     ScreenMap screenMap;
 
     void incrementActiveOption() const;
@@ -53,6 +55,35 @@ public slots:
 
     void handleCallEnded();
 
+private:
+
+    void _rejectCall();
+
+    void _answerCall();
+
+    void _viewCallHistory();
+
+    void _call();
+
+    void _hangUp();
+
+    void _addContact();
+
+    void _deleteContact();
+
+    void _viewContacts();
+
+    void _viewMessages();
+
+    void _sendMessage();
+
+    void _viewLogs();
+
+    void _sendUSSD();
+
+    void _sendATCommand();
+
+    void _disableATConsole();
 };
 
 #endif //PHONE_CLI_H
