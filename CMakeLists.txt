@@ -27,7 +27,14 @@ target_link_libraries(phone
 
 
 set(CMAKE_PREFIX_PATH "/usr/share")
-target_link_libraries(phone readline)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(READLINE REQUIRED IMPORTED_TARGET readline)
+
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(NCURSES REQUIRED IMPORTED_TARGET ncurses)
+
+target_link_libraries(phone PkgConfig::NCURSES)
+target_link_libraries(phone PkgConfig::READLINE)
 
 if(NOT TARGET spdlog)
     # Stand-alone build
@@ -37,4 +44,4 @@ endif()
 target_link_libraries(phone spdlog::spdlog)
 
 set(CMAKE_PREFIX_PATH "/usr/local/bin")
-target_link_libraries(phone wiringPi)
+#target_link_libraries(phone wiringPi)
