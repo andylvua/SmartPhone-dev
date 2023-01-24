@@ -3,6 +3,7 @@
 //
 
 #include "../../Inc/cli/ncurses_io.h"
+#include <algorithm>
 
 void ColorPrint::initColors() {
     start_color();
