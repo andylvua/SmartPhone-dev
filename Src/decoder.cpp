@@ -4,6 +4,8 @@
 #include <bitset>
 #include <QString>
 #include "../Inc/decoder.h"
+#include <codecvt>
+#include <locale>
 
 const std::string Decoder::_hexChartoBin(char c)
 {
@@ -63,11 +65,37 @@ QString Decoder::decode7Bit(const QString& encoded){
     return decoded;
 }
 QString Decoder::decodeUcs2(const QString& encoded){
-    QString decoded = "";
-    for (auto hex : encoded){
-        decoded += hex.unicode();
+        std::string hexString = encoded.toStdString();
+        std::string unicodeLiteral;
+        for (int i = 0; i < hexString.length(); i += 4) {
+            std::string hex = hexString.substr(i, 4);
+            unicodeLiteral += "\\u" + hex;
+        }
 
-    }
+        std::wstring ws;
+        ws.reserve(unicodeLiteral.size());
 
-    return decoded;
+        for(size_t i = 0; i < unicodeLiteral.size();)
+        {
+            char ch = unicodeLiteral[i];
+            i++;
+
+            if ((ch == '\\') && (i < unicodeLiteral.size()) && (unicodeLiteral[i] == 'u'))
+            {
+                auto wc = static_cast<wchar_t>(std::stoi(unicodeLiteral.substr(i + 1, 4),
+                                                         nullptr,
+                                                         16));
+                i += 5;
+                ws.push_back(wc);
+            }
+            else
+            {
+                ws.push_back(static_cast<wchar_t>(ch));
+            }
+        }
+
+        std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+        std::string s = conv.to_bytes(ws);
+
+        return QString::fromStdString(s);
 }
