@@ -497,8 +497,6 @@ void Modem::listCalls() {
                   + "\n");
     }
 
-    SPDLOG_LOGGER_INFO(modem_logger, data);
-
     displayPad(data, "Viewing calls");
 
     file.close();
