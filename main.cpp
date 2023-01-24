@@ -7,7 +7,7 @@
 #include "Inc/logging.h"
 #include <thread>
 
-#define DEBUG
+//#define DEBUG
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
