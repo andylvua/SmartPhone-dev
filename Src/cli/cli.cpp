@@ -185,13 +185,13 @@ void CLI::_call() {
     printColored(YELLOW, "Enter number");
 #ifdef BUILD_ON_RASPBERRY
     printColored(YELLOW, "Read from rotary dial or keyboard? (r/k)");
-    char input;
+    std::string input;
     input = readString();
 
-    if (input == 'r') {
+    if (input == "r") {
         printColored(YELLOW, "Reading from rotary dial");
         number = rtx.listen_for_number(modem.outStream);
-    } else if (input == 'k') {
+    } else if (input == "k") {
         printColored(YELLOW, "Reading from keyboard");
         number = readString();
     } else {
@@ -231,13 +231,13 @@ void CLI::_addContact() {
     printColored(YELLOW, "Enter number");
 #ifdef BUILD_ON_RASPBERRY
     printColored(YELLOW, "Read from rotary dial or keyboard? (r/k)");
-    char input;
+    std::string input;
     input = readString();
 
-    if (input == 'r') {
+    if (input == "r") {
         printColored(YELLOW, "Reading from rotary dial");
         number = rtx.listen_for_number(modem.outStream);
-    } else if (input == 'k') {
+    } else if (input == "k") {
         printColored(YELLOW, "Reading from keyboard");
         number = readString();
     } else {
@@ -285,13 +285,13 @@ void CLI::_sendMessage() {
     printColored(YELLOW, "Enter number: ");
 #ifdef BUILD_ON_RASPBERRY
     printColored(YELLOW, "Read from rotary dial or keyboard? (r/k)");
-    char input;
+    std::string input;
     input = readString();
 
-    if (input == 'r') {
+    if (input == "r") {
         printColored(YELLOW, "Reading from rotary dial");
         number = rtx.listen_for_number(modem.outStream);
-    } else if (input == 'k') {
+    } else if (input == "k") {
         printColored(YELLOW, "Reading from keyboard");
         number = readString();
     } else {
