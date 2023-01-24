@@ -5,6 +5,8 @@
 #include "../../Inc/rotary_reader/rotary_dial.h"
 
 #include <string>
+
+#ifdef BUILD_ON_RASPBERRY
 #include <wiringPi.h>
 
 void RotaryDial::setup(){
@@ -49,12 +51,4 @@ void RotaryDial::print_number(){
         std::cout << phone_number[i];
     }
 }
-
-
-//~ int main(){
-//~ RotaryDial rtx;
-//~ rtx.setup();
-//~ char * phone = rtx.listen_for_number();
-//~ rtx.print_number();
-//~ return 0;
-//~ }
+#endif //BUILD_ON_RASPBERRY

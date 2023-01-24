@@ -6,7 +6,7 @@
 #include "../../Inc/command/command.h"
 #include "../../Inc/command/commands_list.h"
 #include "../../Inc/logging.h"
-#include "../../Inc/cli/color_print.h"
+#include "../../Inc/cli/ncurses_io.h"
 #include <iostream>
 #include <fstream>
 
@@ -434,7 +434,7 @@ void Modem::listContacts() {
 
     while (std::getline(file, line)) {
         auto contact = QString::fromStdString(line).split("; ");
-        std::cout << "Name: " << contact[0].toStdString() << "\n" << " Number: " << contact[1].toStdString() << "\n";
+        printw(std::string("Name: " + contact[0].toStdString() + "\n" + " Number: " + contact[1].toStdString() + "\n").c_str());
     }
 }
 
@@ -465,11 +465,11 @@ void Modem::listMessages() {
 
     while (std::getline(file, line)) {
         auto message = QString::fromStdString(line).split("; ");
-        std::cout << "Number: " << message[0].toStdString() << "\n"
-                  << " Direction: " << message[1].toStdString() << "\n"
-                  << " Date: " << message[2].toStdString() << "\n"
-                  << " Message: " << message[3].toStdString()
-                  << "\n";
+        printw(std::string("Number: " + message[0].toStdString() + "\n"
+                  + " Direction: " + message[1].toStdString() + "\n"
+                  + " Date: " + message[2].toStdString() + "\n"
+                  + " Message: " + message[3].toStdString()
+                  + "\n").c_str());
     }
 
     removeNewMessageNotification();
@@ -483,11 +483,11 @@ void Modem::listCalls() {
 
     while (std::getline(file, line)) {
         auto call = QString::fromStdString(line).split("; ");
-        std::cout << "Number: " << call[0].toStdString() << "\n"
-                  << " Date: " << call[1].toStdString() << "\n"
-                  << " Duration: " << call[2].toStdString() << "\n"
-                  << " Direction: " << call[3].toStdString() << "\n"
-                  << " Call result: " << call[4].toStdString()
-                  << "\n";
+        printw("%s", std::string("Number: " + call[0].toStdString() + "\n"
+                  + " Date: " + call[1].toStdString() + "\n"
+                  + " Duration: " + call[2].toStdString() + "\n"
+                  + " Direction: " + call[3].toStdString() + "\n"
+                  + " Call result: " + call[4].toStdString()
+                  + "\n").c_str());
     }
 }
