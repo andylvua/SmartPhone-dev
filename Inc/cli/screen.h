@@ -8,26 +8,18 @@
 #include <vector>
 #include <QString>
 #include <memory>
-#include "option.h"
 
 class Screen {
 public:
-    QString screenName;
-    std::vector<std::shared_ptr<Screen>> childScreens;
+    std::vector<Screen> childScreens;
     std::shared_ptr<Screen> parentScreen;
-    std::vector<Option> screenOptions;
-    int activeOption = -1;
+    QString screenName;
+    std::vector<QString> screenOptions;
     std::vector<QString> notifications = {};
 
     Screen(QString name, std::shared_ptr<Screen> parentScreen);
 
-    static void initScreen();
-
-    static void releaseScreen();
-
-    void addScreenOption(const QString &name, std::function<void()> const& action);
-
-    int getActiveOption() const;
+    void addScreenOption(const QString &option);
 
     void removeScreenOption(const QString &option);
 
@@ -37,7 +29,6 @@ public:
 
     void removeNotification(const QString &notification);
 
-    void addChildScreen(const std::shared_ptr<Screen> &screen);
 };
 
 #endif //PHONE_SCREEN_H
