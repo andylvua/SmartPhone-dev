@@ -37,3 +37,60 @@ std::string readString(size_t bufferSize) {
     noecho();
     return {buffer};
 }
+
+void displayPad(const std::string &data, std::string header) {
+    clear();
+    move(0, 0);
+
+    header += " (Press 'q' to exit)";
+    printColored(FILLED_WHITE, header);
+    wrefresh(stdscr);
+
+    int ch;
+    int row = 0;
+    int col = 0;
+
+    long screen_rows;
+    long screen_cols;
+    getmaxyx(stdscr, screen_rows, screen_cols);
+
+    long rows = std::count(data.begin(), data.end(), '\n') + 1;
+    long cols = screen_cols;
+
+    WINDOW *pad = newpad(static_cast<int>(rows), static_cast<int>(cols));
+
+    initscr();
+    keypad(pad, TRUE);
+    scrollok(pad, TRUE);
+    wprintw(pad, data.c_str());
+
+    prefresh(pad, row, col, 1, 0, static_cast<int>(screen_rows - 1), static_cast<int>(screen_cols - 1));
+
+    while ((ch = wgetch(pad)) != 'q') {
+        switch (ch) {
+            case KEY_UP:
+                if (row > 0) {
+                    row--;
+                }
+                break;
+            case KEY_DOWN:
+                if (row < rows - screen_rows) {
+                    row++;
+                }
+                break;
+            case KEY_LEFT:
+                if (col > 0) {
+                    col--;
+                }
+                break;
+            case KEY_RIGHT:
+                if (col < cols - screen_cols) {
+                    col++;
+                }
+                break;
+
+            default: break;
+        }
+        prefresh(pad, row, col, 1, 0, static_cast<int>(screen_rows - 1), static_cast<int>(screen_cols - 1));
+    }
+}

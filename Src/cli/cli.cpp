@@ -46,23 +46,41 @@ bool checkNumber(std::string &number) {
     return true;
 }
 
-void CLI::renderScreen() const {
-    int activeOptionIndex = currentScreen->getActiveOption();
-    clear();
+void _render(std::shared_ptr<Screen> screen) {
+    int activeOptionIndex = screen->getActiveOption();
 
-    printColored(WHITE, currentScreen->screenName.toStdString(), true, true);
+    printColored(WHITE, screen->screenName.toStdString(), true, true);
 
-    for (const auto& notification: currentScreen->notifications) {
+    for (const auto& notification: screen->notifications) {
         printColored(WHITE, notification.toStdString());
     }
 
-    for (size_t i = 0; i < currentScreen->screenOptions.size(); ++i) {
-        QString option = currentScreen->screenOptions[i].optionName;
+    for (size_t i = 0; i < screen->screenOptions.size(); ++i) {
+        QString option = screen->screenOptions[i].optionName;
         printColored(WHITE, std::to_string(i) + ". ", false);
 
         int color = (i == static_cast<size_t>(activeOptionIndex)) ? FILLED_WHITE : WHITE;
         printColored(color, option.toStdString());
     }
+}
+
+void CLI::renderScreen() {
+    clear();
+    _render(currentScreen);
+
+    lastRenderedScreen = currentScreen;
+}
+
+void CLI::updateScreen() {
+    if (lastRenderedScreen == nullptr) {
+        lastRenderedScreen = currentScreen;
+        renderScreen();
+        return;
+    }
+
+    move(0, 0);
+    _render(currentScreen);
+    lastRenderedScreen = currentScreen;
 }
 
 void CLI::changeScreen(const QString &screenName) {
@@ -94,17 +112,19 @@ void CLI::handleCallEnded() {
     changeScreen("Main");
 }
 
-void CLI::incrementActiveOption() const {
+void CLI::incrementActiveOption() {
     currentScreen->activeOption++;
+    updateScreen();
 }
 
-void CLI::decrementActiveOption() const {
+void CLI::decrementActiveOption() {
     if (currentScreen->activeOption > -1) {
         currentScreen->activeOption--;
     }
+    updateScreen();
 }
 
-void CLI::listen() const {
+void CLI::listen() {
     cli_logger->flush_on(spdlog::level::debug);
     SPDLOG_LOGGER_INFO(cli_logger, "CLI listener started.");
 
@@ -122,11 +142,9 @@ void CLI::listen() const {
         switch(ch) {
             case KEY_UP:
                 CLI::decrementActiveOption();
-                renderScreen();
                 break;
             case KEY_DOWN:
                 CLI::incrementActiveOption();
-                renderScreen();
                 break;
             case '\n':
                 if (currentScreen->activeOption == -1) {
@@ -159,6 +177,7 @@ void CLI::_answerCall() {
 void CLI::_viewCallHistory() {
     printColored(YELLOW, "Call history:");
     Modem::listCalls();
+    renderScreen();
 }
 
 void CLI::_call() {
@@ -250,12 +269,14 @@ void CLI::_deleteContact() {
 void CLI::_viewContacts() {
     printColored(YELLOW, "Listing contacts");
     Modem::listContacts();
+    renderScreen();
 }
 
 void CLI::_viewMessages() {
     CLI::screenMap["Main"]->notifications.clear();
     printColored(YELLOW, "Listing messages");
     Modem::listMessages();
+    renderScreen();
 }
 
 void CLI::_sendMessage() {
