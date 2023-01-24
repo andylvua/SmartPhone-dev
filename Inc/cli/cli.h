@@ -33,17 +33,19 @@ public:
     std::shared_ptr<Screen> currentScreen{};
     ScreenMap screenMap;
 
-    void incrementActiveOption() const;
+    void incrementActiveOption();
 
-    void decrementActiveOption() const;
+    void decrementActiveOption();
 
-    void renderScreen() const;
+    void updateScreen();
+
+    void renderScreen();
 
     void changeScreen(const QString &screenName);
 
     void gotoParentScreen();
 
-    void listen() const;
+    void listen();
 
     void prepareScreens();
 
@@ -56,6 +58,8 @@ public slots:
     void handleCallEnded();
 
 private:
+
+    std::shared_ptr<Screen> lastRenderedScreen{};
 
     void _rejectCall();
 
