@@ -5,7 +5,9 @@
 #ifndef LEARNGIT_ROTARY_DIAL_H
 #define LEARNGIT_ROTARY_DIAL_H
 #include <iostream>
-#include "../cli/color_print.h"
+#include "../cli/ncurses_io.h"
+
+#ifdef BUILD_ON_RASPBERRY
 class RotaryDial {
     const int pinDial = 4;  // blue
     const int pinPulse = 5;  // yellow
@@ -17,6 +19,6 @@ public:
 
     void print_number();
 };
-
+#endif //BUILD_ON_RASPBERRY
 
 #endif //LEARNGIT_ROTARY_DIAL_H
