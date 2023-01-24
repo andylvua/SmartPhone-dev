@@ -434,8 +434,12 @@ void Modem::listContacts() {
 
     while (std::getline(file, line)) {
         auto contact = QString::fromStdString(line).split("; ");
-        printw(std::string("Name: " + contact[0].toStdString() + "\n" + " Number: " + contact[1].toStdString() + "\n").c_str());
+        data += std::string("Name: " + contact[0].toStdString() + "\n" + " Number: " + contact[1].toStdString() + "\n");
     }
+
+    displayPad(data, "Viewing contacts");
+
+    file.close();
 }
 
 void removeNewMessageNotification() {
@@ -465,12 +469,14 @@ void Modem::listMessages() {
 
     while (std::getline(file, line)) {
         auto message = QString::fromStdString(line).split("; ");
-        printw(std::string("Number: " + message[0].toStdString() + "\n"
+        data += std::string("Number: " + message[0].toStdString() + "\n"
                   + " Direction: " + message[1].toStdString() + "\n"
                   + " Date: " + message[2].toStdString() + "\n"
                   + " Message: " + message[3].toStdString()
-                  + "\n").c_str());
+                  + "\n");
     }
+
+    displayPad(data, "Viewing messages");
 
     removeNewMessageNotification();
 }
@@ -483,11 +489,17 @@ void Modem::listCalls() {
 
     while (std::getline(file, line)) {
         auto call = QString::fromStdString(line).split("; ");
-        printw("%s", std::string("Number: " + call[0].toStdString() + "\n"
+        data += std::string("Number: " + call[0].toStdString() + "\n"
                   + " Date: " + call[1].toStdString() + "\n"
                   + " Duration: " + call[2].toStdString() + "\n"
                   + " Direction: " + call[3].toStdString() + "\n"
                   + " Call result: " + call[4].toStdString()
-                  + "\n").c_str());
+                  + "\n");
     }
+
+    SPDLOG_LOGGER_INFO(modem_logger, data);
+
+    displayPad(data, "Viewing calls");
+
+    file.close();
 }

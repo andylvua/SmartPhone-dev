@@ -27,4 +27,6 @@ void printColored(int color, const std::string &text, bool newLine = true, bool 
 
 std::string readString(size_t bufferSize = 256);
 
+void displayPad(const std::string &data, std::string header);
+
 #endif //PHONE_NCURSES_IO_H
