@@ -3,9 +3,9 @@
 #include <vector>
 #include <bitset>
 #include <QString>
+#include "../Inc/decoder.h"
 
-
-const std::string hex_char_to_bin(char c)
+const std::string Decoder::_hexChartoBin(char c)
 {
     switch(toupper(c))
     {
@@ -28,20 +28,20 @@ const std::string hex_char_to_bin(char c)
     }
 }
 
-std::vector<std::string> hex_str_to_bin_str(const std::string& hex)
+const std::vector<std::string> Decoder::_hexStrtoBinStr(const std::string &hex)
 {
     std::vector<std::string> bin;
     for(unsigned i = 0; i != hex.length()/2; ++i)
-        bin.push_back(hex_char_to_bin(hex[2*i]) + hex_char_to_bin(hex[2*i+1]));
+        bin.push_back(_hexChartoBin(hex[2*i]) + _hexChartoBin(hex[2*i+1]));
     return bin;
 }
 
-QString decode(const QString& encoded){
+QString Decoder::decode7Bit(const QString& encoded){
     QString decoded = "";
     std::string message = encoded.toStdString();
     std::cin>> message;
     // CE3048 -> 11001110 00111000 01001000
-    std::vector<std::string> message_in_bin = hex_str_to_bin_str(message);
+    std::vector<std::string> message_in_bin = _hexStrtoBinStr(message);
     //decode message using 7-bit ASCII
     // 11001110 00111000 01001000 -> 1001110 1110001 0100000
     std::vector <std::string> decoded_message;
@@ -60,5 +60,14 @@ QString decode(const QString& encoded){
         decoded += char(b.to_ulong());
     }
     decoded += "\n";
-    return decoded
+    return decoded;
+}
+QString Decoder::decodeUcs2(const QString& encoded){
+    QString decoded = "";
+    for (auto hex : encoded){
+        decoded += hex.unicode();
+
+    }
+
+    return decoded;
 }
