@@ -1,5 +1,4 @@
 #include "../Inc/decoder.hpp"
-#include <iostream>
 #include <string>
 #include <vector>
 #include <bitset>
@@ -41,7 +40,6 @@ std::vector<std::string> Decoder::hexStrToBinStr(const std::string &hex) {
 QString Decoder::decode7Bit(const QString &encoded) {
     QString decoded = "";
     std::string message = encoded.toStdString();
-    std::cin >> message;
 
     std::vector<std::string> messageInBin = hexStrToBinStr(message);
     std::vector<std::string> decodedMessage;
@@ -61,7 +59,6 @@ QString Decoder::decode7Bit(const QString &encoded) {
         decoded += char(b.to_ulong());
     }
 
-    decoded += "\n";
     return decoded;
 }
 
