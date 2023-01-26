@@ -38,15 +38,12 @@ void printColored(int color, const std::string &text, bool newLine, bool bold, W
     if (bold) {
         wattron(window, A_BOLD);
     }
-
     if (newLine) {
         wprintw(window, "%s\n", text.c_str());
-        wrefresh(window);
     } else {
         wprintw(window, "%s", text.c_str());
-        wrefresh(window);
     }
-
+    wrefresh(window);
     wattroff(window, COLOR_PAIR(color));
     wattroff(window, A_BOLD);
 }
@@ -60,9 +57,26 @@ std::string readString(size_t bufferSize) {
 }
 
 std::string readString(size_t bufferSize, WINDOW *window) {
-    echo();
     char buffer[bufferSize];
-    wgetstr(window, buffer);
-    noecho();
+    int ch;
+    int i = 0;
+    while ((ch = wgetch (window)) != '\n') {
+        if ((ch == KEY_BACKSPACE || ch == 127) && i > 0) {
+            i--;
+            wmove(window, getcury (window), getcurx(window)-1);
+            wechochar(window, ' ');
+            wechochar(window, '\b');
+            wrefresh(window);
+            continue;
+        }
+
+        if (ch == KEY_BACKSPACE || ch == 127) {
+            continue;
+        }
+        buffer[i++] = static_cast<char>(ch);
+        wechochar(window, ch);
+    }
+    wechochar(window, '\n');
+    buffer[i] = '\0';
     return {buffer};
 }

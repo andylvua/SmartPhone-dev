@@ -86,7 +86,6 @@ WINDOW *createConsole(std::string header) {
     header += ". Type 'exit' to exit";
 
     clear();
-    move(0, 0);
 
     printColored(FILLED_WHITE_PAIR, header);
     wrefresh(stdscr);
