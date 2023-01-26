@@ -2,16 +2,17 @@
 // Created by Andrew Yaroshevych on 17.01.2023.
 //
 
-#include "../../Inc/cli/ncurses_io.h"
+#include "../../Inc/cli/ncurses_io.hpp"
+#include "../../Inc/cli/colors.hpp"
 #include <algorithm>
 
 void ColorPrint::initColors() {
     start_color();
-    init_pair(WHITE, COLOR_WHITE, COLOR_BLACK);
-    init_pair(RED, COLOR_RED, COLOR_BLACK);
-    init_pair(GREEN, COLOR_GREEN, COLOR_BLACK);
-    init_pair(YELLOW, COLOR_YELLOW, COLOR_BLACK);
-    init_pair(FILLED_WHITE, COLOR_BLACK, COLOR_WHITE);
+    init_pair(WHITE_PAIR, COLOR_WHITE, COLOR_BLACK);
+    init_pair(RED_PAIR, COLOR_RED, COLOR_BLACK);
+    init_pair(GREEN_PAIR, COLOR_GREEN, COLOR_BLACK);
+    init_pair(YELLOW_PAIR, COLOR_YELLOW, COLOR_BLACK);
+    init_pair(FILLED_WHITE_PAIR, COLOR_BLACK, COLOR_WHITE);
 }
 
 void printColored(int color, const std::string &text, bool newLine, bool bold) {
@@ -22,6 +23,7 @@ void printColored(int color, const std::string &text, bool newLine, bool bold) {
 
     if (newLine) {
         printw("%s\n", text.c_str());
+        refresh();
     } else {
         printw("%s", text.c_str());
         refresh();
@@ -29,6 +31,21 @@ void printColored(int color, const std::string &text, bool newLine, bool bold) {
 
     attroff(COLOR_PAIR(color));
     attroff(A_BOLD);
+}
+
+void printColored(int color, const std::string &text, bool newLine, bool bold, WINDOW *window) {
+    wattron(window, COLOR_PAIR(color));
+    if (bold) {
+        wattron(window, A_BOLD);
+    }
+    if (newLine) {
+        wprintw(window, "%s\n", text.c_str());
+    } else {
+        wprintw(window, "%s", text.c_str());
+    }
+    wrefresh(window);
+    wattroff(window, COLOR_PAIR(color));
+    wattroff(window, A_BOLD);
 }
 
 std::string readString(size_t bufferSize) {
@@ -39,59 +56,27 @@ std::string readString(size_t bufferSize) {
     return {buffer};
 }
 
-void displayPad(const std::string &data, std::string header) {
-    clear();
-    move(0, 0);
-
-    header += " (Press 'q' to exit)";
-    printColored(FILLED_WHITE, header);
-    wrefresh(stdscr);
-
+std::string readString(size_t bufferSize, WINDOW *window) {
+    char buffer[bufferSize];
     int ch;
-    int row = 0;
-    int col = 0;
-
-    long screen_rows;
-    long screen_cols;
-    getmaxyx(stdscr, screen_rows, screen_cols);
-
-    long rows = std::count(data.begin(), data.end(), '\n') + 1;
-    long cols = screen_cols;
-
-    WINDOW *pad = newpad(static_cast<int>(rows), static_cast<int>(cols));
-
-    initscr();
-    keypad(pad, TRUE);
-    scrollok(pad, TRUE);
-    wprintw(pad, data.c_str());
-
-    prefresh(pad, row, col, 1, 0, static_cast<int>(screen_rows - 1), static_cast<int>(screen_cols - 1));
-
-    while ((ch = wgetch(pad)) != 'q') {
-        switch (ch) {
-            case KEY_UP:
-                if (row > 0) {
-                    row--;
-                }
-                break;
-            case KEY_DOWN:
-                if (row < rows - screen_rows) {
-                    row++;
-                }
-                break;
-            case KEY_LEFT:
-                if (col > 0) {
-                    col--;
-                }
-                break;
-            case KEY_RIGHT:
-                if (col < cols - screen_cols) {
-                    col++;
-                }
-                break;
-
-            default: break;
+    int i = 0;
+    while ((ch = wgetch (window)) != '\n') {
+        if ((ch == KEY_BACKSPACE || ch == 127) && i > 0) {
+            i--;
+            wmove(window, getcury (window), getcurx(window)-1);
+            wechochar(window, ' ');
+            wechochar(window, '\b');
+            wrefresh(window);
+            continue;
         }
-        prefresh(pad, row, col, 1, 0, static_cast<int>(screen_rows - 1), static_cast<int>(screen_cols - 1));
+
+        if (ch == KEY_BACKSPACE || ch == 127) {
+            continue;
+        }
+        buffer[i++] = static_cast<char>(ch);
+        wechochar(window, ch);
     }
+    wechochar(window, '\n');
+    buffer[i] = '\0';
+    return {buffer};
 }

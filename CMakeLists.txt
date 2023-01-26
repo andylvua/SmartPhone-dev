@@ -1,12 +1,13 @@
 cmake_minimum_required(VERSION 3.15)
 project(phone)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -W -Wall -Wextra")
+set(QT_VERSION 5.15.2)
 
 cmake_host_system_information(RESULT _host_name QUERY HOSTNAME)
 
@@ -16,17 +17,17 @@ else()
     set(ON_RASPBERRY OFF)
 endif()
 
-#set(CMAKE_PREFIX_PATH "/home/paul/Qt/5.15.2/gcc_64")
-#set(CMAKE_PREFIX_PATH "/Users/andrew/Qt/5.15.2/clang_64")
-#set(CMAKE_PREFIX_PATH "/usr/local/qt5pi/")
+add_executable(phone main.cpp Src/command/command.cpp Inc/command/command.hpp Src/modem/serial.cpp Inc/modem/serial.hpp Inc/modem/modem.hpp Src/modem/modem.cpp Inc/cli/cli.hpp Src/cli/cli.cpp Src/cli/screen.cpp Inc/cli/screen.hpp Inc/logging.hpp Src/cli/cli.cpp Src/cli/cli.cpp Src/cli/cli.cpp Inc/cli/ncurses_io.hpp Src/cli/ncurses_io.cpp Inc/rotary_reader/rotary_dial.hpp Src/rotary_reader/rotary_dial.cpp Inc/cli/option.hpp Src/cli/option.cpp Inc/cli/colors.hpp Src/decoder.cpp Inc/cli/cli_macros.hpp Inc/modem/cache_manager.hpp Src/modem/cache_manager.cpp Inc/modem/media_types.hpp Src/modem/media_types.cpp Src/modem/modem_utils.cpp Src/modem/handlers.cpp Inc/cli/ncurses_utils.hpp Src/cli/ncurses_utils.cpp)
+
+set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};$ENV{HOME}/Qt/${QT_VERSION}/gcc_64")
+set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};$ENV{HOME}/Qt/${QT_VERSION}/clang_64")
+set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};/usr/local/qt5pi/")
 
 find_package(Qt5 COMPONENTS
         Core
         Widgets
         SerialPort
         REQUIRED)
-
-add_executable(phone main.cpp Src/command/command.cpp Inc/command/command.h Src/modem/serial.cpp Inc/modem/serial.h Inc/modem/modem.h Src/modem/modem.cpp Inc/cli/cli.h Src/cli/cli.cpp Src/cli/screen.cpp Inc/cli/screen.h Inc/logging.h Src/cli/cli.cpp Src/cli/cli.cpp Src/cli/cli.cpp Inc/cli/ncurses_io.h Src/cli/ncurses_io.cpp Inc/rotary_reader/rotary_dial.h Src/rotary_reader/rotary_dial.cpp Inc/cli/option.h Src/cli/option.cpp)
 
 if(ON_RASPBERRY)
     target_compile_definitions(phone PUBLIC BUILD_ON_RASPBERRY)
@@ -35,26 +36,16 @@ if(ON_RASPBERRY)
     target_link_libraries(phone wiringPi)
 endif()
 
-target_link_libraries(phone
+target_link_libraries(phone PRIVATE
         Qt5::Core
         Qt5::Widgets
         Qt5::SerialPort
         )
 
-
-set(CMAKE_PREFIX_PATH "/usr/share")
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(READLINE REQUIRED IMPORTED_TARGET readline)
-
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(NCURSES REQUIRED IMPORTED_TARGET ncurses)
 
-target_link_libraries(phone PkgConfig::NCURSES)
-target_link_libraries(phone PkgConfig::READLINE)
+target_link_libraries(phone PRIVATE PkgConfig::NCURSES)
 
-if(NOT TARGET spdlog)
-    # Stand-alone build
-    find_package(spdlog REQUIRED)
-endif()
-
-target_link_libraries(phone spdlog::spdlog)
+find_package(spdlog REQUIRED)
+target_link_libraries(phone PRIVATE spdlog::spdlog)

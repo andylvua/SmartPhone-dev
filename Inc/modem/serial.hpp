@@ -2,8 +2,8 @@
 // Created by Andrew Yaroshevych on 02.12.2022.
 //
 
-#ifndef UNTITLED3_SERIAL_H
-#define UNTITLED3_SERIAL_H
+#ifndef PHONE_SERIAL_HPP
+#define PHONE_SERIAL_HPP
 
 #include <QMainWindow>
 #include <QApplication>
@@ -32,4 +32,4 @@ public:
     bool openSerialPort();
 };
 
-#endif //UNTITLED3_SERIAL_H
+#endif //PHONE_SERIAL_HPP
