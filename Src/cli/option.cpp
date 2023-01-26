@@ -5,7 +5,7 @@
 
 #include <utility>
 
-#include "../../Inc/cli/option.h"
+#include "../../Inc/cli/option.hpp"
 
 
 Option::Option(QString name, std::function<void()> const& action) : optionName(std::move(name)), action(action) {}
