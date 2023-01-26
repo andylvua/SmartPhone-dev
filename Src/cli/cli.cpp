@@ -170,18 +170,18 @@ void CLI::call() {
     std::string number;
     printColored(YELLOW_PAIR, "Enter number");
 #ifdef BUILD_ON_RASPBERRY
-    printColored(YELLOW, "Read from rotary dial or keyboard? (r/k)");
+    printColored(YELLOW_PAIR, "Read from rotary dial or keyboard? (r/k)");
     std::string input;
     input = readString();
 
     if (input == "r") {
-        printColored(YELLOW, "Reading from rotary dial");
+        printColored(YELLOW_PAIR, "Reading from rotary dial");
         number = rtx.listen_for_number(modem.outStream);
     } else if (input == "k") {
-        printColored(YELLOW, "Reading from keyboard");
+        printColored(YELLOW_PAIR, "Reading from keyboard");
         number = readString();
     } else {
-        printColored(RED, "Invalid input");
+        printColored(RED_PAIR, "Invalid input");
         return;
     }
 #else
@@ -216,18 +216,18 @@ void CLI::addContact() {
     name = readString();
     printColored(YELLOW_PAIR, "Enter number");
 #ifdef BUILD_ON_RASPBERRY
-    printColored(YELLOW, "Read from rotary dial or keyboard? (r/k)");
+    printColored(YELLOW_PAIR, "Read from rotary dial or keyboard? (r/k)");
     std::string input;
     input = readString();
 
     if (input == "r") {
-        printColored(YELLOW, "Reading from rotary dial");
+        printColored(YELLOW_PAIR, "Reading from rotary dial");
         number = rtx.listen_for_number(modem.outStream);
     } else if (input == "k") {
-        printColored(YELLOW, "Reading from keyboard");
+        printColored(YELLOW_PAIR, "Reading from keyboard");
         number = readString();
     } else {
-        printColored(RED, "Invalid input");
+        printColored(RED_PAIR, "Invalid input");
         return;
     }
 #else
@@ -269,18 +269,18 @@ void CLI::sendMessage() {
     std::string message;
     printColored(YELLOW_PAIR, "Enter number: ");
 #ifdef BUILD_ON_RASPBERRY
-    printColored(YELLOW, "Read from rotary dial or keyboard? (r/k)");
+    printColored(YELLOW_PAIR, "Read from rotary dial or keyboard? (r/k)");
     std::string input;
     input = readString();
 
     if (input == "r") {
-        printColored(YELLOW, "Reading from rotary dial");
+        printColored(YELLOW_PAIR, "Reading from rotary dial");
         number = rtx.listen_for_number(modem.outStream);
     } else if (input == "k") {
-        printColored(YELLOW, "Reading from keyboard");
+        printColored(YELLOW_PAIR, "Reading from keyboard");
         number = readString();
     } else {
-        printColored(RED, "Invalid input");
+        printColored(RED_PAIR, "Invalid input");
         return;
     }
 #else
