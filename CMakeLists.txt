@@ -36,7 +36,7 @@ if(ON_RASPBERRY)
     target_link_libraries(phone wiringPi)
 endif()
 
-target_link_libraries(phone PRIVATE
+target_link_libraries(phone
         Qt5::Core
         Qt5::Widgets
         Qt5::SerialPort
@@ -45,7 +45,7 @@ target_link_libraries(phone PRIVATE
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(NCURSES REQUIRED IMPORTED_TARGET ncurses)
 
-target_link_libraries(phone PRIVATE PkgConfig::NCURSES)
+target_link_libraries(phone PkgConfig::NCURSES)
 
 find_package(spdlog REQUIRED)
-target_link_libraries(phone PRIVATE spdlog::spdlog)
+target_link_libraries(phone spdlog::spdlog)
