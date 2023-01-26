@@ -2,8 +2,8 @@
 // Created by Andrew Yaroshevych on 02.12.2022.
 //
 
-#ifndef UNTITLED3_COMMANDS_LIST_H
-#define UNTITLED3_COMMANDS_LIST_H
+#ifndef PHONE_COMMANDS_LIST_HPP
+#define PHONE_COMMANDS_LIST_HPP
 
 #define AT "AT" // Test communication with shield.
 #define AT_CPOF "AT+CPOF" // Turn off the module.
@@ -87,7 +87,7 @@
 #define CLIR "CLIR" // Calling Line Identification Restriction Control (anti ANI).
 #define COLP "COLP" // Connected line identification management.
 #define CSSN "CSSN" // Supplementary Service Notification Management.
-#define CUSD "CUSD" // Management and execution of USSD requests (Unstructured Supplementary Service Data).
+#define AT_CUSD "AT+CUSD" // Management and execution of USSD requests (Unstructured Supplementary Service Data).
 #define STA "STA" // SAT Interface Activation (SIM Application Toolkit)
 #define STN "STN" // STK Notification (SIM ToolKit)
 #define STGI "STGI" // Request information from STK (SIM ToolKit)
@@ -142,4 +142,4 @@
 #define CDNSGIP "CDNSGIP" // Request the IP address of the specified domain name.
 
 
-#endif //UNTITLED3_COMMANDS_LIST_H
+#endif //PHONE_COMMANDS_LIST_HPP
