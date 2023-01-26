@@ -320,10 +320,10 @@ void CLI::sendUSSD() {
         if (ussd == "exit") {
             break;
         }
-        if (!ussd.starts_with("*") || !ussd.ends_with("#")) {
-            printColored(RED_PAIR, "Invalid USSD command", true, false, console);
-            continue;
-        }
+//        if (!ussd.starts_with("*") || !ussd.ends_with("#")) {
+//            printColored(RED_PAIR, "Invalid USSD command", true, false, console);
+//            continue;
+//        }
 
         modem.sendUSSDConsoleCommand(QString::fromStdString(ussd));
     }
