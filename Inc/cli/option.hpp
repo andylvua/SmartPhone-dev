@@ -2,8 +2,8 @@
 // Created by Andrew Yaroshevych on 23.01.2023.
 //
 
-#ifndef PHONE_OPTION_H
-#define PHONE_OPTION_H
+#ifndef PHONE_OPTION_HPP
+#define PHONE_OPTION_HPP
 
 #include <QString>
 #include <memory>
@@ -21,4 +21,4 @@ public:
     void execute() const;
 };
 
-#endif //PHONE_OPTION_H
+#endif //PHONE_OPTION_HPP

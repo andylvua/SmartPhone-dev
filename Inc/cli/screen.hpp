@@ -2,13 +2,13 @@
 // Created by paul on 1/15/23.
 //
 
-#ifndef PHONE_SCREEN_H
-#define PHONE_SCREEN_H
+#ifndef PHONE_SCREEN_HPP
+#define PHONE_SCREEN_HPP
 
 #include <vector>
 #include <QString>
 #include <memory>
-#include "option.h"
+#include "option.hpp"
 
 class Screen {
 public:
@@ -21,23 +21,17 @@ public:
 
     Screen(QString name, std::shared_ptr<Screen> parentScreen);
 
-    static void initScreen();
-
-    static void releaseScreen();
-
     void addScreenOption(const QString &name, std::function<void()> const& action);
 
-    int getActiveOption() const;
+    [[nodiscard]] int getActiveOption() const;
+
+    void addNotification(const QString &notification);
 
     void removeScreenOption(const QString &option);
 
     void removeScreenOption(int index);
 
-    void addNotification(const QString &notification);
-
     void removeNotification(const QString &notification);
-
-    void addChildScreen(const std::shared_ptr<Screen> &screen);
 };
 
-#endif //PHONE_SCREEN_H
+#endif //PHONE_SCREEN_HPP

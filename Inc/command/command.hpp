@@ -2,13 +2,13 @@
 // Created by paul on 12/1/22.
 //
 
-#ifndef UNTITLED3_COMMAND_H
-#define UNTITLED3_COMMAND_H
+#ifndef PHONE_COMMAND_HPP
+#define PHONE_COMMAND_HPP
 
 #include <string>
 #include <QSerialPort>
 #include <vector>
-#include "../modem/serial.h"
+#include "../modem/serial.hpp"
 
 using commRes_t = enum class commRes {
     CR_OK,
@@ -23,7 +23,7 @@ public:
 
     Command(std::string commandText, SerialPort &serial);
 
-    std::string getCommandText() const;
+    [[nodiscard]] std::string getCommandText() const;
 
     static QString uartResponseParser(const QByteArray &response);
 
@@ -34,23 +34,23 @@ public:
 
 class GetCommand : public Command {
 public:
-    GetCommand(const std::string &commandText, SerialPort &serial);
+    using Command::Command;
 
     QString execute(bool enableInterruptDataRead = true, bool parseResponse = true);
 };
 
 class SetCommand : public Command {
 public:
-    SetCommand(const std::string &commandText, SerialPort &serial);
+    using Command::Command;
 
     commRes_t execute(bool enableInterruptDataRead = true);
 };
 
 class Task : public Command {
 public:
-    Task(const std::string &commandText, SerialPort &serial);
+    using Command::Command;
 
     commRes_t execute(bool parseResponse = true);
 };
 
-#endif //UNTITLED3_COMMAND_H
+#endif //PHONE_COMMAND_HPP

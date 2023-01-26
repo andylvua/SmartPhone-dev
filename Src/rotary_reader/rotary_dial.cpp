@@ -2,12 +2,9 @@
 // Created by Yaroslav Korch on 17.01.2023.
 //
 
-#include "../../Inc/rotary_reader/rotary_dial.h"
-
-#include <string>
-
 #ifdef BUILD_ON_RASPBERRY
 #include <wiringPi.h>
+#include "../../Inc/rotary_reader/rotary_dial.h"
 
 void RotaryDial::setup(){
     wiringPiSetup();
@@ -45,10 +42,4 @@ char * RotaryDial::listen_for_number(std::ostream &outStream) {
     return phone_number;
 }
 
-
-void RotaryDial::print_number(){
-    for (int i = 0; i < 12; i++){
-        std::cout << phone_number[i];
-    }
-}
 #endif //BUILD_ON_RASPBERRY
