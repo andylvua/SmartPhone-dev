@@ -1,19 +1,20 @@
+#include "Inc/logging.hpp"
 #include <QApplication>
 #include <QtSerialPort/QSerialPort>
 
-#include "Inc/modem/serial.h"
-#include "Inc/modem/modem.h"
-#include "Inc/cli/cli.h"
-#include "Inc/logging.h"
+#include "Inc/modem/serial.hpp"
+#include "Inc/modem/modem.hpp"
+#include "Inc/cli/cli.hpp"
+#include "Inc/cli/colors.hpp"
 #include <thread>
 
 //#define DEBUG
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
-    auto main_logger = spdlog::basic_logger_mt("main",
-                                               "../logs/log.txt",
-                                               true);
+    auto mainLogger = spdlog::basic_logger_mt("main",
+                                              "../logs/log.txt",
+                                              true);
 
     spdlog::flush_on(spdlog::level::debug);
     spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%^%l%$] [%n] [function %!] [line %#] %v");
@@ -34,11 +35,12 @@ int main(int argc, char *argv[]) {
 
     #ifndef DEBUG
     if (!serial.openSerialPort()) {
-        qDebug() << "Serial port was not opened" << serial.errorString();
-        SPDLOG_LOGGER_ERROR(main_logger, "Serial port was not opened: \"{}\"", serial.errorString().toStdString());
+        std::cout << RED_COLOR << "Serial port error: " << serial.errorString().toStdString() <<
+        ". Check module connection" << RESET << std::endl;
+        SPDLOG_LOGGER_ERROR(mainLogger, "Serial port was not opened: \"{}\"", serial.errorString().toStdString());
         return 1;
     } else {
-        SPDLOG_LOGGER_INFO(main_logger, "Serial port was opened successfully. Starting modem");
+        SPDLOG_LOGGER_INFO(mainLogger, "Serial port was opened successfully. Starting modem");
     }
     #endif
 
@@ -50,15 +52,15 @@ int main(int argc, char *argv[]) {
     bool modemReady = modem.initialize();
 
     if (!modemReady) {
-        qDebug() << "Modem initialization failed. Exiting...";
+        SPDLOG_LOGGER_ERROR(mainLogger, "Modem initialization was not successful");
         return 1;
     } else {
-        SPDLOG_LOGGER_INFO(main_logger, "Modem initialization was successful. Preparing CLI");
+        SPDLOG_LOGGER_INFO(mainLogger, "Modem initialization was successful. Preparing CLI");
     }
     #endif
 
-    std::thread workerThread([&cli, &main_logger] {
-        SPDLOG_LOGGER_INFO(main_logger, "CLI listener thread started successfully");
+    std::thread workerThread([&cli, &mainLogger] {
+        SPDLOG_LOGGER_INFO(mainLogger, "CLI listener thread started successfully");
         cli.listen();
     });
 
@@ -69,4 +71,3 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
-
