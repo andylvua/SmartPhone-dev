@@ -34,7 +34,7 @@ char * RotaryDial::listen_for_number(std::ostream &outStream) {
                 if(count >= 10){count=0;}
 
                 phone_number[numbers_typed++] = '0' + count;
-                printColored(WHITE, std::to_string(count), false);
+                printColored(WHITE_PAIR, std::to_string(count), false);
             }
         }
     }
