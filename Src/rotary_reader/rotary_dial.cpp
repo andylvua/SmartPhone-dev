@@ -4,7 +4,7 @@
 
 #ifdef BUILD_ON_RASPBERRY
 #include <wiringPi.h>
-#include "../../Inc/rotary_reader/rotary_dial.h"
+#include "../../Inc/rotary_reader/rotary_dial.hpp"
 
 void RotaryDial::setup(){
     wiringPiSetup();
