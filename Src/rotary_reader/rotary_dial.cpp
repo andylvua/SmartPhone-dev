@@ -5,6 +5,7 @@
 #ifdef BUILD_ON_RASPBERRY
 #include <wiringPi.h>
 #include "../../Inc/rotary_reader/rotary_dial.hpp"
+#include "../../Inc/cli/colors.hpp"
 
 void RotaryDial::setup(){
     wiringPiSetup();
