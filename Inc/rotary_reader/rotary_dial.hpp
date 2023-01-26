@@ -2,10 +2,10 @@
 // Created by Yaroslav Korch on 17.01.2023.
 //
 
-#ifndef LEARNGIT_ROTARY_DIAL_H
-#define LEARNGIT_ROTARY_DIAL_H
+#ifndef PHONE_ROTARY_DIAL_HPP
+#define PHONE_ROTARY_DIAL_HPP
 #include <iostream>
-#include "../cli/ncurses_io.h"
+#include "../cli/ncurses_io.hpp"
 
 #ifdef BUILD_ON_RASPBERRY
 class RotaryDial {
@@ -16,9 +16,7 @@ public:
 
     void setup();
     char * listen_for_number(std::ostream &outStream = std::cout);
-
-    void print_number();
 };
 #endif //BUILD_ON_RASPBERRY
 
-#endif //LEARNGIT_ROTARY_DIAL_H
+#endif //PHONE_ROTARY_DIAL_HPP
