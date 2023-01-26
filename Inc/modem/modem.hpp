@@ -11,14 +11,14 @@
 #include <iostream>
 #include <ncurses.h>
 
-enum class consoleType {
+using consoleType_t = enum class consoleType {
     CM_AT,
     CM_USSD
 };
 
 struct ConsoleMode {
     bool enabled;
-    consoleType consoleType;
+    consoleType_t consoleType;
     WINDOW *consoleWindow;
 };
 

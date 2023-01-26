@@ -9,17 +9,17 @@
 #include <QDateTime>
 #include <utility>
 
-enum class callResult {
+using callResult_t = enum class callResult {
     CR_ANSWERED,
     CR_NO_ANSWER
 };
 
-enum class callDirection {
+using callDirection_t = enum class callDirection {
     CD_INCOMING,
     CD_OUTGOING
 };
 
-enum class messageDirection {
+using messageDirection_t = enum class messageDirection {
     MD_INCOMING,
     MD_OUTGOING
 };
@@ -34,17 +34,17 @@ struct Call {
     QString number;
     QDateTime startTime;
     QDateTime endTime;
-    callResult callResult;
-    callDirection callDirection;
+    callResult_t callResult;
+    callDirection_t callDirection;
 };
 
 struct Message {
     Message();
-    Message(QString number, QString dateTime, QString message, messageDirection messageDirection);
+    Message(QString number, QString dateTime, QString message, messageDirection_t messageDirection);
     QString number;
     QString dateTime;
     QString message;
-    messageDirection messageDirection;
+    messageDirection_t messageDirection;
 };
 
 #endif //PHONE_MEDIA_TYPES_HPP

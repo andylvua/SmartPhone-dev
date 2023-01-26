@@ -5,6 +5,7 @@
 #include "../../Inc/cli/ncurses_utils.hpp"
 #include "../../Inc/cli/ncurses_io.hpp"
 #include "../../Inc/cli/colors.hpp"
+#include <algorithm>
 
 void initScreen() {
     initscr();
