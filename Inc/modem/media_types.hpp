@@ -39,12 +39,19 @@ struct Call {
 };
 
 struct Message {
-    Message();
     Message(QString number, QString dateTime, QString message, messageDirection_t messageDirection);
     QString number;
     QString dateTime;
     QString message;
     messageDirection_t messageDirection;
+};
+
+struct Contact {
+    Contact();
+    Contact(QString name, QString number);
+    bool hasValue() const;
+    QString name;
+    QString number;
 };
 
 #endif //PHONE_MEDIA_TYPES_HPP

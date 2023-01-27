@@ -87,8 +87,18 @@ void CLI::gotoParentScreen() {
 }
 
 void CLI::handleIncomingCall(const QString& number) {
-    CLI::screenMap["Incoming Call"]->addNotification("Incoming call from +" + number);
-    CLI::screenMap["In Call"]->addNotification("Incoming call from +" + number);
+    auto contant = CacheManager::getContact(number.toStdString());
+
+    QString info = "Incoming call from ";
+
+    if (contant.hasValue()) {
+        info += contant.name;
+    } else {
+        info += number;
+    }
+
+    CLI::screenMap["Incoming Call"]->addNotification(info);
+    CLI::screenMap["In Call"]->addNotification(info);
     changeScreen("Incoming Call");
 }
 
