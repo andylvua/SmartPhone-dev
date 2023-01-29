@@ -1,24 +1,32 @@
 name: Raspberry Pi Build
-on: [push]
-jobs:
 
+on: [push, pull_request]
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Debug
+
+jobs:
   build:
     name: Build
+
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
+      - name: Build
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.RPIHOST }}
           username: ${{ secrets.RPIUSERNAME }}
           password: ${{ secrets.RPIPASSWORD }}
           port: ${{ secrets.RPIPORT }}
+
           script: |
             rm -rf /tmp/${{ github.event.repository.name }}_build
             mkdir /tmp/${{ github.event.repository.name }}_build
             cd /tmp/${{ github.event.repository.name }}_build
             git clone ${{ github.event.repository.clone_url }}
-            cd ${{ github.event.repository.name }} && cmake -B build && cmake --build build
-            if [ $? -ne 1 ]; then exit 1; fi
+            cd ${{ github.event.repository.name }} && cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+            cmake --build build --config ${{env.BUILD_TYPE}}
+            if [ $? -ne 0 ]; then exit 1; fi
             rm -rf /tmp/${{ github.event.repository.name }}_build
-            echo "Build successful!"
+            echo "Build successful"
