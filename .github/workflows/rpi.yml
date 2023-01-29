@@ -8,7 +8,7 @@ env:
 jobs:
   build:
     name: Build
-
+    if: "!contains(github.event.commits[0].message, '[skip rpi-build]')"
     runs-on: ubuntu-latest
 
     steps:
