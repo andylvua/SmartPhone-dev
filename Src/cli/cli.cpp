@@ -60,9 +60,10 @@ void render(const std::shared_ptr<Screen>& screen) {
 
     for (size_t i = 0; i < screen->screenOptions.size(); ++i) {
         QString option = screen->screenOptions[i].optionName;
-        printColored(WHITE_PAIR, std::to_string(i) + ". ", false);
-
         int color = (i == static_cast<size_t>(activeOptionIndex)) ? FILLED_WHITE_PAIR : WHITE_PAIR;
+        if (i == 0 && i == static_cast<size_t>(activeOptionIndex)) {
+            color = FILLED_RED_PAIR;
+        }
         printColored(color, option.toStdString());
     }
 
@@ -71,6 +72,11 @@ void render(const std::shared_ptr<Screen>& screen) {
 
 void CLI::renderScreen() const {
     clear();
+    render(currentScreen);
+}
+
+void CLI::updateScreen() const {
+    move(0, 0);
     render(currentScreen);
 }
 
@@ -115,14 +121,14 @@ void CLI::handleCallEnded() {
 
 void CLI::incrementActiveOption() const {
     currentScreen->activeOption++;
-    renderScreen();
+    updateScreen();
 }
 
 void CLI::decrementActiveOption() const {
     if (currentScreen->activeOption > -1) {
         currentScreen->activeOption--;
     }
-    renderScreen();
+    updateScreen();
 }
 
 void CLI::listen() const {
@@ -209,6 +215,14 @@ void CLI::call() {
     changeScreen("In Call");
 }
 
+void CLI::call(const QString &number) {
+    printColored(YELLOW_PAIR, "Calling...");
+    modem.call(number.toStdString());
+
+    CLI::screenMap["In Call"]->addNotification("Calling " + number);
+    changeScreen("In Call");
+}
+
 void CLI::hangUp() {
     modem.hangUp();
     CLI::screenMap["In Call"]->notifications.clear();
@@ -248,6 +262,8 @@ void CLI::addContact() {
     }
 
     CacheManager::addContact(name, number);
+    printColored(GREEN_PAIR, "Contact added. Press any key to continue");
+    getch();
     changeScreen("Contacts");
 }
 
@@ -261,9 +277,28 @@ void CLI::deleteContact() {
     changeScreen("Contacts");
 }
 
-void CLI::viewContacts() const {
-    printColored(YELLOW_PAIR, "Listing contacts");
-    CacheManager::listContacts();
+void CLI::viewContacts() {
+    std::vector<Contact> contacts = CacheManager::getContacts();
+    auto contactsPage = CLI::screenMap["Contacts Page"];
+
+    contactsPage->screenOptions.erase(
+            contactsPage->screenOptions.begin() + 1,
+            contactsPage->screenOptions.end());
+
+    for (const auto& contact : contacts) {
+        contactsPage->addScreenOption(
+                contact.name + ": " + contact.number,
+                [contact, this](){
+            auto contactScreen = std::make_shared<ContactScreen>(
+                    CLI::screenMap["Contacts Page"],
+                    contact,
+                    *this);
+
+            currentScreen = contactScreen;
+            renderScreen();
+        });
+    }
+    changeScreen("Contacts Page");
     renderScreen();
 }
 
@@ -308,6 +343,15 @@ void CLI::sendMessage() {
     modem.message(number, message);
 }
 
+void CLI::sendMessage(const QString &number) {
+    std::string message;
+    printColored(YELLOW_PAIR, "Enter message: ");
+    message = readString();
+    printColored(YELLOW_PAIR, "Sending SMS");
+
+    modem.message(number.toStdString(), message);
+}
+
 void CLI::viewLogs() {
     printColored(GREEN_PAIR, "Opening logs");
     system("xdg-open ./../logs/log.txt");
@@ -330,10 +374,6 @@ void CLI::sendUSSD() {
         if (ussd == "exit") {
             break;
         }
-//        if (!ussd.starts_with("*") || !ussd.ends_with("#")) {
-//            printColored(RED_PAIR, "Invalid USSD command", true, false, console);
-//            continue;
-//        }
 
         modem.sendUSSDConsoleCommand(QString::fromStdString(ussd));
     }
@@ -381,7 +421,8 @@ void CLI::prepareScreens() {
     auto callScreen = SCREEN_SHARED_PTR("Call", phoneScreen);
     auto inCallScreen = SCREEN_SHARED_PTR("In Call", callScreen);
     auto contactsScreen = SCREEN_SHARED_PTR("Contacts", phoneScreen);
-    auto smsScreen = SCREEN_SHARED_PTR("SMS", mainScreen);
+    auto contactsPageScreen = SCREEN_SHARED_PTR("Contacts Page", contactsScreen);
+    auto smsScreen = SCREEN_SHARED_PTR("SMS", phoneScreen);
     auto sendSMSScreen = SCREEN_SHARED_PTR("Send SMS", smsScreen);
     auto logScreen = SCREEN_SHARED_PTR("Logs", mainScreen);
     auto ussdScreen = SCREEN_SHARED_PTR("USSD Console", mainScreen);
@@ -392,7 +433,6 @@ void CLI::prepareScreens() {
         exit(0);
     });
     mainScreen->addScreenOption("Phone", CHANGE_SCREEN("Phone"));
-    mainScreen->addScreenOption("SMS", CHANGE_SCREEN("SMS"));
     mainScreen->addScreenOption("USSD Console", CHANGE_SCREEN("USSD Console"));
     mainScreen->addScreenOption("AT Console", CHANGE_SCREEN("AT Console"));
     mainScreen->addScreenOption("Logs", CHANGE_SCREEN("Logs"));
@@ -403,20 +443,20 @@ void CLI::prepareScreens() {
 
     phoneScreen->addScreenOption("Back", GO_BACK);
     phoneScreen->addScreenOption("Call", CHANGE_SCREEN("Call"));
+    phoneScreen->addScreenOption("SMS", CHANGE_SCREEN("SMS"));
     phoneScreen->addScreenOption("Contacts", CHANGE_SCREEN("Contacts"));
-    phoneScreen->addScreenOption("Call history", EXECUTE_METHOD(viewCallHistory));
 
     callScreen->addScreenOption("Return", GO_BACK);
-
-    callScreen->addScreenOption("Call", EXECUTE_METHOD(call));
+    callScreen->addScreenOption("Make Call", EXECUTE_METHOD(call));
+    callScreen->addScreenOption("Call History", EXECUTE_METHOD(viewCallHistory));
 
     inCallScreen->addScreenOption("Hang up", EXECUTE_METHOD(hangUp));
 
     contactsScreen->addScreenOption("Back", GO_BACK);
-    contactsScreen->addScreenOption("Add Contact", EXECUTE_METHOD(addContact));
-    contactsScreen->addScreenOption("Delete Contact", EXECUTE_METHOD(deleteContact));
-
     contactsScreen->addScreenOption("View Contacts", EXECUTE_METHOD(viewContacts));
+    contactsScreen->addScreenOption("Add Contact", EXECUTE_METHOD(addContact));
+
+    contactsPageScreen->addScreenOption("Back", GO_BACK);
 
     smsScreen->addScreenOption("Back", GO_BACK);
     smsScreen->addScreenOption("Messages", EXECUTE_METHOD(viewMessages));
@@ -441,6 +481,7 @@ void CLI::prepareScreens() {
             {"Call", callScreen},
             {"In Call", inCallScreen},
             {"Contacts", contactsScreen},
+            {"Contacts Page", contactsPageScreen},
             {"SMS", smsScreen},
             {"Send SMS", sendSMSScreen},
             {"Logs", logScreen},
