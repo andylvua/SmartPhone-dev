@@ -13,6 +13,7 @@ void ColorPrint::initColors() {
     init_pair(GREEN_PAIR, COLOR_GREEN, COLOR_BLACK);
     init_pair(YELLOW_PAIR, COLOR_YELLOW, COLOR_BLACK);
     init_pair(FILLED_WHITE_PAIR, COLOR_BLACK, COLOR_WHITE);
+    init_pair(FILLED_RED_PAIR, COLOR_RED, COLOR_WHITE);
 }
 
 void printColored(int color, const std::string &text, bool newLine, bool bold) {

@@ -11,3 +11,14 @@ Message::Message(QString number, QString dateTime, QString message,
     this->message = std::move(message);
     this->messageDirection = messageDirection;
 }
+
+Contact::Contact() = default;
+
+Contact::Contact(QString name, QString number) {
+    this->name = std::move(name);
+    this->number = std::move(number);
+}
+
+bool Contact::hasValue() const {
+    return !name.isEmpty() && !number.isEmpty();
+}
