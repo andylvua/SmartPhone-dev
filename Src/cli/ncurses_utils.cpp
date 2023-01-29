@@ -20,9 +20,9 @@ void initScreen() {
 
 void releaseScreen() {
     refresh();
-    endwin();
     keypad(stdscr, FALSE);
     resetty();
+    endwin();
 }
 
 void displayPad(const std::string &data, std::string header) {
