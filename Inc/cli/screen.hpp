@@ -9,6 +9,9 @@
 #include <QString>
 #include <memory>
 #include "option.hpp"
+#include "../modem/media_types.hpp"
+
+class CLI;
 
 class Screen {
 public:
@@ -32,6 +35,13 @@ public:
     void removeScreenOption(int index);
 
     void removeNotification(const QString &notification);
+};
+
+class ContactScreen : public Screen {
+public:
+    Contact contact;
+
+    ContactScreen(std::shared_ptr<Screen> parentScreen, const Contact& contact, CLI &cli);
 };
 
 #endif //PHONE_SCREEN_HPP

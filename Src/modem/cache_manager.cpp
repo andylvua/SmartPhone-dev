@@ -129,6 +129,21 @@ void CacheManager::listContacts() {
     file.close();
 }
 
+std::vector<Contact> CacheManager::getContacts() {
+    SPDLOG_LOGGER_INFO(cacheLogger, "Getting contacts");
+    std::ifstream file(CONTACTS_FILEPATH);
+    std::string line;
+    std::vector<Contact> contacts;
+
+    while (std::getline(file, line)) {
+        auto contact = QString::fromStdString(line).split("; ");
+        contacts.emplace_back(contact[0], contact[1]);
+    }
+
+    file.close();
+    return contacts;
+}
+
 Contact CacheManager::getContact(const std::string &info) {
     SPDLOG_LOGGER_INFO(cacheLogger, "Getting contact by name: {}", info);
     std::ifstream file(CONTACTS_FILEPATH);
