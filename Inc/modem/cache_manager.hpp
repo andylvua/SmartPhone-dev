@@ -29,6 +29,10 @@ public:
 
     static void listContacts();
 
+    static std::vector<Contact> getContacts();
+
+    static Contact getContact(const std::string &info);
+
     static void listMessages();
 
     static void listCalls();

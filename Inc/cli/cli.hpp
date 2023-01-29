@@ -34,6 +34,8 @@ public:
 
     void renderScreen() const;
 
+    void updateScreen() const;
+
     void changeScreen(const QString &screenName);
 
     void gotoParentScreen();
@@ -41,6 +43,14 @@ public:
     void listen() const;
 
     void prepareScreens();
+
+    void deleteContact();
+
+    void viewContacts();
+
+    void call(const QString &number);
+
+    void sendMessage(const QString &number);
 
 public slots:
 
@@ -64,10 +74,6 @@ private:
 
     void addContact();
 
-    void deleteContact();
-
-    void viewContacts() const;
-
     void viewMessages();
 
     void sendMessage();
@@ -79,6 +85,7 @@ private:
     void sendATCommand();
 
     void disableATConsole();
+
 };
 
 #endif //PHONE_CLI_HPP

@@ -131,14 +131,16 @@ void Modem::atConsoleMode() {
         if (parsedLine.isEmpty()) {
             return;
         }
-        SPDLOG_LOGGER_INFO(modemLogger, "Console mode: {}", parsedLine.toStdString());
+
+        int responseColor = WHITE_PAIR;
         if (parsedLine.contains("ERROR")) {
-            printColored(RED_PAIR, parsedLine.toStdString(), true, false, consoleMode.consoleWindow);
+            responseColor = RED_PAIR;
         } else if (parsedLine.contains("OK")) {
-            printColored(GREEN_PAIR, parsedLine.toStdString(), true, false, consoleMode.consoleWindow);
-        } else {
-            printColored(WHITE_PAIR, parsedLine.toStdString(), true, false, consoleMode.consoleWindow);
+            responseColor = GREEN_PAIR;
         }
+
+        SPDLOG_LOGGER_INFO(modemLogger, "Console mode: {}", parsedLine.toStdString());
+        printColored(responseColor, parsedLine.toStdString(), true, false, consoleMode.consoleWindow);
     }
 }
 

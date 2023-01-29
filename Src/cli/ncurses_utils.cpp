@@ -6,8 +6,12 @@
 #include "../../Inc/cli/ncurses_io.hpp"
 #include "../../Inc/cli/colors.hpp"
 #include <algorithm>
+#include <termios.h>
+
+const auto terminalState = termios{};
 
 void initScreen() {
+    tcgetattr(0, const_cast<termios *>(&terminalState));
     initscr();
     savetty();
     raw();
@@ -22,6 +26,8 @@ void releaseScreen() {
     refresh();
     keypad(stdscr, FALSE);
     resetty();
+    noraw();
+    tcsetattr(0, TCSANOW, &terminalState);
     endwin();
 }
 
