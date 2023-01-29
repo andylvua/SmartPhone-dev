@@ -13,7 +13,7 @@ jobs:
           username: ${{ secrets.RPIUSERNAME }}
           password: ${{ secrets.RPIPASSWORD }}
           port: ${{ secrets.RPIPORT }}
-          script:
+          script: |
             rm -rf /tmp/{{ github.event.repository.name }}_build
             mkdir /tmp/{{ github.event.repository.name }}_build
             cd /tmp/{{ github.event.repository.name }}_build
