@@ -1,0 +1,16 @@
+name: Raspberry Pi Build
+on: [push]
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.RPIHOST }}
+          username: ${{ secrets.RPIUSERNAME }}
+          password: ${{ secrets.RPIPASSWORD }}
+          port: ${{ secrets.RPIPORT }}
+          script: whoami
