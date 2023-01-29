@@ -14,16 +14,11 @@ jobs:
           password: ${{ secrets.RPIPASSWORD }}
           port: ${{ secrets.RPIPORT }}
           script:
-            # create temporary directory for build (remove if already exists)
-            - rm -rf /tmp/{{ github.event.repository.name }}_build
-            - mkdir /tmp/{{ github.event.repository.name }}_build
-            - cd /tmp/{{ github.event.repository.name }}_build
-            # clone repository on Raspberry Pi (get repository url automatically)
-            - git clone ${{ github.event.repository.clone_url }}
-            # change directory to repository, run cmake -B build and then cmake --build build
-            - cd ${{ github.event.repository.name }} && cmake -B build && cmake --build build
-            # check if build was successful, if not - make action fail
-            - if [ $? -ne 0 ]; then exit 1; fi
-            # delete temporary directory
-            - rm -rf /tmp/{{ github.event.repository.name }}_build
-            - echo "Build successful!"
+            rm -rf /tmp/{{ github.event.repository.name }}_build
+            mkdir /tmp/{{ github.event.repository.name }}_build
+            cd /tmp/{{ github.event.repository.name }}_build
+            git clone ${{ github.event.repository.clone_url }}
+            cd ${{ github.event.repository.name }} && cmake -B build && cmake --build build
+            if [ $? -ne 0 ]; then exit 1; fi
+            rm -rf /tmp/{{ github.event.repository.name }}_build
+            echo "Build successful!"
