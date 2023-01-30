@@ -55,14 +55,14 @@ ContactScreen::ContactScreen(std::shared_ptr<Screen> parentScreen, const Contact
     addScreenOption("SMS", [&cli, &contact]() {
         cli.sendMessage(contact.number);
     });
-    addScreenOption("Delete", [&cli, this, &contact]() {
+    addScreenOption("Delete", [&cli, &contact]() {
         CacheManager::removeContact(contact.name.toStdString());
 
         printColored(GREEN_PAIR, "Contact deleted. Press any key to continue...");
         getch();
         cli.viewContacts();
     });
-    addScreenOption("Edit", [&cli, this, &contact]() {
+    addScreenOption("Edit", [&cli, &contact]() {
         printColored(YELLOW_PAIR, "Enter new name: ");
         std::string newName = readString();
         printColored(YELLOW_PAIR, "Enter new number: ");
