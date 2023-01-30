@@ -132,15 +132,15 @@ void Modem::atConsoleMode() {
             return;
         }
 
-        int responseColor = WHITE_PAIR;
+        const char* responseColor = WHITE_COLOR;
         if (parsedLine.contains("ERROR")) {
-            responseColor = RED_PAIR;
+            responseColor = RED_COLOR;
         } else if (parsedLine.contains("OK")) {
-            responseColor = GREEN_PAIR;
+            responseColor = GREEN_COLOR;
         }
 
         SPDLOG_LOGGER_INFO(modemLogger, "Console mode: {}", parsedLine.toStdString());
-        printColored(responseColor, parsedLine.toStdString(), true, false, consoleMode.consoleWindow);
+        std::cout << responseColor << parsedLine.toStdString() << RESET << std::endl;
     }
 }
 
@@ -165,18 +165,20 @@ void Modem::ussdConsoleMode() {
         }
 
         if (encoding == ussdEncoding::UE_UNKNOWN) {
-            printColored(RED_PAIR, parsedLine.toStdString(), true, false, consoleMode.consoleWindow);
+            std::cout << RED_COLOR << "Error: Unknown encoding" << RESET << std::endl;
+            std::cout << RED_COLOR << parsedLine.toStdString() << RESET << std::endl;
             continue;
         }
 
         auto response = parsedLine.split("\"")[1];
+        QString decoded;
 
         if (encoding == ussdEncoding::UE_GSM7) {
-            QString decoded = Decoder::decode7Bit(response);
-            printColored(GREEN_PAIR, decoded.toStdString(), true, false, consoleMode.consoleWindow);
+            decoded = Decoder::decode7Bit(response);
         } else {
-            QString decoded = Decoder::decodeUCS2(response);
-            printColored(GREEN_PAIR, decoded.toStdString(), true, false, consoleMode.consoleWindow);
+            decoded = Decoder::decodeUCS2(response);
         }
+
+        std::cout << GREEN_COLOR << decoded.toStdString() << RESET << std::endl;
     }
 }

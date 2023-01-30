@@ -8,8 +8,12 @@
 #include "../../Inc/cli/ncurses_utils.hpp"
 #include "../../Inc/modem/cache_manager.hpp"
 #include "../../Inc/cli/colors.hpp"
+#include "../../Inc/cli/readline_utils.hpp"
+#include <readline/readline.h>
+#include <readline/history.h>
 #include <QProcess>
 #include <string>
+#include <fstream>
 
 const auto cliLogger = spdlog::basic_logger_mt("cli", "../logs/log.txt", true);
 
@@ -49,12 +53,12 @@ bool checkNumber(std::string &number) {
     return true;
 }
 
-void render(const std::shared_ptr<Screen>& screen) {
+void render(const std::shared_ptr<Screen> &screen) {
     int activeOptionIndex = screen->getActiveOption();
 
     printColored(WHITE_PAIR, screen->screenName.toStdString(), true, true);
 
-    for (const auto& notification: screen->notifications) {
+    for (const auto &notification: screen->notifications) {
         printColored(WHITE_PAIR, notification.toStdString());
     }
 
@@ -146,10 +150,12 @@ void CLI::listen() const {
             exit(0);
         }
 
-        switch(ch) {
-            case KEY_UP: CLI::decrementActiveOption();
+        switch (ch) {
+            case KEY_UP:
+                CLI::decrementActiveOption();
                 break;
-            case KEY_DOWN: CLI::incrementActiveOption();
+            case KEY_DOWN:
+                CLI::incrementActiveOption();
                 break;
             case '\n':
                 if (currentScreen->activeOption == -1) {
@@ -157,7 +163,8 @@ void CLI::listen() const {
                 }
                 currentScreen->screenOptions[currentScreen->getActiveOption()].execute();
                 break;
-            default: break;
+            default:
+                break;
         }
     }
 }
@@ -275,18 +282,18 @@ void CLI::viewContacts() {
             contactsPage->screenOptions.begin() + 1,
             contactsPage->screenOptions.end());
 
-    for (const auto& contact : contacts) {
+    for (const auto &contact: contacts) {
         contactsPage->addScreenOption(
                 contact.name + ": " + contact.number,
-                [contact, this](){
-            auto contactScreen = std::make_shared<ContactScreen>(
-                    CLI::screenMap["Contacts Page"],
-                    contact,
-                    *this);
+                [contact, this]() {
+                    auto contactScreen = std::make_shared<ContactScreen>(
+                            CLI::screenMap["Contacts Page"],
+                            contact,
+                            *this);
 
-            currentScreen = contactScreen;
-            renderScreen();
-        });
+                    currentScreen = contactScreen;
+                    renderScreen();
+                });
     }
     changeScreen("Contacts Page");
     renderScreen();
@@ -343,60 +350,85 @@ void CLI::sendMessage(const QString &number) {
 }
 
 void CLI::viewLogs() {
-    printColored(GREEN_PAIR, "Opening logs");
-    system("xdg-open ./../logs/log.txt");
+    printColored(GREEN_PAIR, "Opening logs file");
+    CacheManager::listLogs();
 }
 
-void CLI::sendUSSD() {
-    WINDOW *console = createConsole("USSD console mode");
-    printColored(YELLOW_PAIR, "Loading...", true, false, console);
+void CLI::ussdConsoleMode() {
+    curs_set(1);
+    releaseScreen();
+    system("clear");
 
-    modem.enableUSSDConsoleMode(console);
+    std::cout << YELLOW_COLOR << "Loading..." << RESET;
+    std::cout.flush();
 
-    std::string ussd{};
+    modem.enableUSSDConsoleMode();
 
-    wclear(console);
-    printColored(GREEN_PAIR, "Send USSD commands:", true, false, console);
+    const char *ussd;
 
-    while (true) {
-        ussd = readString(256, console);
+    std::cout << "\r" << GREEN_COLOR << "Send USSD commands:" << RESET << std::endl;
 
-        if (ussd == "exit") {
+    while ((ussd = readline("")) != nullptr) {
+        if (*ussd) {
+            add_history(ussd);
+        }
+        if (strcmp(ussd, "exit") == 0) {
             break;
         }
+        if (strcmp(ussd, "clear") == 0) {
+            system("clear");
+            continue;
+        }
 
-        modem.sendUSSDConsoleCommand(QString::fromStdString(ussd));
+        modem.sendUSSDConsoleCommand(ussd);
+
+        free((void *) ussd);
     }
 
     modem.disableUSSDConsoleMode();
-    delwin(console);
-    curs_set(0);
+
+    initScreen();
     renderScreen();
 }
 
-void CLI::sendATCommand() {
-    WINDOW *console = createConsole("AT console mode");
-    printColored(YELLOW_PAIR, "Loading...", true, false, console);
 
-    modem.enableATConsoleMode(console);
+void CLI::atConsoleMode() {
+    curs_set(1);
+    releaseScreen();
+    system("clear");
 
-    std::string at{};
+    std::cout << YELLOW_COLOR << "Loading..." << RESET;
+    std::cout.flush();
 
-    wclear(console);
-    printColored(GREEN_PAIR, "Send AT commands:", true, false, console);
+    modem.enableATConsoleMode();
 
-    while (true) {
-        at = readString(256, console);
+    initReadlineCompletions();
+    rl_attempted_completion_function = commandCompletion;
 
-        if (at == "exit") {
+    const char *at;
+
+    std::cout << "\r" << GREEN_COLOR << "Send AT commands:" << RESET << std::endl;
+
+    while ((at = readline("")) != nullptr) {
+        if (*at) {
+            add_history(at);
+        }
+        if (strcmp(at, "exit") == 0) {
             break;
         }
-        modem.sendATConsoleCommand(QString::fromStdString(at));
+        if (strcmp(at, "clear") == 0) {
+            system("clear");
+            continue;
+        }
+
+        modem.sendATConsoleCommand(at);
+
+        free((void *) at);
     }
 
     modem.disableATConsoleMode();
-    delwin(console);
-    curs_set(0);
+
+    initScreen();
     renderScreen();
 }
 
