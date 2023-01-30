@@ -267,16 +267,6 @@ void CLI::addContact() {
     changeScreen("Contacts");
 }
 
-void CLI::deleteContact() {
-    printColored(YELLOW_PAIR, "Deleting contact");
-    std::string name;
-    printColored(YELLOW_PAIR, "Enter name");
-    name = readString();
-
-    CacheManager::removeContact(name);
-    changeScreen("Contacts");
-}
-
 void CLI::viewContacts() {
     std::vector<Contact> contacts = CacheManager::getContacts();
     auto contactsPage = CLI::screenMap["Contacts Page"];
