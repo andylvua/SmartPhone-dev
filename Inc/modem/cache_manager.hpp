@@ -12,7 +12,7 @@
 constexpr const char *CONTACTS_FILEPATH = "../module_cache/contacts.txt";
 constexpr const char *MESSAGES_FILEPATH = "../module_cache/messages.txt";
 constexpr const char *CALLS_FILEPATH = "../module_cache/calls.txt";
-
+#define LOGS_FILEPATH "../logs/log.txt";
 
 class CacheManager {
 public:
@@ -38,6 +38,8 @@ public:
     static void listCalls();
 
     static void checkCacheFiles();
+
+    static void listLogs();
 
 private:
 
