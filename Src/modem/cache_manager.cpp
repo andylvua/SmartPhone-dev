@@ -200,3 +200,8 @@ void CacheManager::listCalls() {
 
     file.close();
 }
+
+void CacheManager::listLogs() {
+    std::string command = "open " LOGS_FILEPATH;
+    system(command.c_str());
+}
