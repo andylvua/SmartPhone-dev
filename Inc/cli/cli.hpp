@@ -44,8 +44,6 @@ public:
 
     void prepareScreens();
 
-    void deleteContact();
-
     void viewContacts();
 
     void call(const QString &number);
