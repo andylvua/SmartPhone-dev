@@ -14,6 +14,4 @@ void releaseScreen();
 
 void displayPad(const std::string &data, std::string header);
 
-WINDOW *createConsole(std::string header);
-
 #endif //PHONE_NCURSES_UTILS_HPP
