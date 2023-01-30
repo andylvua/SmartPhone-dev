@@ -78,9 +78,9 @@ private:
 
     static void viewLogs();
 
-    void sendUSSD();
+    void ussdConsoleMode();
 
-    void sendATCommand();
+    void atConsoleMode();
 
     void disableATConsole();
 

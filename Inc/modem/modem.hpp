@@ -19,7 +19,6 @@ using consoleType_t = enum class consoleType {
 struct ConsoleMode {
     bool enabled;
     consoleType_t consoleType;
-    WINDOW *consoleWindow;
 };
 
 class Modem : public QObject {
@@ -43,11 +42,11 @@ public:
 
     bool enableEcho();
 
-    void enableATConsoleMode(WINDOW *);
+    void enableATConsoleMode();
 
     void disableATConsoleMode();
 
-    void enableUSSDConsoleMode(WINDOW *);
+    void enableUSSDConsoleMode();
 
     void disableUSSDConsoleMode();
 

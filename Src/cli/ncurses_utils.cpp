@@ -25,6 +25,7 @@ void releaseScreen() {
     resetty();
     noraw();
     endwin();
+    system("clear");
 }
 
 void displayPad(const std::string &data, std::string header) {
@@ -43,7 +44,21 @@ void displayPad(const std::string &data, std::string header) {
     long screenCols;
     getmaxyx(stdscr, screenRows, screenCols);
 
-    long rows = std::count(data.begin(), data.end(), '\n') + 1;
+    long dataRows = std::count(data.begin(), data.end(), '\n') + 1;
+
+    long currentLineLength = 0;
+    for (auto c : data) {
+        if (c == '\n') {
+            if (currentLineLength > screenCols) {
+                dataRows += currentLineLength / screenCols;
+            }
+            currentLineLength = 0;
+        } else {
+            currentLineLength++;
+        }
+    }
+
+    long rows = dataRows;
     long cols = screenCols;
 
     WINDOW *pad = newpad(static_cast<int>(rows), static_cast<int>(cols));
@@ -82,6 +97,8 @@ void displayPad(const std::string &data, std::string header) {
         }
         prefresh(pad, row, col, 1, 0, static_cast<int>(screenRows - 1), static_cast<int>(screenCols - 1));
     }
+
+    delwin(pad);
 }
 
 WINDOW *createConsole(std::string header) {

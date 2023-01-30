@@ -37,36 +37,32 @@ void Modem::setCharacterSet(const std::string &characterSet) {
     setCharacterSetCommand.execute();
 }
 
-void Modem::enableATConsoleMode(WINDOW *consoleWindowPtr) {
+void Modem::enableATConsoleMode() {
     SPDLOG_LOGGER_INFO(modemLogger, "Console mode enabled");
     serial.write(ATE0"\r\n");
     QThread::msleep(serial.timeout);
     consoleMode.enabled = true;
-    consoleMode.consoleWindow = consoleWindowPtr;
     consoleMode.consoleType = consoleType::CM_AT;
 }
 
 void Modem::disableATConsoleMode() {
     SPDLOG_LOGGER_INFO(modemLogger, "Console mode disabled");
     consoleMode.enabled = false;
-    consoleMode.consoleWindow = nullptr;
     serial.write(ATE1"\r\n");
 }
 
-void Modem::enableUSSDConsoleMode(WINDOW *consoleWindowPtr) {
+void Modem::enableUSSDConsoleMode() {
     SPDLOG_LOGGER_INFO(modemLogger, "USSD console mode enabled");
     setCharacterSet("HEX");
     serial.write(ATE0"\r\n");
     QThread::msleep(serial.timeout);
     consoleMode.enabled = true;
-    consoleMode.consoleWindow = consoleWindowPtr;
     consoleMode.consoleType = consoleType::CM_USSD;
 }
 
 void Modem::disableUSSDConsoleMode() {
     SPDLOG_LOGGER_INFO(modemLogger, "USSD console mode disabled");
     consoleMode.enabled = false;
-    consoleMode.consoleWindow = nullptr;
     serial.write(ATE1"\r\n");
 }
 
