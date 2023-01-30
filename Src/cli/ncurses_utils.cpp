@@ -100,25 +100,3 @@ void displayPad(const std::string &data, std::string header) {
 
     delwin(pad);
 }
-
-WINDOW *createConsole(std::string header) {
-    header += ". Type 'exit' to exit";
-
-    clear();
-
-    printColored(FILLED_WHITE_PAIR, header);
-    wrefresh(stdscr);
-
-    long screenRows;
-    long screenCols;
-    getmaxyx(stdscr, screenRows, screenCols);
-
-    WINDOW *console = newwin(static_cast<int>(screenRows - 1), static_cast<int>(screenCols), 1, 0);
-
-    initscr();
-    keypad(console, TRUE);
-    scrollok(console, TRUE);
-    curs_set(1);
-
-    return console;
-}
