@@ -92,13 +92,13 @@ void CLI::gotoParentScreen() {
     }
 }
 
-void CLI::handleIncomingCall(const QString& number) {
-    auto contant = CacheManager::getContact(number.toStdString());
+void CLI::handleIncomingCall(const QString &number) {
+    auto contact = CacheManager::getContact(number.toStdString());
 
     QString info = "Incoming call from ";
 
-    if (contant.hasValue()) {
-        info += contant.name;
+    if (contact.hasValue()) {
+        info += contact.name;
     } else {
         info += number;
     }
