@@ -425,16 +425,16 @@ void CLI::prepareScreens() {
     auto smsScreen = SCREEN_SHARED_PTR("SMS", phoneScreen);
     auto sendSMSScreen = SCREEN_SHARED_PTR("Send SMS", smsScreen);
     auto logScreen = SCREEN_SHARED_PTR("Logs", mainScreen);
-    auto ussdScreen = SCREEN_SHARED_PTR("USSD Console", mainScreen);
     auto atScreen = SCREEN_SHARED_PTR("AT Console", mainScreen);
+    auto ussdScreen = SCREEN_SHARED_PTR("USSD Console", mainScreen);
 
     mainScreen->addScreenOption("Exit", []() {
         releaseScreen();
         exit(0);
     });
     mainScreen->addScreenOption("Phone", CHANGE_SCREEN("Phone"));
-    mainScreen->addScreenOption("USSD Console", CHANGE_SCREEN("USSD Console"));
     mainScreen->addScreenOption("AT Console", CHANGE_SCREEN("AT Console"));
+    mainScreen->addScreenOption("USSD Console", CHANGE_SCREEN("USSD Console"));
     mainScreen->addScreenOption("Logs", CHANGE_SCREEN("Logs"));
 
     incomingCallScreen->addScreenOption("Reject call", EXECUTE_METHOD(rejectCall));
@@ -468,25 +468,25 @@ void CLI::prepareScreens() {
     logScreen->addScreenOption("View Logs", EXECUTE_METHOD(viewLogs));
 
     ussdScreen->addScreenOption("Back", GO_BACK);
-    ussdScreen->addScreenOption("Send USSD Command", EXECUTE_METHOD(sendUSSD));
+    ussdScreen->addScreenOption("Send USSD Command", EXECUTE_METHOD(ussdConsoleMode));
 
     atScreen->addScreenOption("Back", EXECUTE_METHOD(disableATConsole));
-    atScreen->addScreenOption("Send AT Command", EXECUTE_METHOD(sendATCommand));
+    atScreen->addScreenOption("Send AT Command", EXECUTE_METHOD(atConsoleMode));
 
 
     CLI::screenMap = {
-            {"Main", mainScreen},
+            {"Main",          mainScreen},
             {"Incoming Call", incomingCallScreen},
-            {"Phone", phoneScreen},
-            {"Call", callScreen},
-            {"In Call", inCallScreen},
-            {"Contacts", contactsScreen},
+            {"Phone",         phoneScreen},
+            {"Call",          callScreen},
+            {"In Call",       inCallScreen},
+            {"Contacts",      contactsScreen},
             {"Contacts Page", contactsPageScreen},
-            {"SMS", smsScreen},
-            {"Send SMS", sendSMSScreen},
-            {"Logs", logScreen},
-            {"USSD Console", ussdScreen},
-            {"AT Console", atScreen}
+            {"SMS",           smsScreen},
+            {"Send SMS",      sendSMSScreen},
+            {"Logs",          logScreen},
+            {"USSD Console",  ussdScreen},
+            {"AT Console",    atScreen}
     };
 
     currentScreen = mainScreen;
