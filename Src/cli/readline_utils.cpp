@@ -8,7 +8,7 @@
 #include <iostream>
 #include <readline/readline.h>
 
-const char **words;
+const char **words = {nullptr};
 
 char *commandGenerator(const char *text, int state) {
     static size_t listIndex, len;
@@ -38,7 +38,7 @@ void initReadlineCompletions() {
 
     if (!atCommandsFile.is_open()) {
         std::cerr << "Could not open completions file" << std::endl;
-        words = new const char*[] {nullptr};
+        words = new const char* {nullptr};
     }
 
     std::string line;
