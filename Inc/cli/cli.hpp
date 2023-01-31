@@ -84,6 +84,16 @@ private:
 
     void disableATConsole();
 
+    void setMessageMode();
+
+    void setNumberID();
+
+    void setEchoMode();
+
+    void setPIN();
+
+    void aboutDevice();
+
 };
 
 #endif //PHONE_CLI_HPP

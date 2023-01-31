@@ -63,12 +63,22 @@ void render(const std::shared_ptr<Screen> &screen) {
     }
 
     for (size_t i = 0; i < screen->screenOptions.size(); ++i) {
-        QString option = screen->screenOptions[i].optionName;
+        auto option = screen->screenOptions[i];
+
         int color = (i == static_cast<size_t>(activeOptionIndex)) ? FILLED_WHITE_PAIR : WHITE_PAIR;
-        if (i == 0 && i == static_cast<size_t>(activeOptionIndex)) {
+        int activeIndex = static_cast<size_t>(activeOptionIndex);
+        if (i == 0 && i == activeIndex) {
             color = FILLED_RED_PAIR;
         }
-        printColored(color, option.toStdString());
+        if (option->isSwitcher) {
+           if (i == activeIndex){
+                color = option->switcher ? FILLED_GREEN_PAIR : FILLED_RED_PAIR;
+           } else {
+                color = option->switcher ? GREEN_PAIR : RED_PAIR;
+           }
+        }
+
+        printColored(color, option->optionName.toStdString());
     }
 
     refresh();
@@ -161,7 +171,7 @@ void CLI::listen() const {
                 if (currentScreen->activeOption == -1) {
                     break;
                 }
-                currentScreen->screenOptions[currentScreen->getActiveOption()].execute();
+                currentScreen->screenOptions[currentScreen->getActiveOption()]->execute();
                 break;
             default:
                 break;
@@ -436,6 +446,45 @@ void CLI::disableATConsole() {
     gotoParentScreen();
 }
 
+void CLI::setMessageMode() {
+    for (auto option: CLI::screenMap["Debug Mode"]->screenOptions) {
+        if (option->optionName == "Message Mode" && option->isSwitcher) {
+            modem.setMessageMode(!option->getState());
+            option->switchState();
+        }
+    }
+}
+void CLI::setNumberID() {
+    for (auto option: CLI::screenMap["Debug Mode"]->screenOptions) {
+        if (option->optionName == "Number Identifier" && option->isSwitcher) {
+            modem.setNumberID(!option->getState());
+            option->switchState();
+        }
+    }
+}
+
+void CLI::setEchoMode(){
+    for (auto option: CLI::screenMap["Debug Mode"]->screenOptions) {
+        if (option->optionName == "Echo Mode" && option->isSwitcher){
+            modem.setEchoMode(!option->getState());
+            option->switchState();
+        }
+    }
+}
+
+void CLI::setPIN() {
+    std::string pin;
+    printColored(YELLOW_PAIR, "Enter PIN: ");
+    pin = readString();
+    modem.setPIN(pin);
+}
+
+void CLI::aboutDevice(){
+    changeScreen("About Device");
+    QString aboutInfo = modem.aboutDevice();
+    printColored(WHITE_PAIR, aboutInfo.toStdString());
+}
+
 void CLI::prepareScreens() {
     auto mainScreen = SCREEN_SHARED_PTR("Main", nullptr);
     auto incomingCallScreen = SCREEN_SHARED_PTR("Incoming Call", mainScreen);
@@ -449,6 +498,10 @@ void CLI::prepareScreens() {
     auto logScreen = SCREEN_SHARED_PTR("Logs", mainScreen);
     auto atScreen = SCREEN_SHARED_PTR("AT Console", mainScreen);
     auto ussdScreen = SCREEN_SHARED_PTR("USSD Console", mainScreen);
+    auto settingsScreen = SCREEN_SHARED_PTR("Settings", mainScreen);
+    auto debugSettingsScreen = SCREEN_SHARED_PTR("Debug Mode", settingsScreen);
+    auto simSettingsScreen = SCREEN_SHARED_PTR("SIM Settings", settingsScreen);
+    auto aboutScreen = SCREEN_SHARED_PTR("About Device", settingsScreen);
 
     mainScreen->addScreenOption("Exit", []() {
         releaseScreen();
@@ -458,6 +511,8 @@ void CLI::prepareScreens() {
     mainScreen->addScreenOption("AT Console", CHANGE_SCREEN("AT Console"));
     mainScreen->addScreenOption("USSD Console", CHANGE_SCREEN("USSD Console"));
     mainScreen->addScreenOption("Logs", CHANGE_SCREEN("Logs"));
+    mainScreen->addScreenOption("Settings", CHANGE_SCREEN("Settings"));
+
 
     incomingCallScreen->addScreenOption("Reject call", EXECUTE_METHOD(rejectCall));
 
@@ -495,6 +550,23 @@ void CLI::prepareScreens() {
     atScreen->addScreenOption("Back", EXECUTE_METHOD(disableATConsole));
     atScreen->addScreenOption("Send AT Command", EXECUTE_METHOD(atConsoleMode));
 
+    settingsScreen->addScreenOption("Back", GO_BACK);
+    settingsScreen->addScreenOption("Debug Mode", CHANGE_SCREEN("Debug Mode"));
+    settingsScreen->addScreenOption("SIM Settings", CHANGE_SCREEN("SIM Settings"));
+    settingsScreen->addScreenOption("About Device", EXECUTE_METHOD(aboutDevice));
+
+    debugSettingsScreen->addScreenOption("Back", GO_BACK);
+    debugSettingsScreen->addScreenOption("Message Mode", EXECUTE_METHOD(setMessageMode), true, true);
+    debugSettingsScreen->addScreenOption("Number Identifier", EXECUTE_METHOD(setNumberID), true, true);
+    debugSettingsScreen->addScreenOption("Echo Mode", EXECUTE_METHOD(setEchoMode), true, true);
+
+    simSettingsScreen->addScreenOption("Back", GO_BACK);
+    simSettingsScreen->addScreenOption("Set PIN", EXECUTE_METHOD(setPIN));
+
+    aboutScreen->addScreenOption("Back", GO_BACK);
+
+
+
 
     CLI::screenMap = {
             {"Main",          mainScreen},
@@ -508,7 +580,11 @@ void CLI::prepareScreens() {
             {"Send SMS",      sendSMSScreen},
             {"Logs",          logScreen},
             {"USSD Console",  ussdScreen},
-            {"AT Console",    atScreen}
+            {"AT Console",    atScreen},
+            {"Settings",      settingsScreen},
+            {"Debug Mode",    debugSettingsScreen},
+            {"SIM Settings",  simSettingsScreen},
+            {"About Device",  aboutScreen}
     };
 
     currentScreen = mainScreen;

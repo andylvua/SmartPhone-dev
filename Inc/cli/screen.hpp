@@ -18,13 +18,15 @@ public:
     QString screenName;
     std::vector<std::shared_ptr<Screen>> childScreens;
     std::shared_ptr<Screen> parentScreen;
-    std::vector<Option> screenOptions;
+    std::vector<std::shared_ptr<Option>> screenOptions;
     int activeOption = -1;
     std::vector<QString> notifications = {};
 
     Screen(QString name, std::shared_ptr<Screen> parentScreen);
 
     void addScreenOption(const QString &name, std::function<void()> const& action);
+
+    void addScreenOption(const QString &name, std::function<void()> const& action, bool isSwitcher, bool switcher);
 
     [[nodiscard]] int getActiveOption() const;
 

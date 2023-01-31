@@ -68,6 +68,16 @@ public:
 
     bool message(const std::string &number, const std::string &message);
 
+    bool setMessageMode(bool mode);
+
+    bool setNumberID(bool mode);
+
+    bool setEchoMode(bool mode);
+
+    bool setPIN(const std::string &pin);
+
+    QString aboutDevice();
+
     bool initialize();
 
     void worker();
