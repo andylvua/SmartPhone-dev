@@ -182,3 +182,22 @@ void Modem::ussdConsoleMode() {
         std::cout << GREEN_COLOR << decoded.toStdString() << RESET << std::endl;
     }
 }
+
+void Modem::httpConsoleMode() {
+    while (consoleMode.enabled) {
+        QByteArray data = readLine();
+        QString parsedLine = parseLine(data);
+
+        if (parsedLine.isEmpty()) {
+            return;
+        }
+
+        SPDLOG_LOGGER_INFO(modemLogger, "Console mode: {}", parsedLine.toStdString());
+        if (parsedLine.left(15) == "OKHTTP/1.1  200") {
+            std::cout << GREEN_COLOR << "OK - HTTP/1.1 200 OK" << RESET << std::endl;
+            std::cout << GREEN_COLOR << parsedLine.left(100).toStdString() + "..." << RESET << std::endl;
+        } else {
+            std::cout << RED_COLOR << parsedLine.left(15).toStdString() << RESET << std::endl;
+        }
+    }
+}

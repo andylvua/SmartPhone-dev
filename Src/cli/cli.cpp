@@ -14,6 +14,7 @@
 #include <QProcess>
 #include <string>
 #include <fstream>
+#include <regex>
 
 const auto cliLogger = spdlog::basic_logger_mt("cli", "../logs/log.txt", true);
 
@@ -366,7 +367,7 @@ void CLI::ussdConsoleMode() {
 
     const char *ussd;
 
-    std::cout << "\r" << GREEN_COLOR << "Send USSD commands:" << RESET << std::endl;
+    std::cout << "\r" << GREEN_COLOR << "Send USSD commands. Type 'exit' to exit" << RESET << std::endl;
 
     while ((ussd = readline("")) != nullptr) {
         if (*ussd) {
@@ -391,7 +392,6 @@ void CLI::ussdConsoleMode() {
     renderScreen();
 }
 
-
 void CLI::atConsoleMode() {
     curs_set(1);
     releaseScreen();
@@ -407,7 +407,7 @@ void CLI::atConsoleMode() {
 
     const char *at;
 
-    std::cout << "\r" << GREEN_COLOR << "Send AT commands:" << RESET << std::endl;
+    std::cout << "\r" << GREEN_COLOR << "Send AT commands. Type exit to exit:" << RESET << std::endl;
 
     while ((at = readline("")) != nullptr) {
         if (*at) {
@@ -432,8 +432,96 @@ void CLI::atConsoleMode() {
     renderScreen();
 }
 
-void CLI::disableATConsole() {
-    gotoParentScreen();
+std::string parseUrl(std::string httpCommand, httpMethod_t method) {
+    std::string url;
+    if (method == httpMethod::HM_GET) {
+        url = httpCommand.erase(0, httpCommand.find(' ') + 1);
+    } else if (method == httpMethod::HM_POST) {
+        url = httpCommand.erase(0, httpCommand.find(' ') + 1);
+    }
+
+    if (!url.starts_with("http://") && !url.starts_with("https://")) {
+        url = "http://" + url;
+    }
+
+    url.erase(0, url.find_first_not_of(' '));
+    url.erase(url.find_last_not_of(' ') + 1);
+
+    std::basic_regex<char> urlRegex(
+            "^(http|https)://[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)+([a-zA-Z0-9-._~:/?#[\\]@!$&'()*+,;=]*)?$"
+            );
+    if (!std::regex_match(url, urlRegex)) {
+        std::cout << RED_COLOR << "Invalid URL" << RESET << std::endl;
+        return "";
+    }
+
+    return url;
+}
+
+void CLI::httpConsoleMode() {
+    curs_set(1);
+    releaseScreen();
+    system("clear");
+
+    std::cout << YELLOW_COLOR << "Loading..." << RESET;
+    std::cout.flush();
+
+    auto consoleEnabled = modem.enableHTTPConsoleMode();
+
+    if (!consoleEnabled) {
+        modem.disableHTTPConsoleMode();
+
+        initScreen();
+        renderScreen();
+        return;
+    }
+
+    const char *http;
+
+    std::cout << "\r" << GREEN_COLOR
+    << "Send HTTP commands. GET and POST are supported. Type exit to exit:" << RESET << std::endl;
+
+    while ((http = readline("")) != nullptr) {
+        if (*http) {
+            add_history(http);
+        }
+        if (strcmp(http, "exit") == 0) {
+            break;
+        }
+        if (strcmp(http, "clear") == 0) {
+            system("clear");
+            continue;
+        }
+
+        httpMethod_t method;
+
+        if (strstr(http, "GET ") != nullptr) {
+            method = httpMethod::HM_GET;
+        } else if (strstr(http, "POST ") != nullptr) {
+            method = httpMethod::HM_POST;
+        } else {
+            std::cout << RED_COLOR << "Invalid HTTP command" << RESET << std::endl;
+            continue;
+        }
+
+        std::string rawCommand = http;
+        std::string url = parseUrl(rawCommand, method);
+
+        if (url.empty()) {
+            SPDLOG_LOGGER_INFO(cliLogger, "Invalid HTTP command: {}", rawCommand);
+            continue;
+        }
+
+        SPDLOG_LOGGER_INFO(cliLogger, "Sending HTTP command: {}", url);
+        modem.sendHTTPConsoleCommand(QString::fromStdString(url), method);
+
+        free((void *) http);
+    }
+
+    modem.disableHTTPConsoleMode();
+
+    initScreen();
+    renderScreen();
 }
 
 void CLI::prepareScreens() {
@@ -449,6 +537,7 @@ void CLI::prepareScreens() {
     auto logScreen = SCREEN_SHARED_PTR("Logs", mainScreen);
     auto atScreen = SCREEN_SHARED_PTR("AT Console", mainScreen);
     auto ussdScreen = SCREEN_SHARED_PTR("USSD Console", mainScreen);
+    auto httpScreen = SCREEN_SHARED_PTR("HTTP Console", mainScreen);
 
     mainScreen->addScreenOption("Exit", []() {
         releaseScreen();
@@ -457,6 +546,7 @@ void CLI::prepareScreens() {
     mainScreen->addScreenOption("Phone", CHANGE_SCREEN("Phone"));
     mainScreen->addScreenOption("AT Console", CHANGE_SCREEN("AT Console"));
     mainScreen->addScreenOption("USSD Console", CHANGE_SCREEN("USSD Console"));
+    mainScreen->addScreenOption("HTTP Console", CHANGE_SCREEN("HTTP Console"));
     mainScreen->addScreenOption("Logs", CHANGE_SCREEN("Logs"));
 
     incomingCallScreen->addScreenOption("Reject call", EXECUTE_METHOD(rejectCall));
@@ -492,9 +582,11 @@ void CLI::prepareScreens() {
     ussdScreen->addScreenOption("Back", GO_BACK);
     ussdScreen->addScreenOption("Send USSD Command", EXECUTE_METHOD(ussdConsoleMode));
 
-    atScreen->addScreenOption("Back", EXECUTE_METHOD(disableATConsole));
+    atScreen->addScreenOption("Back", GO_BACK);
     atScreen->addScreenOption("Send AT Command", EXECUTE_METHOD(atConsoleMode));
 
+    httpScreen->addScreenOption("Back", GO_BACK);
+    httpScreen->addScreenOption("Send HTTP Command", EXECUTE_METHOD(httpConsoleMode));
 
     CLI::screenMap = {
             {"Main",          mainScreen},
@@ -508,7 +600,8 @@ void CLI::prepareScreens() {
             {"Send SMS",      sendSMSScreen},
             {"Logs",          logScreen},
             {"USSD Console",  ussdScreen},
-            {"AT Console",    atScreen}
+            {"AT Console",    atScreen},
+            {"HTTP Console",  httpScreen}
     };
 
     currentScreen = mainScreen;
