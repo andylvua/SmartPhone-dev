@@ -24,6 +24,11 @@ using messageDirection_t = enum class messageDirection {
     MD_OUTGOING
 };
 
+using httpMethod_t = enum class httpMethod {
+    HM_GET,
+    HM_POST
+};
+
 enum class ussdEncoding {
     UE_GSM7,
     UE_UCS2,
