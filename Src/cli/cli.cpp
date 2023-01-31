@@ -541,6 +541,7 @@ void CLI::setMessageMode() {
             option->switchState();
         }
     }
+    updateScreen();
 }
 void CLI::setNumberID() {
     for (auto option: CLI::screenMap["Debug Mode"]->screenOptions) {
@@ -549,6 +550,7 @@ void CLI::setNumberID() {
             option->switchState();
         }
     }
+    updateScreen();
 }
 
 void CLI::setEchoMode(){
@@ -558,6 +560,7 @@ void CLI::setEchoMode(){
             option->switchState();
         }
     }
+    updateScreen();
 }
 
 void CLI::setPIN() {
@@ -673,7 +676,7 @@ void CLI::prepareScreens() {
             {"Logs",          logScreen},
             {"USSD Console",  ussdScreen},
             {"AT Console",    atScreen},
-            {"HTTP Console",  httpScreen}
+            {"HTTP Console",  httpScreen},
             {"AT Console",    atScreen},
             {"Settings",      settingsScreen},
             {"Debug Mode",    debugSettingsScreen},
