@@ -367,7 +367,7 @@ void CLI::ussdConsoleMode() {
 
     const char *ussd;
 
-    std::cout << "\r" << GREEN_COLOR << "Send USSD commands:" << RESET << std::endl;
+    std::cout << "\r" << GREEN_COLOR << "Send USSD commands. Type 'exit' to exit" << RESET << std::endl;
 
     while ((ussd = readline("")) != nullptr) {
         if (*ussd) {
@@ -407,7 +407,7 @@ void CLI::atConsoleMode() {
 
     const char *at;
 
-    std::cout << "\r" << GREEN_COLOR << "Send AT commands:" << RESET << std::endl;
+    std::cout << "\r" << GREEN_COLOR << "Send AT commands. Type exit to exit:" << RESET << std::endl;
 
     while ((at = readline("")) != nullptr) {
         if (*at) {
