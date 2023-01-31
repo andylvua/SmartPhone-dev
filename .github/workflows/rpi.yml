@@ -34,6 +34,6 @@ jobs:
             fi
             cd ${{ github.event.repository.name }} && cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
             cmake --build build --config ${{env.BUILD_TYPE}}
-            if [ $? -ne 0 ]; then exit 1; fi
+            if [ $? -ne 0 ]; then exit 1 && rm -rf $BUILD_DIR; fi
             rm -rf $BUILD_DIR
             echo "Build successful"
