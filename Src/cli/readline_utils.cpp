@@ -7,6 +7,7 @@
 #include <vector>
 #include <iostream>
 #include <readline/readline.h>
+#include <algorithm>
 
 const char **words = {nullptr};
 
