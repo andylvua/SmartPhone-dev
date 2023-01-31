@@ -27,7 +27,7 @@ jobs:
             if [ -n "${{ github.event.pull_request.head.sha }}" ]; then
               git clone --depth 1 --branch ${{ github.event.pull_request.head.ref }} ${{ github.event.repository.clone_url }} ${{ github.event.repository.name }}
             else
-              git clone --depth 1 --branch ${{ github.event.ref }} ${{ github.event.repository.clone_url }} ${{ github.event.repository.name }}
+              git clone --depth 1 ${{ github.event.repository.clone_url }} ${{ github.event.repository.name }}
             fi
             cd ${{ github.event.repository.name }} && cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
             cmake --build build --config ${{env.BUILD_TYPE}}
