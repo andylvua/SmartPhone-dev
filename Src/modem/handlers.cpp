@@ -14,9 +14,9 @@ void Modem::dataInterruptHandler() {
     QByteArray data;
     SPDLOG_LOGGER_INFO(modemLogger, "Data interrupt handler started");
     serial.buffer.clear();
-    if (serial.waitForReadyRead(100)) {
+    if (serial.waitForReadyRead(serial.timeout)) {
         data = serial.readAll();
-        while (serial.waitForReadyRead(100))
+        while (serial.waitForReadyRead(serial.timeout))
             data += serial.readAll();
     }
 

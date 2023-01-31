@@ -66,6 +66,42 @@ void Modem::disableUSSDConsoleMode() {
     serial.write(ATE1"\r\n");
 }
 
+bool Modem::enableHTTPConsoleMode() {
+    SPDLOG_LOGGER_INFO(modemLogger, "HTTP console mode enabled");
+
+    serial.write(ATE0"\r\n");
+    QThread::msleep(serial.timeout);
+
+    auto setAPNCommand = SetCommand(R"(AT+CGDCONT=1,"IP","internet")", serial);
+    auto response = setAPNCommand.execute();
+
+    if (response != commRes::CR_OK) {
+        SPDLOG_LOGGER_ERROR(modemLogger, "Failed to set APN");
+        std::cout << RED_COLOR << "\nFailed to set APN" << RESET << std::endl;
+        QThread::msleep(3000);
+        return false;
+    }
+
+    auto activateConnectionCommand = SetCommand("AT+CGACT=1,1", serial);
+    response = activateConnectionCommand.execute();
+    if (response != commRes::CR_OK) {
+        SPDLOG_LOGGER_ERROR(modemLogger, "Failed to activate connection");
+        std::cout << RED_COLOR << "\nFailed to activate connection" << RESET << std::endl;
+        QThread::msleep(3000);
+        return false;
+    }
+
+    consoleMode.enabled = true;
+    consoleMode.consoleType = consoleType::CM_HTTP;
+    return true;
+}
+
+void Modem::disableHTTPConsoleMode() {
+    SPDLOG_LOGGER_INFO(modemLogger, "HTTP console mode disabled");
+    consoleMode.enabled = false;
+    serial.write(ATE1"\r\n");
+}
+
 void Modem::sendATConsoleCommand(const QString &command) {
     SPDLOG_LOGGER_INFO(modemLogger, "sendConsoleCommand: {}", command.toStdString());
     serial.write((command.toStdString() + "\r\n").c_str());
@@ -74,6 +110,16 @@ void Modem::sendATConsoleCommand(const QString &command) {
 void Modem::sendUSSDConsoleCommand(const QString &command) {
     SPDLOG_LOGGER_INFO(modemLogger, "sendUSSDConsoleCommand: {}", command.toStdString());
     serial.write((AT_CUSD"=1,\"" + command.toStdString() + "\",15\r\n").c_str());
+}
+
+void Modem::sendHTTPConsoleCommand(const QString &command, httpMethod_t method) {
+    SPDLOG_LOGGER_INFO(modemLogger, "sendHTTPConsoleCommand: {}", command.toStdString());
+
+    if (method == httpMethod_t::HM_GET) {
+        serial.write(("AT+HTTPGET=\"" + command.toStdString() + "\"\r\n").c_str());
+    } else if (method == httpMethod_t::HM_POST) {
+        serial.write(("AT+HTTPPOST=\"" + command.toStdString() + "\"\r\n").c_str());
+    }
 }
 
 bool Modem::checkAT() {
@@ -246,6 +292,10 @@ void Modem::listen() {
 
             if (consoleMode.consoleType == consoleType::CM_USSD) {
                 ussdConsoleMode();
+            }
+
+            if (consoleMode.consoleType == consoleType::CM_HTTP) {
+                httpConsoleMode();
             }
 
             continue;

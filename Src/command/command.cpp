@@ -137,18 +137,14 @@ commRes_t SetCommand::execute([[maybe_unused]] bool enableInterruptDataRead) {
     if (data.isEmpty()) {
         qDebug() << "WARNING: No data received during execution of SetCommand";
         SPDLOG_LOGGER_WARN(commandLogger, "No data received during execution of GetCommand");
-        return commRes::CR_OK;
     }
 
-    QString response = uartResponseParser(data);
-
-    if (response.isValidUtf16() && !response.isNull() && !response.isEmpty() && response == "OK") {
+    if (data.contains("OK")) {
         if (request != uartEchoParser(data)) {
-            qDebug() << "Echo is not equal to request";
-            return commRes::CR_ERROR;
+            SPDLOG_LOGGER_WARN(commandLogger, "Echo is not equal to request");
         }
     } else {
-        qDebug() << "Error: invalid response";
+        SPDLOG_LOGGER_WARN(commandLogger, "Invalid response");
         return commRes::CR_ERROR;
     }
 

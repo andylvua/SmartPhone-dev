@@ -82,7 +82,7 @@ private:
 
     void atConsoleMode();
 
-    void disableATConsole();
+    void httpConsoleMode();
 
     void setMessageMode();
 

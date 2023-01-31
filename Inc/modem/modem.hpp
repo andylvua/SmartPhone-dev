@@ -13,7 +13,8 @@
 
 using consoleType_t = enum class consoleType {
     CM_AT,
-    CM_USSD
+    CM_USSD,
+    CM_HTTP
 };
 
 struct ConsoleMode {
@@ -50,9 +51,15 @@ public:
 
     void disableUSSDConsoleMode();
 
+    [[nodiscard]] bool enableHTTPConsoleMode();
+
+    void disableHTTPConsoleMode();
+
     void sendATConsoleCommand(const QString &command);
 
     void sendUSSDConsoleCommand(const QString &command);
+
+    void sendHTTPConsoleCommand(const QString &command, httpMethod_t method);
 
     void setCharacterSet(const std::string &characterSet);
 
@@ -109,6 +116,8 @@ private:
     void atConsoleMode();
 
     void ussdConsoleMode();
+
+    void httpConsoleMode();
 };
 
 #endif //PHONE_MODEM_HPP
