@@ -21,9 +21,10 @@ jobs:
           port: ${{ secrets.RPIPORT }}
 
           script: |
-            rm -rf /tmp/${{ github.event.repository.name }}_build
-            mkdir /tmp/${{ github.event.repository.name }}_build
-            cd /tmp/${{ github.event.repository.name }}_build
+            export BUILD_DIR=/tmp/${{ github.event.repository.name }}_build_commit_${{ github.sha }}
+            rm -rf $BUILD_DIR
+            mkdir $BUILD_DIR
+            cd $BUILD_DIR
             if [ -n "${{ github.event.pull_request.head.sha }}" ]; then
               git clone --depth 1 --single-branch --branch ${{ github.event.pull_request.head.ref }} ${{ github.event.repository.clone_url }} ${{ github.event.repository.name }}
               echo "Building pull request ${{ github.event.pull_request.number }} from branch ${{ github.ref_name }}"
@@ -34,5 +35,5 @@ jobs:
             cd ${{ github.event.repository.name }} && cmake -B build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
             cmake --build build --config ${{env.BUILD_TYPE}}
             if [ $? -ne 0 ]; then exit 1; fi
-            rm -rf /tmp/${{ github.event.repository.name }}_build
+            rm -rf $BUILD_DIR
             echo "Build successful"
