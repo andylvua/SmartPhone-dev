@@ -17,22 +17,22 @@ std::string Command::getCommandText() const {
 }
 
 // Returns actual response from uart, dropping echo of command
-QString Command::uartResponseParser(const QByteArray &response) {
+QString Command::uartResponseParser(const QByteArray &response, const QString &commandText) {
     SPDLOG_LOGGER_INFO(commandLogger, "uartResponseParser: {}", response.toStdString());
     auto responseString = QString(response);
     if (responseString.isEmpty()) {
         return responseString;
     }
-    QStringList parsedResponse;
-    parsedResponse = responseString.split("\r\n");
 
-    if (parsedResponse.size() > 2) {
-        return QString{parsedResponse[2]};
-        SPDLOG_LOGGER_INFO(commandLogger, "uartResponseParser [parsed]: {}", parsedResponse[2].toStdString());
-    } else {
-        SPDLOG_LOGGER_WARN(commandLogger, "Response from UART was not parsed correctly, returning empty string");
-        return QString{};
-    }
+    QStringList parsedResponseList = responseString.split("\r\n");
+
+    parsedResponseList.removeAll("");
+    parsedResponseList.removeOne(commandText);
+
+    QString parsedResponse = parsedResponseList.join("\n");
+
+    SPDLOG_LOGGER_INFO(commandLogger, "uartResponseParser [parsed]: {}", parsedResponse.toStdString());
+    return parsedResponse;
 }
 
 // Returns echo of command, dropping actual response from uart
@@ -87,7 +87,7 @@ QString GetCommand::execute(bool enableInterruptDataRead, bool parseResponse) {
         return QString{data};
     }
 
-    QString response = uartResponseParser(data);
+    QString response = uartResponseParser(data, request);
 
     if (response.isValidUtf16() && !response.isNull()) {
         if (request != uartEchoParser(data)) {
@@ -176,7 +176,7 @@ commRes_t Task::execute(bool parseResponse) {
         return commRes::CR_OK;
     }
 
-    QString response = uartResponseParser(data);
+    QString response = uartResponseParser(data, QString::fromStdString(commandText));
     SPDLOG_LOGGER_INFO(commandLogger, "Unparsed response: {}", QString(data).toStdString());
 
     if (response.isValidUtf16() && !response.isNull()) {
