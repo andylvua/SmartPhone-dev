@@ -269,7 +269,8 @@ bool Modem::setPIN(const std::string &pin) {
 QString Modem::aboutDevice() {
     SPDLOG_LOGGER_INFO(modemLogger, "Getting device info");
     auto command = GetCommand("ATI", serial);
-    auto result = command.execute();
+    QString result = command.execute();
+    result.remove("OK");
     return result;
 }
 
