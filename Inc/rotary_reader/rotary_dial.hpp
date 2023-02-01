@@ -9,8 +9,8 @@
 
 #ifdef BUILD_ON_RASPBERRY
 class RotaryDial {
-    const int pinDial = 4;  // blue
-    const int pinPulse = 5;  // yellow
+    static const int pinDial = 4;  // blue
+    static const int pinPulse = 5;  // yellow
 public:
     char phone_number[12];
 
