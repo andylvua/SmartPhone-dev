@@ -75,6 +75,14 @@ public:
 
     bool message(const std::string &number, const std::string &message);
 
+    [[nodiscard]] bool setMessageMode(bool mode);
+
+    [[nodiscard]] bool setNumberID(bool mode);
+
+    [[nodiscard]] bool setEchoMode(bool mode);
+
+    QString aboutDevice();
+
     bool initialize();
 
     void worker();

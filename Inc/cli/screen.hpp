@@ -18,7 +18,7 @@ public:
     QString screenName;
     std::vector<std::shared_ptr<Screen>> childScreens;
     std::shared_ptr<Screen> parentScreen;
-    std::vector<Option> screenOptions;
+    std::vector<std::shared_ptr<Option>> screenOptions;
     int activeOption = -1;
     std::vector<QString> notifications = {};
 
@@ -26,15 +26,14 @@ public:
 
     void addScreenOption(const QString &name, std::function<void()> const& action);
 
+    void addScreenOption(const QString &name, std::function<void()> const& action, bool switcher);
+
+    void removeScreenOption(int index);
+
     [[nodiscard]] int getActiveOption() const;
 
     void addNotification(const QString &notification);
 
-    void removeScreenOption(const QString &option);
-
-    void removeScreenOption(int index);
-
-    void removeNotification(const QString &notification);
 };
 
 class ContactScreen : public Screen {

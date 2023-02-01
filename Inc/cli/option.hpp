@@ -15,10 +15,19 @@ class Option {
 public:
     QString optionName;
     std::function<void()> action;
+    const bool isSwitcher = false;
+    bool switcher = false;
+    bool isAvailable = true;
 
     Option(QString name, std::function<void()> const& action);
 
+    Option(QString name, std::function<void()> const& action, bool isSwitcher, bool switcher);
+
     void execute() const;
+
+    void switchState();
+
+    [[nodiscard]] bool getState() const;
 };
 
 #endif //PHONE_OPTION_HPP

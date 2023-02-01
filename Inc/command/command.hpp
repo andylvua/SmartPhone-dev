@@ -25,7 +25,7 @@ public:
 
     [[nodiscard]] std::string getCommandText() const;
 
-    static QString uartResponseParser(const QByteArray &response);
+    static QString uartResponseParser(const QByteArray &response, const QString &commandText);
 
     static QString uartEchoParser(const QByteArray &response);
 

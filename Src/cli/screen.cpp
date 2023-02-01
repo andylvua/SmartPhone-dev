@@ -11,9 +11,16 @@ Screen::Screen(QString name, std::shared_ptr<Screen> parentScreen) : screenName(
                                                                      parentScreen(std::move(parentScreen)) {}
 
 void Screen::addScreenOption(const QString &name, std::function<void()> const& action) {
-    Option option(name, action);
+    std::shared_ptr option = std::make_shared<Option>(name, action);
     screenOptions.push_back(option);
 }
+
+void Screen::addScreenOption(const QString &name, std::function<void()> const& action, bool switcher) {
+    std::shared_ptr option = std::make_shared<Option>(name, action, true, switcher);
+    screenOptions.push_back(option);
+}
+
+[[nodiscard]]
 
 int Screen::getActiveOption() const {
     if (activeOption == -1) {
@@ -27,17 +34,6 @@ int Screen::getActiveOption() const {
 
 void Screen::addNotification(const QString &notification) {
     notifications.push_back(notification);
-}
-
-void Screen::removeScreenOption(const QString &option) {
-    screenOptions.erase(std::remove_if(screenOptions.begin(), screenOptions.end(),
-                                       [&option](const Option &screenOption) {
-                                           return screenOption.optionName == option;
-                                       }), screenOptions.end());
-}
-
-void Screen::removeNotification(const QString &notification) {
-    notifications.erase(std::remove(notifications.begin(), notifications.end(), notification), notifications.end());
 }
 
 void Screen::removeScreenOption(int index) {
