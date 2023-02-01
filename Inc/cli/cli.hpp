@@ -90,8 +90,6 @@ private:
 
     void setEchoMode();
 
-    void setPIN();
-
     void aboutDevice();
 
 };

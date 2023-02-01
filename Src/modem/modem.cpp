@@ -256,16 +256,6 @@ bool Modem::setEchoMode(bool mode) {
     return false;
 }
 
-bool Modem::setPIN(const std::string &pin) {
-    SPDLOG_LOGGER_INFO(modemLogger, "Setting PIN to {}", pin);
-    auto command = SetCommand("AT+CPIN="+pin, serial);
-    commRes_t result = command.execute();
-    if (result == commRes::CR_OK) {
-        return true;
-    }
-    return false;
-}
-
 QString Modem::aboutDevice() {
     SPDLOG_LOGGER_INFO(modemLogger, "Getting device info");
     auto command = GetCommand("ATI", serial);

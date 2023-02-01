@@ -81,8 +81,6 @@ public:
 
     bool setEchoMode(bool mode);
 
-    bool setPIN(const std::string &pin);
-
     QString aboutDevice();
 
     bool initialize();

@@ -13,7 +13,6 @@
 #include <readline/history.h>
 #include <QProcess>
 #include <string>
-#include <fstream>
 #include <regex>
 
 const auto cliLogger = spdlog::basic_logger_mt("cli", "../logs/log.txt", true);
@@ -446,7 +445,7 @@ void CLI::atConsoleMode() {
     renderScreen();
 }
 
-std::string parseUrl(std::string httpCommand, httpMethod_t method) {
+std::string parseUrl(std::string httpCommand) {
     std::string url;
     url = httpCommand.erase(0, httpCommand.find(' ') + 1);
 
@@ -515,7 +514,7 @@ void CLI::httpConsoleMode() {
         }
 
         std::string rawCommand = http;
-        std::string url = parseUrl(rawCommand, method);
+        std::string url = parseUrl(rawCommand);
 
         if (url.empty()) {
             SPDLOG_LOGGER_INFO(cliLogger, "Invalid HTTP command: {}", rawCommand);
@@ -561,13 +560,6 @@ void CLI::setEchoMode(){
         }
     }
     updateScreen();
-}
-
-void CLI::setPIN() {
-    std::string pin;
-    printColored(YELLOW_PAIR, "Enter PIN: ");
-    pin = readString();
-    modem.setPIN(pin);
 }
 
 void CLI::aboutDevice(){
@@ -658,9 +650,6 @@ void CLI::prepareScreens() {
     debugSettingsScreen->addScreenOption("Echo Mode", EXECUTE_METHOD(setEchoMode),
                                          true, true);
 
-    simSettingsScreen->addScreenOption("Back", GO_BACK);
-    simSettingsScreen->addScreenOption("Set PIN", EXECUTE_METHOD(setPIN));
-
     aboutScreen->addScreenOption("Back", GO_BACK);
 
     CLI::screenMap = {
@@ -680,7 +669,6 @@ void CLI::prepareScreens() {
             {"AT Console",    atScreen},
             {"Settings",      settingsScreen},
             {"Debug Mode",    debugSettingsScreen},
-            {"SIM Settings",  simSettingsScreen},
             {"About Device",  aboutScreen}
     };
 
