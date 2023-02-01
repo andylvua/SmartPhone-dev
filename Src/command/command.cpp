@@ -3,7 +3,7 @@
 //
 
 #include "../../Inc/logging.hpp"
-#include "../../Inc/command/command.hpp"
+#include "../../Inc/modem/command/command.hpp"
 #include <QtSerialPort/QSerialPortInfo>
 #include <QThread>
 #include <utility>

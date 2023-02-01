@@ -2,10 +2,10 @@
 // Created by Andrew Yaroshevych on 26.01.2023.
 //
 
-#include "../../Inc/modem/cache_manager.hpp"
-#include "../../Inc/logging.hpp"
-#include "../../Inc/cli/ncurses_io.hpp"
-#include "../../Inc/cli/ncurses_utils.hpp"
+#include "../../../Inc/modem/utils/cache_manager.hpp"
+#include "../../../Inc/logging.hpp"
+#include "../../../Inc/cli/utils/io/ncurses_io.hpp"
+#include "../../../Inc/cli/utils/ncurses_utils.hpp"
 #include <fstream>
 
 const auto cacheLogger = spdlog::basic_logger_mt("cache", "../logs/log.txt", true);

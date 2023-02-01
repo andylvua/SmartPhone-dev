@@ -4,11 +4,11 @@
 
 #include "../../Inc/logging.hpp"
 #include "../../Inc/modem/modem.hpp"
-#include "../../Inc/modem/cache_manager.hpp"
-#include "../../Inc/command/command.hpp"
-#include "../../Inc/command/commands_list.hpp"
-#include "../../Inc/cli/ncurses_io.hpp"
-#include "../../Inc/cli/colors.hpp"
+#include "../../Inc/modem/utils/cache_manager.hpp"
+#include "../../Inc/modem/command/command.hpp"
+#include "../../Inc/modem/command/commands_list.hpp"
+#include "../../Inc/cli/utils/io/ncurses_io.hpp"
+#include "../../Inc/cli/defenitions/colors.hpp"
 #include <string>
 #include <utility>
 
