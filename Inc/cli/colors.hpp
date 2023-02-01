@@ -17,5 +17,6 @@ constexpr int GREEN_PAIR = 3;
 constexpr int YELLOW_PAIR = 4;
 constexpr int FILLED_WHITE_PAIR = 5;
 constexpr int FILLED_RED_PAIR = 6;
+constexpr int FILLED_GREEN_PAIR = 7;
 
 #endif //PHONE_COLORS_HPP

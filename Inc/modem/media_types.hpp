@@ -54,7 +54,7 @@ struct Message {
 struct Contact {
     Contact();
     Contact(QString name, QString number);
-    bool hasValue() const;
+    [[nodiscard]] bool hasValue() const;
     QString name;
     QString number;
 };

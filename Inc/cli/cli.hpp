@@ -84,6 +84,14 @@ private:
 
     void httpConsoleMode();
 
+    void setMessageMode();
+
+    void setNumberID();
+
+    void setEchoMode();
+
+    void aboutDevice();
+
 };
 
 #endif //PHONE_CLI_HPP

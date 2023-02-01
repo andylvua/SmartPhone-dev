@@ -37,6 +37,12 @@ void CacheManager::checkCacheFiles() {
 }
 
 void CacheManager::writeToFile(const std::string &fileName, const std::string &data) {
+    std::ifstream checkFile(fileName);
+    if (!checkFile.is_open()) {
+        std::ofstream createFile(fileName);
+        createFile.close();
+    }
+
     std::ofstream file(fileName, std::ios::app);
     file << data << std::endl;
     file.close();
@@ -111,22 +117,6 @@ void CacheManager::removeNewMessageNotification() {
 
     std::ofstream messagesFile(MESSAGES_FILEPATH);
     messagesFile << data;
-}
-
-void CacheManager::listContacts() {
-    SPDLOG_LOGGER_INFO(cacheLogger, "Listing contacts");
-    std::ifstream file(CONTACTS_FILEPATH);
-    std::string line;
-    std::string data;
-
-    while (std::getline(file, line)) {
-        auto contact = QString::fromStdString(line).split("; ");
-        data += std::string("Name: " + contact[0].toStdString() + "\n" + " Number: " + contact[1].toStdString() + "\n");
-    }
-
-    displayPad(data, "Viewing contacts");
-
-    file.close();
 }
 
 std::vector<Contact> CacheManager::getContacts() {

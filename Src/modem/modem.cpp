@@ -222,6 +222,48 @@ bool Modem::message(const std::string &number, const std::string &message) {
     return false;
 }
 
+bool Modem::setMessageMode(bool mode) {
+    SPDLOG_LOGGER_INFO(modemLogger, "Setting message mode to {}", mode);
+    int modeInt = mode ? 1 : 0;
+    auto command = SetCommand(AT_CMGF"=" + std::to_string(modeInt), serial);
+    commRes_t result = command.execute();
+    if (result == commRes::CR_OK) {
+        return true;
+    }
+    return false;
+
+}
+
+bool Modem::setNumberID(bool mode) {
+    SPDLOG_LOGGER_INFO(modemLogger, "Setting number ID to {}", mode);
+    int modeInt = mode ? 1 : 0;
+    auto command = SetCommand("AT+CLIP="+std::to_string(modeInt), serial);
+    commRes_t result = command.execute();
+    if (result == commRes::CR_OK) {
+        return true;
+    }
+    return false;
+}
+
+bool Modem::setEchoMode(bool mode) {
+    SPDLOG_LOGGER_INFO(modemLogger, "Setting echo to {}", mode);
+    int modeInt = mode ? 1 : 0;
+    auto command = SetCommand("ATE"+std::to_string(modeInt), serial);
+    commRes_t result = command.execute();
+    if (result == commRes::CR_OK) {
+        return true;
+    }
+    return false;
+}
+
+QString Modem::aboutDevice() {
+    SPDLOG_LOGGER_INFO(modemLogger, "Getting device info");
+    auto command = GetCommand("ATI", serial);
+    QString result = command.execute();
+    result.remove("OK");
+    return result;
+}
+
 void Modem::worker() {
     Modem::workerStatus = true;
     SPDLOG_LOGGER_INFO(modemLogger, "Worker started");

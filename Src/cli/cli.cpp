@@ -13,7 +13,6 @@
 #include <readline/history.h>
 #include <QProcess>
 #include <string>
-#include <fstream>
 #include <regex>
 
 const auto cliLogger = spdlog::basic_logger_mt("cli", "../logs/log.txt", true);
@@ -63,13 +62,27 @@ void render(const std::shared_ptr<Screen> &screen) {
         printColored(WHITE_PAIR, notification.toStdString());
     }
 
-    for (size_t i = 0; i < screen->screenOptions.size(); ++i) {
-        QString option = screen->screenOptions[i].optionName;
-        int color = (i == static_cast<size_t>(activeOptionIndex)) ? FILLED_WHITE_PAIR : WHITE_PAIR;
-        if (i == 0 && i == static_cast<size_t>(activeOptionIndex)) {
+    for (int i = 0; i < static_cast<int>(screen->screenOptions.size()); ++i) {
+        auto option = screen->screenOptions[i];
+
+        int color = (i == (activeOptionIndex)) ? FILLED_WHITE_PAIR : WHITE_PAIR;
+
+        if (i == 0 && i == activeOptionIndex) {
             color = FILLED_RED_PAIR;
         }
-        printColored(color, option.toStdString());
+        if (option->isSwitcher) {
+           if (i == activeOptionIndex){
+                color = option->switcher ? FILLED_GREEN_PAIR : FILLED_RED_PAIR;
+           } else {
+                color = option->switcher ? GREEN_PAIR : RED_PAIR;
+           }
+        }
+
+        if (!option->isAvailable) {
+            color = (i == (activeOptionIndex)) ? FILLED_RED_PAIR : RED_PAIR;
+        }
+
+        printColored(color, option->optionName.toStdString());
     }
 
     refresh();
@@ -162,7 +175,7 @@ void CLI::listen() const {
                 if (currentScreen->activeOption == -1) {
                     break;
                 }
-                currentScreen->screenOptions[currentScreen->getActiveOption()].execute();
+                currentScreen->screenOptions[currentScreen->getActiveOption()]->execute();
                 break;
             default:
                 break;
@@ -432,16 +445,12 @@ void CLI::atConsoleMode() {
     renderScreen();
 }
 
-std::string parseUrl(std::string httpCommand, httpMethod_t method) {
+std::string parseUrl(std::string httpCommand) {
     std::string url;
-    if (method == httpMethod::HM_GET) {
-        url = httpCommand.erase(0, httpCommand.find(' ') + 1);
-    } else if (method == httpMethod::HM_POST) {
-        url = httpCommand.erase(0, httpCommand.find(' ') + 1);
-    }
+    url = httpCommand.erase(0, httpCommand.find(' ') + 1);
 
     if (!url.starts_with("http://") && !url.starts_with("https://")) {
-        url = "http://" + url;
+        url = "https://" + url;
     }
 
     url.erase(0, url.find_first_not_of(' '));
@@ -505,7 +514,7 @@ void CLI::httpConsoleMode() {
         }
 
         std::string rawCommand = http;
-        std::string url = parseUrl(rawCommand, method);
+        std::string url = parseUrl(rawCommand);
 
         if (url.empty()) {
             SPDLOG_LOGGER_INFO(cliLogger, "Invalid HTTP command: {}", rawCommand);
@@ -524,6 +533,53 @@ void CLI::httpConsoleMode() {
     renderScreen();
 }
 
+void CLI::setMessageMode() {
+    for (const auto& option: CLI::screenMap["Debug Settings"]->screenOptions) {
+        if (option->optionName == "Message Mode" && option->isSwitcher) {
+            bool success = modem.setMessageMode(!option->getState());
+            if (success) {
+                option->switchState();
+            } else {
+                printColored(RED_PAIR, "Failed to set Message Mode");
+            }
+        }
+    }
+    updateScreen();
+}
+void CLI::setNumberID() {
+    for (const auto& option: CLI::screenMap["Debug Settings"]->screenOptions) {
+        if (option->optionName == "Number Identifier" && option->isSwitcher) {
+            bool success = modem.setNumberID(!option->getState());
+            if (success) {
+                option->switchState();
+            } else {
+                printColored(RED_PAIR, "Failed to set Number Identifier");
+            }
+        }
+    }
+    updateScreen();
+}
+
+void CLI::setEchoMode(){
+    for (const auto& option: CLI::screenMap["Debug Settings"]->screenOptions) {
+        if (option->optionName == "Echo Mode" && option->isSwitcher){
+            bool success = modem.setEchoMode(!option->getState());
+            if (success) {
+                option->switchState();
+            } else {
+                printColored(RED_PAIR, "Failed to set Echo Mode");
+            }
+        }
+    }
+    updateScreen();
+}
+
+void CLI::aboutDevice(){
+    changeScreen("About Device");
+    QString aboutInfo = modem.aboutDevice();
+    printColored(WHITE_PAIR, aboutInfo.toStdString());
+}
+
 void CLI::prepareScreens() {
     auto mainScreen = SCREEN_SHARED_PTR("Main", nullptr);
     auto incomingCallScreen = SCREEN_SHARED_PTR("Incoming Call", mainScreen);
@@ -538,6 +594,9 @@ void CLI::prepareScreens() {
     auto atScreen = SCREEN_SHARED_PTR("AT Console", mainScreen);
     auto ussdScreen = SCREEN_SHARED_PTR("USSD Console", mainScreen);
     auto httpScreen = SCREEN_SHARED_PTR("HTTP Console", mainScreen);
+    auto settingsScreen = SCREEN_SHARED_PTR("Settings", mainScreen);
+    auto debugSettingsScreen = SCREEN_SHARED_PTR("Debug Settings", settingsScreen);
+    auto aboutScreen = SCREEN_SHARED_PTR("About Device", settingsScreen);
 
     mainScreen->addScreenOption("Exit", []() {
         releaseScreen();
@@ -547,7 +606,9 @@ void CLI::prepareScreens() {
     mainScreen->addScreenOption("AT Console", CHANGE_SCREEN("AT Console"));
     mainScreen->addScreenOption("USSD Console", CHANGE_SCREEN("USSD Console"));
     mainScreen->addScreenOption("HTTP Console", CHANGE_SCREEN("HTTP Console"));
+    mainScreen->addScreenOption("Settings", CHANGE_SCREEN("Settings"));
     mainScreen->addScreenOption("Logs", CHANGE_SCREEN("Logs"));
+
 
     incomingCallScreen->addScreenOption("Reject call", EXECUTE_METHOD(rejectCall));
 
@@ -588,6 +649,17 @@ void CLI::prepareScreens() {
     httpScreen->addScreenOption("Back", GO_BACK);
     httpScreen->addScreenOption("Send HTTP Command", EXECUTE_METHOD(httpConsoleMode));
 
+    settingsScreen->addScreenOption("Back", GO_BACK);
+    settingsScreen->addScreenOption("Debug Settings", CHANGE_SCREEN("Debug Settings"));
+    settingsScreen->addScreenOption("About Device", EXECUTE_METHOD(aboutDevice));
+
+    debugSettingsScreen->addScreenOption("Back", GO_BACK);
+    debugSettingsScreen->addScreenOption("Number Identifier", EXECUTE_METHOD(setNumberID), true);
+    debugSettingsScreen->addScreenOption("Text Mode", EXECUTE_METHOD(setMessageMode), true);
+    debugSettingsScreen->addScreenOption("Echo Mode", EXECUTE_METHOD(setEchoMode), true);
+
+    aboutScreen->addScreenOption("Back", GO_BACK);
+
     CLI::screenMap = {
             {"Main",          mainScreen},
             {"Incoming Call", incomingCallScreen},
@@ -601,7 +673,11 @@ void CLI::prepareScreens() {
             {"Logs",          logScreen},
             {"USSD Console",  ussdScreen},
             {"AT Console",    atScreen},
-            {"HTTP Console",  httpScreen}
+            {"HTTP Console",  httpScreen},
+            {"AT Console",    atScreen},
+            {"Settings",      settingsScreen},
+            {"Debug Settings",    debugSettingsScreen},
+            {"About Device",  aboutScreen}
     };
 
     currentScreen = mainScreen;
