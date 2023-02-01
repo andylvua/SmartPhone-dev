@@ -75,11 +75,11 @@ public:
 
     bool message(const std::string &number, const std::string &message);
 
-    bool setMessageMode(bool mode);
+    [[nodiscard]] bool setMessageMode(bool mode);
 
-    bool setNumberID(bool mode);
+    [[nodiscard]] bool setNumberID(bool mode);
 
-    bool setEchoMode(bool mode);
+    [[nodiscard]] bool setEchoMode(bool mode);
 
     QString aboutDevice();
 
