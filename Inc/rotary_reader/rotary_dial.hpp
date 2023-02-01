@@ -14,7 +14,7 @@ class RotaryDial {
 public:
     char phone_number[12];
 
-    void setup();
+    static void setup();
     char * listen_for_number();
 };
 #endif //BUILD_ON_RASPBERRY

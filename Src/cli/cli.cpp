@@ -16,6 +16,8 @@ const auto cliLogger = spdlog::basic_logger_mt("cli", "../logs/log.txt", true);
 CLI::CLI(Modem &modem) : modem(modem) {
     prepareScreens();
 
+    RotaryDial::setup();
+
     connect(&modem, SIGNAL(incomingCall(QString)),
             this, SLOT(handleIncomingCall(QString)));
     connect(&modem, SIGNAL(incomingSMS()), this, SLOT(handleIncomingSMS()));

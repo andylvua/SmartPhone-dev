@@ -7,10 +7,10 @@
 #include "cli/utils/ncurses_utils.hpp"
 #include "cli/defenitions/colors.hpp"
 #include "modem/utils/cache_manager.hpp"
+#include "rotary_reader/rotary_dial.hpp"
 
 #ifdef BUILD_ON_RASPBERRY
 RotaryDial rtx;
-rtx.setup();
 #endif
 
 void render(const std::shared_ptr<Screen> &screen) {
@@ -98,7 +98,7 @@ void CLI::call() {
 
     if (input == "r") {
         printColored(YELLOW_PAIR, "Reading from rotary dial");
-        number = rtx.listen_for_number(modem.outStream);
+        number = rtx.listen_for_number();
     } else if (input == "k") {
         printColored(YELLOW_PAIR, "Reading from keyboard");
         number = readString();
@@ -152,7 +152,7 @@ void CLI::addContact() {
 
     if (input == "r") {
         printColored(YELLOW_PAIR, "Reading from rotary dial");
-        number = rtx.listen_for_number(modem.outStream);
+        number = rtx.listen_for_number();
     } else if (input == "k") {
         printColored(YELLOW_PAIR, "Reading from keyboard");
         number = readString();
@@ -216,7 +216,7 @@ void CLI::sendMessage() {
 
     if (input == "r") {
         printColored(YELLOW_PAIR, "Reading from rotary dial");
-        number = rtx.listen_for_number(modem.outStream);
+        number = rtx.listen_for_number();
     } else if (input == "k") {
         printColored(YELLOW_PAIR, "Reading from keyboard");
         number = readString();
