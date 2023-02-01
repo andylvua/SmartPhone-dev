@@ -8,6 +8,11 @@
 #include "cli/defenitions/colors.hpp"
 #include "modem/utils/cache_manager.hpp"
 
+#ifdef BUILD_ON_RASPBERRY
+RotaryDial rtx;
+rtx.setup();
+#endif
+
 void render(const std::shared_ptr<Screen> &screen) {
     int activeOptionIndex = screen->getActiveOption();
 

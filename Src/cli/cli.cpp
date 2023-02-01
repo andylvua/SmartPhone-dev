@@ -13,15 +13,8 @@
 
 const auto cliLogger = spdlog::basic_logger_mt("cli", "../logs/log.txt", true);
 
-#ifdef BUILD_ON_RASPBERRY
-RotaryDial rtx;
-#endif
-
 CLI::CLI(Modem &modem) : modem(modem) {
     prepareScreens();
-#ifdef BUILD_ON_RASPBERRY
-    rtx.setup();
-#endif
 
     connect(&modem, SIGNAL(incomingCall(QString)),
             this, SLOT(handleIncomingCall(QString)));
