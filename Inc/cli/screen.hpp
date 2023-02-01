@@ -28,15 +28,12 @@ public:
 
     void addScreenOption(const QString &name, std::function<void()> const& action, bool isSwitcher, bool switcher);
 
+    void removeScreenOption(int index);
+
     [[nodiscard]] int getActiveOption() const;
 
     void addNotification(const QString &notification);
 
-    void removeScreenOption(const QString &option);
-
-    void removeScreenOption(int index);
-
-    void removeNotification(const QString &notification);
 };
 
 class ContactScreen : public Screen {

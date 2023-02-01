@@ -27,7 +27,7 @@ public:
 
     void switchState();
 
-    bool getState() const;
+    [[nodiscard]] bool getState() const;
 };
 
 #endif //PHONE_OPTION_HPP

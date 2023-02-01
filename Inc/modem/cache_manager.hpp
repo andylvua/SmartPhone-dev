@@ -27,8 +27,6 @@ public:
 
     static void removeNewMessageNotification();
 
-    static void listContacts();
-
     static std::vector<Contact> getContacts();
 
     static Contact getContact(const std::string &info);

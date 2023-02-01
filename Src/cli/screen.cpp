@@ -36,17 +36,6 @@ void Screen::addNotification(const QString &notification) {
     notifications.push_back(notification);
 }
 
-//void Screen::removeScreenOption(const QString &option) {
-//    screenOptions.erase(std::remove_if(screenOptions.begin(), screenOptions.end(),
-//                                       [&option](const Option &screenOption) {
-//                                           return screenOption.optionName == option;
-//                                       }), screenOptions.end());
-//}
-
-void Screen::removeNotification(const QString &notification) {
-    notifications.erase(std::remove(notifications.begin(), notifications.end(), notification), notifications.end());
-}
-
 void Screen::removeScreenOption(int index) {
     screenOptions.erase(screenOptions.begin() + index);
 }
