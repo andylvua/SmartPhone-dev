@@ -26,7 +26,7 @@ public:
 
     void addScreenOption(const QString &name, std::function<void()> const& action);
 
-    void addScreenOption(const QString &name, std::function<void()> const& action, bool isSwitcher, bool switcher);
+    void addScreenOption(const QString &name, std::function<void()> const& action, bool switcher);
 
     void removeScreenOption(int index);
 
