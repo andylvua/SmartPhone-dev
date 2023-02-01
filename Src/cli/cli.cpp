@@ -63,16 +63,16 @@ void render(const std::shared_ptr<Screen> &screen) {
         printColored(WHITE_PAIR, notification.toStdString());
     }
 
-    for (size_t i = 0; i < screen->screenOptions.size(); ++i) {
+    for (int i = 0; i < static_cast<int>(screen->screenOptions.size()); ++i) {
         auto option = screen->screenOptions[i];
 
-        int color = (i == static_cast<size_t>(activeOptionIndex)) ? FILLED_WHITE_PAIR : WHITE_PAIR;
-        int activeIndex = static_cast<size_t>(activeOptionIndex);
-        if (i == 0 && i == activeIndex) {
+        int color = (i == (activeOptionIndex)) ? FILLED_WHITE_PAIR : WHITE_PAIR;
+
+        if (i == 0 && i == activeOptionIndex) {
             color = FILLED_RED_PAIR;
         }
         if (option->isSwitcher) {
-           if (i == activeIndex){
+           if (i == activeOptionIndex){
                 color = option->switcher ? FILLED_GREEN_PAIR : FILLED_RED_PAIR;
            } else {
                 color = option->switcher ? GREEN_PAIR : RED_PAIR;
@@ -444,14 +444,10 @@ void CLI::atConsoleMode() {
 
 std::string parseUrl(std::string httpCommand, httpMethod_t method) {
     std::string url;
-    if (method == httpMethod::HM_GET) {
-        url = httpCommand.erase(0, httpCommand.find(' ') + 1);
-    } else if (method == httpMethod::HM_POST) {
-        url = httpCommand.erase(0, httpCommand.find(' ') + 1);
-    }
+    url = httpCommand.erase(0, httpCommand.find(' ') + 1);
 
     if (!url.starts_with("http://") && !url.starts_with("https://")) {
-        url = "http://" + url;
+        url = "https://" + url;
     }
 
     url.erase(0, url.find_first_not_of(' '));
@@ -535,7 +531,7 @@ void CLI::httpConsoleMode() {
 }
 
 void CLI::setMessageMode() {
-    for (auto option: CLI::screenMap["Debug Mode"]->screenOptions) {
+    for (const auto& option: CLI::screenMap["Debug Mode"]->screenOptions) {
         if (option->optionName == "Message Mode" && option->isSwitcher) {
             modem.setMessageMode(!option->getState());
             option->switchState();
@@ -544,7 +540,7 @@ void CLI::setMessageMode() {
     updateScreen();
 }
 void CLI::setNumberID() {
-    for (auto option: CLI::screenMap["Debug Mode"]->screenOptions) {
+    for (const auto& option: CLI::screenMap["Debug Mode"]->screenOptions) {
         if (option->optionName == "Number Identifier" && option->isSwitcher) {
             modem.setNumberID(!option->getState());
             option->switchState();
@@ -554,7 +550,7 @@ void CLI::setNumberID() {
 }
 
 void CLI::setEchoMode(){
-    for (auto option: CLI::screenMap["Debug Mode"]->screenOptions) {
+    for (const auto& option: CLI::screenMap["Debug Mode"]->screenOptions) {
         if (option->optionName == "Echo Mode" && option->isSwitcher){
             modem.setEchoMode(!option->getState());
             option->switchState();
@@ -651,17 +647,17 @@ void CLI::prepareScreens() {
     settingsScreen->addScreenOption("About Device", EXECUTE_METHOD(aboutDevice));
 
     debugSettingsScreen->addScreenOption("Back", GO_BACK);
-    debugSettingsScreen->addScreenOption("Message Mode", EXECUTE_METHOD(setMessageMode), true, true);
-    debugSettingsScreen->addScreenOption("Number Identifier", EXECUTE_METHOD(setNumberID), true, true);
-    debugSettingsScreen->addScreenOption("Echo Mode", EXECUTE_METHOD(setEchoMode), true, true);
+    debugSettingsScreen->addScreenOption("Message Mode", EXECUTE_METHOD(setMessageMode),
+                                         true, true);
+    debugSettingsScreen->addScreenOption("Number Identifier", EXECUTE_METHOD(setNumberID),
+                                         true, true);
+    debugSettingsScreen->addScreenOption("Echo Mode", EXECUTE_METHOD(setEchoMode),
+                                         true, true);
 
     simSettingsScreen->addScreenOption("Back", GO_BACK);
     simSettingsScreen->addScreenOption("Set PIN", EXECUTE_METHOD(setPIN));
 
     aboutScreen->addScreenOption("Back", GO_BACK);
-
-
-
 
     CLI::screenMap = {
             {"Main",          mainScreen},
