@@ -654,12 +654,9 @@ void CLI::prepareScreens() {
     settingsScreen->addScreenOption("About Device", EXECUTE_METHOD(aboutDevice));
 
     debugSettingsScreen->addScreenOption("Back", GO_BACK);
-    debugSettingsScreen->addScreenOption("Number Identifier", EXECUTE_METHOD(setNumberID),
-                                         true, true);
-    debugSettingsScreen->addScreenOption("Text Mode", EXECUTE_METHOD(setMessageMode),
-                                         true, true);
-    debugSettingsScreen->addScreenOption("Echo Mode", EXECUTE_METHOD(setEchoMode),
-                                         true, true);
+    debugSettingsScreen->addScreenOption("Number Identifier", EXECUTE_METHOD(setNumberID), true);
+    debugSettingsScreen->addScreenOption("Text Mode", EXECUTE_METHOD(setMessageMode), true);
+    debugSettingsScreen->addScreenOption("Echo Mode", EXECUTE_METHOD(setEchoMode), true);
 
     aboutScreen->addScreenOption("Back", GO_BACK);
 

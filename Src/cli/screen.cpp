@@ -11,12 +11,12 @@ Screen::Screen(QString name, std::shared_ptr<Screen> parentScreen) : screenName(
                                                                      parentScreen(std::move(parentScreen)) {}
 
 void Screen::addScreenOption(const QString &name, std::function<void()> const& action) {
-    std::shared_ptr option= std::make_shared<Option>(name, action);
+    std::shared_ptr option = std::make_shared<Option>(name, action);
     screenOptions.push_back(option);
 }
 
-void Screen::addScreenOption(const QString &name, std::function<void()> const& action, const bool isSwitcher, bool switcher) {
-    std::shared_ptr option= std::make_shared<Option>(name, action, isSwitcher, switcher);
+void Screen::addScreenOption(const QString &name, std::function<void()> const& action, bool switcher) {
+    std::shared_ptr option = std::make_shared<Option>(name, action, true, switcher);
     screenOptions.push_back(option);
 }
 
