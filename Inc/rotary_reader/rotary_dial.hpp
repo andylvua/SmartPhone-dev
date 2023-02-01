@@ -8,9 +8,10 @@
 #include "cli/utils/io/ncurses_io.hpp"
 
 #ifdef BUILD_ON_RASPBERRY
+#define pinDial 4
+#define pinPulse 5
+
 class RotaryDial {
-    static const int pinDial = 4;  // blue
-    static const int pinPulse = 5;  // yellow
 public:
     char phone_number[12];
 
