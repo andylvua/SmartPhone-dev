@@ -37,6 +37,12 @@ void CacheManager::checkCacheFiles() {
 }
 
 void CacheManager::writeToFile(const std::string &fileName, const std::string &data) {
+    std::ifstream checkFile(fileName);
+    if (!checkFile.is_open()) {
+        std::ofstream createFile(fileName);
+        createFile.close();
+    }
+
     std::ofstream file(fileName, std::ios::app);
     file << data << std::endl;
     file.close();
