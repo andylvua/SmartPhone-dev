@@ -7,9 +7,9 @@
 #include "cli/utils/ncurses_utils.hpp"
 #include "cli/defenitions/colors.hpp"
 #include "modem/utils/cache_manager.hpp"
-#include "rotary_reader/rotary_dial.hpp"
 
 #ifdef BUILD_ON_RASPBERRY
+#include "rotary_reader/rotary_dial.hpp"
 RotaryDial rtx;
 #endif
 
