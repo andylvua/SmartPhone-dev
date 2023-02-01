@@ -2,8 +2,8 @@
 // Created by Andrew Yaroshevych on 01.02.2023.
 //
 
-#include "../../../Inc/cli/cli.hpp"
-#include "../../../Inc/modem/utils/cache_manager.hpp"
+#include "cli/cli.hpp"
+#include "modem/utils/cache_manager.hpp"
 
 void CLI::handleIncomingCall(const QString &number) {
     auto contact = CacheManager::getContact(number.toStdString());

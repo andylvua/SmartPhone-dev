@@ -1,4 +1,4 @@
-#include "../../../Inc/modem/utils/decoder.hpp"
+#include "modem/utils/decoder.hpp"
 #include <string>
 #include <vector>
 #include <bitset>

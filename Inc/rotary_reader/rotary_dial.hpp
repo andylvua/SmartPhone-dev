@@ -5,7 +5,7 @@
 #ifndef PHONE_ROTARY_DIAL_HPP
 #define PHONE_ROTARY_DIAL_HPP
 #include <iostream>
-#include "../cli/utils/io/ncurses_io.hpp"
+#include "cli/utils/io/ncurses_io.hpp"
 
 #ifdef BUILD_ON_RASPBERRY
 class RotaryDial {
@@ -15,7 +15,7 @@ public:
     char phone_number[12];
 
     void setup();
-    char * listen_for_number(std::ostream &outStream = std::cout);
+    char * listen_for_number();
 };
 #endif //BUILD_ON_RASPBERRY
 

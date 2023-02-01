@@ -2,12 +2,12 @@
 // Created by paul on 1/14/23.
 //
 
-#include "../../Inc/logging.hpp"
-#include "../../Inc/cli/cli.hpp"
-#include "../../Inc/cli/defenitions/cli_macros.hpp"
-#include "../../Inc/cli/utils/ncurses_utils.hpp"
-#include "../../Inc/modem/utils/cache_manager.hpp"
-#include "../../Inc/cli/utils/cli_utils.hpp"
+#include "logging.hpp"
+#include "cli/cli.hpp"
+#include "cli/defenitions/cli_macros.hpp"
+#include "cli/utils/ncurses_utils.hpp"
+#include "modem/utils/cache_manager.hpp"
+#include "cli/utils/cli_utils.hpp"
 #include <QProcess>
 #include <string>
 

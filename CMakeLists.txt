@@ -53,3 +53,5 @@ target_link_libraries(phone PkgConfig::READLINE)
 
 find_package(spdlog REQUIRED)
 target_link_libraries(phone spdlog::spdlog)
+
+target_include_directories(phone PUBLIC Inc)

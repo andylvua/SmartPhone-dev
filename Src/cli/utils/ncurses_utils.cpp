@@ -2,9 +2,9 @@
 // Created by Andrew Yaroshevych on 26.01.2023.
 //
 
-#include "../../../Inc/cli/utils/ncurses_utils.hpp"
-#include "../../../Inc/cli/utils/io/ncurses_io.hpp"
-#include "../../../Inc/cli/defenitions/colors.hpp"
+#include "cli/utils/ncurses_utils.hpp"
+#include "cli/utils/io/ncurses_io.hpp"
+#include "cli/defenitions/colors.hpp"
 #include <algorithm>
 
 

@@ -7,7 +7,7 @@
 
 #include <string>
 #include <QString>
-#include "../media_types.hpp"
+#include "modem/media_types.hpp"
 
 constexpr const char *CONTACTS_FILEPATH = "../module_cache/contacts.txt";
 constexpr const char *MESSAGES_FILEPATH = "../module_cache/messages.txt";

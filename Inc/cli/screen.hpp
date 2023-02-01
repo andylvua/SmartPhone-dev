@@ -9,7 +9,7 @@
 #include <QString>
 #include <memory>
 #include "option.hpp"
-#include "../modem/media_types.hpp"
+#include "modem/media_types.hpp"
 
 class CLI;
 

@@ -2,11 +2,11 @@
 // Created by Andrew Yaroshevych on 01.02.2023.
 //
 
-#include "../../../Inc/cli/cli.hpp"
-#include "../../../Inc/cli/utils/ncurses_utils.hpp"
-#include "../../../Inc/cli/defenitions/colors.hpp"
-#include "../../../Inc/logging.hpp"
-#include "../../../Inc/cli/utils/io/readline_utils.hpp"
+#include "cli/cli.hpp"
+#include "cli/utils/ncurses_utils.hpp"
+#include "cli/defenitions/colors.hpp"
+#include "logging.hpp"
+#include "cli/utils/io/readline_utils.hpp"
 #include <readline/readline.h>
 #include <readline/history.h>
 #include <regex>

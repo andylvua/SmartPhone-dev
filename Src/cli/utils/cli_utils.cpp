@@ -2,11 +2,11 @@
 // Created by Andrew Yaroshevych on 01.02.2023.
 //
 
-#include "../../../Inc/cli/cli.hpp"
-#include "../../../Inc/cli/utils/cli_utils.hpp"
-#include "../../../Inc/cli/utils/ncurses_utils.hpp"
-#include "../../../Inc/cli/defenitions/colors.hpp"
-#include "../../../Inc/modem/utils/cache_manager.hpp"
+#include "cli/cli.hpp"
+#include "cli/utils/cli_utils.hpp"
+#include "cli/utils/ncurses_utils.hpp"
+#include "cli/defenitions/colors.hpp"
+#include "modem/utils/cache_manager.hpp"
 
 void render(const std::shared_ptr<Screen> &screen) {
     int activeOptionIndex = screen->getActiveOption();

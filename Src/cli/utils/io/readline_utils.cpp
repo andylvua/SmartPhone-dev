@@ -2,7 +2,7 @@
 // Created by Andrew Yaroshevych on 30.01.2023.
 //
 
-#include "../../../../Inc/cli/utils/io/readline_utils.hpp"
+#include "cli/utils/io/readline_utils.hpp"
 #include <fstream>
 #include <vector>
 #include <iostream>
