@@ -79,6 +79,10 @@ void render(const std::shared_ptr<Screen> &screen) {
            }
         }
 
+        if (!option->isAvailable) {
+            color = (i == (activeOptionIndex)) ? FILLED_RED_PAIR : RED_PAIR;
+        }
+
         printColored(color, option->optionName.toStdString());
     }
 

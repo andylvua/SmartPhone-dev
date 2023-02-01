@@ -17,6 +17,7 @@ public:
     std::function<void()> action;
     const bool isSwitcher = false;
     bool switcher = false;
+    bool isAvailable = true;
 
     Option(QString name, std::function<void()> const& action);
 
@@ -26,17 +27,7 @@ public:
 
     void switchState();
 
-    bool getState();
+    bool getState() const;
 };
-//
-//class OptionSwitcher: public Option {
-//public:
-//    OptionSwitcher(QString name, std::function<void()> const& action, bool switcher, bool isSwitcher = true);
-//    bool switcher;
-//
-//    void switchState();
-//
-//    bool getState();
-//};
 
 #endif //PHONE_OPTION_HPP

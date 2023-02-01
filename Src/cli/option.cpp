@@ -6,6 +6,9 @@
 #include <utility>
 
 #include "../../Inc/cli/option.hpp"
+#include "../../Inc/cli/colors.hpp"
+#include "../../Inc/cli/ncurses_io.hpp"
+#include <QThread>
 
 
 Option::Option(QString name, std::function<void()> const& action) : optionName(std::move(name)), action(action) {};
@@ -13,14 +16,20 @@ Option::Option(QString name, std::function<void()> const& action) : optionName(s
 Option::Option(QString name, std::function<void()> const& action, bool isSwitcher, bool switcher) : optionName(std::move(name)), action(action), isSwitcher(isSwitcher), switcher(switcher) {};
 
 void Option::execute() const {
-    action();
+    if (isAvailable){
+        action();
+    } else {
+        printColored(RED_PAIR, "This option is not available", false);
+        QThread::msleep(1000);
+        deleteln();
+        move(getcury(stdscr), 0);
+    }
 }
 
 void Option::switchState() {
     switcher = !switcher;
 }
-bool Option::getState() {
+
+bool Option::getState() const {
     return switcher;
 }
-
-
