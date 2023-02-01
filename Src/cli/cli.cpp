@@ -534,29 +534,41 @@ void CLI::httpConsoleMode() {
 }
 
 void CLI::setMessageMode() {
-    for (const auto& option: CLI::screenMap["Debug Mode"]->screenOptions) {
+    for (const auto& option: CLI::screenMap["Debug Settings"]->screenOptions) {
         if (option->optionName == "Message Mode" && option->isSwitcher) {
-            modem.setMessageMode(!option->getState());
-            option->switchState();
+            bool success = modem.setMessageMode(!option->getState());
+            if (success) {
+                option->switchState();
+            } else {
+                printColored(RED_PAIR, "Failed to set Message Mode");
+            }
         }
     }
     updateScreen();
 }
 void CLI::setNumberID() {
-    for (const auto& option: CLI::screenMap["Debug Mode"]->screenOptions) {
+    for (const auto& option: CLI::screenMap["Debug Settings"]->screenOptions) {
         if (option->optionName == "Number Identifier" && option->isSwitcher) {
-            modem.setNumberID(!option->getState());
-            option->switchState();
+            bool success = modem.setNumberID(!option->getState());
+            if (success) {
+                option->switchState();
+            } else {
+                printColored(RED_PAIR, "Failed to set Number Identifier");
+            }
         }
     }
     updateScreen();
 }
 
 void CLI::setEchoMode(){
-    for (const auto& option: CLI::screenMap["Debug Mode"]->screenOptions) {
+    for (const auto& option: CLI::screenMap["Debug Settings"]->screenOptions) {
         if (option->optionName == "Echo Mode" && option->isSwitcher){
-            modem.setEchoMode(!option->getState());
-            option->switchState();
+            bool success = modem.setEchoMode(!option->getState());
+            if (success) {
+                option->switchState();
+            } else {
+                printColored(RED_PAIR, "Failed to set Echo Mode");
+            }
         }
     }
     updateScreen();
@@ -583,8 +595,7 @@ void CLI::prepareScreens() {
     auto ussdScreen = SCREEN_SHARED_PTR("USSD Console", mainScreen);
     auto httpScreen = SCREEN_SHARED_PTR("HTTP Console", mainScreen);
     auto settingsScreen = SCREEN_SHARED_PTR("Settings", mainScreen);
-    auto debugSettingsScreen = SCREEN_SHARED_PTR("Debug Mode", settingsScreen);
-    auto simSettingsScreen = SCREEN_SHARED_PTR("SIM Settings", settingsScreen);
+    auto debugSettingsScreen = SCREEN_SHARED_PTR("Debug Settings", settingsScreen);
     auto aboutScreen = SCREEN_SHARED_PTR("About Device", settingsScreen);
 
     mainScreen->addScreenOption("Exit", []() {
@@ -595,8 +606,8 @@ void CLI::prepareScreens() {
     mainScreen->addScreenOption("AT Console", CHANGE_SCREEN("AT Console"));
     mainScreen->addScreenOption("USSD Console", CHANGE_SCREEN("USSD Console"));
     mainScreen->addScreenOption("HTTP Console", CHANGE_SCREEN("HTTP Console"));
-    mainScreen->addScreenOption("Logs", CHANGE_SCREEN("Logs"));
     mainScreen->addScreenOption("Settings", CHANGE_SCREEN("Settings"));
+    mainScreen->addScreenOption("Logs", CHANGE_SCREEN("Logs"));
 
 
     incomingCallScreen->addScreenOption("Reject call", EXECUTE_METHOD(rejectCall));
@@ -637,15 +648,15 @@ void CLI::prepareScreens() {
 
     httpScreen->addScreenOption("Back", GO_BACK);
     httpScreen->addScreenOption("Send HTTP Command", EXECUTE_METHOD(httpConsoleMode));
+
     settingsScreen->addScreenOption("Back", GO_BACK);
-    settingsScreen->addScreenOption("Debug Mode", CHANGE_SCREEN("Debug Mode"));
-    settingsScreen->addScreenOption("SIM Settings", CHANGE_SCREEN("SIM Settings"));
+    settingsScreen->addScreenOption("Debug Settings", CHANGE_SCREEN("Debug Settings"));
     settingsScreen->addScreenOption("About Device", EXECUTE_METHOD(aboutDevice));
 
     debugSettingsScreen->addScreenOption("Back", GO_BACK);
-    debugSettingsScreen->addScreenOption("Message Mode", EXECUTE_METHOD(setMessageMode),
-                                         true, true);
     debugSettingsScreen->addScreenOption("Number Identifier", EXECUTE_METHOD(setNumberID),
+                                         true, true);
+    debugSettingsScreen->addScreenOption("Text Mode", EXECUTE_METHOD(setMessageMode),
                                          true, true);
     debugSettingsScreen->addScreenOption("Echo Mode", EXECUTE_METHOD(setEchoMode),
                                          true, true);
@@ -668,7 +679,7 @@ void CLI::prepareScreens() {
             {"HTTP Console",  httpScreen},
             {"AT Console",    atScreen},
             {"Settings",      settingsScreen},
-            {"Debug Mode",    debugSettingsScreen},
+            {"Debug Settings",    debugSettingsScreen},
             {"About Device",  aboutScreen}
     };
 
