@@ -8,10 +8,12 @@
 #include "Inc/cli/definitions/colors.hpp"
 #include <thread>
 
-//#define DEBUG
+#define DEBUG
 
 int main(int argc, char *argv[]) {
+    qInstallMessageHandler(logOutputHandler);
     QApplication app(argc, argv);
+
     auto mainLogger = spdlog::basic_logger_mt("main",
                                               "../logs/log.txt",
                                               true);
