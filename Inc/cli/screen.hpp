@@ -20,6 +20,7 @@ public:
     std::shared_ptr<Screen> parentScreen;
     std::vector<std::shared_ptr<Option>> screenOptions;
     int activeOption = -1;
+
     std::vector<QString> notifications = {};
 
     Screen(QString name, std::shared_ptr<Screen> parentScreen);
@@ -31,6 +32,12 @@ public:
     void removeScreenOption(int index);
 
     [[nodiscard]] int getActiveOption() const;
+
+    [[nodiscard]] int getMaxOptionsPerPage() const;
+
+    [[nodiscard]] bool isFirstPage() const;
+
+    [[nodiscard]] bool isLastPage() const;
 
     void addNotification(const QString &notification);
 

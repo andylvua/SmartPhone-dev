@@ -61,6 +61,22 @@ void CLI::decrementActiveOption() const {
     updateScreen();
 }
 
+void CLI::incrementActivePage() const {
+    int optionsPerPage = currentScreen->getMaxOptionsPerPage();
+    if (!currentScreen->isLastPage()) {
+        currentScreen->activeOption += optionsPerPage - currentScreen->getActiveOption() % optionsPerPage;
+    }
+    updateScreen();
+}
+
+void CLI::decrementActivePage() const {
+    int optionsPerPage = currentScreen->getMaxOptionsPerPage();
+    if (!currentScreen->isFirstPage()) {
+        currentScreen->activeOption -= optionsPerPage + currentScreen->getActiveOption() % optionsPerPage;
+        updateScreen();
+    }
+}
+
 void CLI::listen() const {
     cliLogger->flush_on(spdlog::level::debug);
     SPDLOG_LOGGER_INFO(cliLogger, "CLI listener started.");
@@ -82,6 +98,12 @@ void CLI::listen() const {
                 break;
             case KEY_DOWN:
                 CLI::incrementActiveOption();
+                break;
+            case KEY_LEFT:
+                CLI::decrementActivePage();
+                break;
+            case KEY_RIGHT:
+                CLI::incrementActivePage();
                 break;
             case '\n':
                 if (currentScreen->activeOption == -1) {
