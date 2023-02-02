@@ -5,7 +5,7 @@
 #include "Inc/modem/serial.hpp"
 #include "Inc/modem/modem.hpp"
 #include "Inc/cli/cli.hpp"
-#include "Inc/cli/defenitions/colors.hpp"
+#include "Inc/cli/definitions/colors.hpp"
 #include <thread>
 
 //#define DEBUG
