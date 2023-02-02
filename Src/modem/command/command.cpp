@@ -4,7 +4,7 @@
 
 #include "logging.hpp"
 #include "modem/command/command.hpp"
-#include <QtSerialPort/QSerialPortInfo>
+#include <QSerialPortInfo>
 #include <QThread>
 #include <utility>
 
