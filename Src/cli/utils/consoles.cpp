@@ -65,7 +65,7 @@ void CLI::ussdConsoleMode() {
 
     const char *ussd;
 
-    std::cout << "\r" << GREEN_COLOR << "Send USSD commands. Type 'exit' to exit" << RESET << std::endl;
+    std::cout << "\r" << GREEN_COLOR << "Send USSD commands. Type 'exit' to exit:" << RESET << std::endl;
 
     while ((ussd = readline("")) != nullptr) {
         if (*ussd) {
