@@ -4,8 +4,8 @@
 
 #ifdef BUILD_ON_RASPBERRY
 #include <wiringPi.h>
-#include "../../Inc/rotary_reader/rotary_dial.hpp"
-#include "../../Inc/cli/colors.hpp"
+#include "rotary_reader/rotary_dial.hpp"
+#include "cli/definitions/colors.hpp"
 
 void RotaryDial::setup(){
     wiringPiSetup();
@@ -15,7 +15,7 @@ void RotaryDial::setup(){
     pullUpDnControl(pinPulse, PUD_UP);
 }
 
-char * RotaryDial::listen_for_number(std::ostream &outStream) {
+char * RotaryDial::listen_for_number() {
     int numbers_typed = 0;
     int count = 0;
     while (numbers_typed < 12) {

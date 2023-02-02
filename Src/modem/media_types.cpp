@@ -2,7 +2,7 @@
 // Created by Andrew Yaroshevych on 26.01.2023.
 //
 
-#include "../../Inc/modem/media_types.hpp"
+#include "modem/media_types.hpp"
 
 Message::Message(QString number, QString dateTime, QString message,
                  enum messageDirection messageDirection) {

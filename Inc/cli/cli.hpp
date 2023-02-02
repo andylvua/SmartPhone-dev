@@ -5,9 +5,9 @@
 #ifndef PHONE_CLI_HPP
 #define PHONE_CLI_HPP
 
-#include "../modem/modem.hpp"
-#include "../rotary_reader/rotary_dial.hpp"
-#include "../../Inc/cli/option.hpp"
+#include "modem/modem.hpp"
+#include "rotary_reader/rotary_dial.hpp"
+#include "cli/option.hpp"
 
 #include <QObject>
 #include <iostream>
