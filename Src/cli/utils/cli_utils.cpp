@@ -255,12 +255,12 @@ void CLI::viewLogs() {
 
 void CLI::setMessageMode() {
     for (const auto& option: CLI::screenMap["Debug Settings"]->screenOptions) {
-        if (option->optionName == "Message Mode" && option->isSwitcher) {
+        if (option->optionName == "Text Mode" && option->isSwitcher) {
             bool success = modem.setMessageMode(!option->getState());
             if (success) {
                 option->switchState();
             } else {
-                printColored(RED_PAIR, "Failed to set Message Mode");
+                printColored(RED_PAIR, "Failed to set Text Mode");
             }
         }
     }
