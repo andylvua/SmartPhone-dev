@@ -1,7 +1,7 @@
 //
 // Created by Andrew Yaroshevych on 02.12.2022.
 //
-#include "../../Inc/modem/serial.hpp"
+#include "modem/serial.hpp"
 
 SerialPort::SerialPort(const char *portName,
                        int timeout,

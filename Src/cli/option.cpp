@@ -5,9 +5,9 @@
 
 #include <utility>
 
-#include "../../Inc/cli/option.hpp"
-#include "../../Inc/cli/colors.hpp"
-#include "../../Inc/cli/ncurses_io.hpp"
+#include "cli/option.hpp"
+#include "cli/definitions/colors.hpp"
+#include "cli/utils/io/ncurses_io.hpp"
 #include <QThread>
 
 

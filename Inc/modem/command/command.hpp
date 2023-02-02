@@ -8,7 +8,7 @@
 #include <string>
 #include <QSerialPort>
 #include <vector>
-#include "../modem/serial.hpp"
+#include "modem/serial.hpp"
 
 using commRes_t = enum class commRes {
     CR_OK,

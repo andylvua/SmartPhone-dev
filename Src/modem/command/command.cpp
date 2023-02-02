@@ -2,9 +2,9 @@
 // Created by paul on 12/1/22.
 //
 
-#include "../../Inc/logging.hpp"
-#include "../../Inc/command/command.hpp"
-#include <QtSerialPort/QSerialPortInfo>
+#include "logging.hpp"
+#include "modem/command/command.hpp"
+#include <QSerialPortInfo>
 #include <QThread>
 #include <utility>
 
