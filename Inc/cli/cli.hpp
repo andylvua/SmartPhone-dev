@@ -32,6 +32,10 @@ public:
 
     void decrementActiveOption() const;
 
+    void incrementActivePage() const;
+
+    void decrementActivePage() const;
+
     void renderScreen() const;
 
     void updateScreen() const;

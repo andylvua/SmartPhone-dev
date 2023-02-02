@@ -16,30 +16,51 @@ RotaryDial rtx;
 void render(const std::shared_ptr<Screen> &screen) {
     int activeOptionIndex = screen->getActiveOption();
 
+    int optionsPerPage = screen->getMaxOptionsPerPage();
+    int pagesCount = static_cast<int>(screen->screenOptions.size()) / optionsPerPage;
+    int activePage = activeOptionIndex / optionsPerPage;
+    int activeOptionOnPage = activeOptionIndex % optionsPerPage;
+
+    int startOptionIndex = activePage * optionsPerPage;
+
+    if (pagesCount > 0) {
+        clear();
+        int previousLine = getcury(stdscr);
+        move(LINES - 1, 0);
+        printColored(FILLED_WHITE_PAIR, "Page " + std::to_string(activePage + 1)
+        + " of " + std::to_string(pagesCount + 1));
+        move(previousLine, 0);
+    }
+
     printColored(WHITE_PAIR, screen->screenName.toStdString(), true, true);
 
     for (const auto &notification: screen->notifications) {
         printColored(WHITE_PAIR, notification.toStdString());
     }
 
-    for (int i = 0; i < static_cast<int>(screen->screenOptions.size()); ++i) {
-        auto option = screen->screenOptions[i];
+    for (int i = 0; i < optionsPerPage; ++i) {
+        int optionIndex = startOptionIndex + i;
 
-        int color = (i == (activeOptionIndex)) ? FILLED_WHITE_PAIR : WHITE_PAIR;
+        if (optionIndex >= static_cast<int>(screen->screenOptions.size())) {
+            break;
+        }
 
-        if (i == 0 && i == activeOptionIndex) {
+        auto option = screen->screenOptions[optionIndex];
+
+        int color = (i == (activeOptionOnPage)) ? FILLED_WHITE_PAIR : WHITE_PAIR;
+
+        if (i == 0 && i == activeOptionOnPage && activePage == 0) {
             color = FILLED_RED_PAIR;
         }
         if (option->isSwitcher) {
-            if (i == activeOptionIndex){
+            if (i == activeOptionOnPage){
                 color = option->switcher ? FILLED_GREEN_PAIR : FILLED_RED_PAIR;
             } else {
                 color = option->switcher ? GREEN_PAIR : RED_PAIR;
             }
         }
-
         if (!option->isAvailable) {
-            color = (i == (activeOptionIndex)) ? FILLED_RED_PAIR : RED_PAIR;
+            color = (i == (activeOptionOnPage)) ? FILLED_RED_PAIR : RED_PAIR;
         }
 
         printColored(color, option->optionName.toStdString());

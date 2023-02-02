@@ -32,6 +32,18 @@ int Screen::getActiveOption() const {
     return activeOption % optionsSize;
 }
 
+int Screen::getMaxOptionsPerPage() const {
+    return static_cast<int>(LINES - 2 - notifications.size());
+}
+
+bool Screen::isFirstPage() const {
+    return getActiveOption() <= getMaxOptionsPerPage() - 1;
+}
+
+bool Screen::isLastPage() const {
+    return static_cast<int>(screenOptions.size() - screenOptions.size() % getMaxOptionsPerPage()) <= getActiveOption();
+}
+
 void Screen::addNotification(const QString &notification) {
     notifications.push_back(notification);
 }
