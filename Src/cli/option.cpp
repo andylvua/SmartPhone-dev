@@ -6,7 +6,7 @@
 #include <utility>
 
 #include "cli/option.hpp"
-#include "cli/defenitions/colors.hpp"
+#include "cli/definitions/colors.hpp"
 #include "cli/utils/io/ncurses_io.hpp"
 #include <QThread>
 

@@ -4,7 +4,7 @@
 
 #include <utility>
 #include "cli/cli.hpp"
-#include "cli/defenitions/colors.hpp"
+#include "cli/definitions/colors.hpp"
 #include "modem/utils/cache_manager.hpp"
 
 Screen::Screen(QString name, std::shared_ptr<Screen> parentScreen) : screenName(std::move(name)),

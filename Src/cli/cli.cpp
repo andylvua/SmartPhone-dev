@@ -4,7 +4,7 @@
 
 #include "logging.hpp"
 #include "cli/cli.hpp"
-#include "cli/defenitions/cli_macros.hpp"
+#include "cli/definitions/cli_macros.hpp"
 #include "cli/utils/ncurses_utils.hpp"
 #include "modem/utils/cache_manager.hpp"
 #include "cli/utils/cli_utils.hpp"

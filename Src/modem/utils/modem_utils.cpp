@@ -4,7 +4,7 @@
 
 #include "modem/modem.hpp"
 #include "modem/utils/cache_manager.hpp"
-#include "cli/defenitions/colors.hpp"
+#include "cli/definitions/colors.hpp"
 #include "logging.hpp"
 #include "modem/utils/decoder.hpp"
 #include "cli/utils/io/ncurses_io.hpp"

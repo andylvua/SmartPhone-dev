@@ -4,7 +4,7 @@
 
 #include "cli/cli.hpp"
 #include "cli/utils/ncurses_utils.hpp"
-#include "cli/defenitions/colors.hpp"
+#include "cli/definitions/colors.hpp"
 #include "logging.hpp"
 #include "cli/utils/io/readline_utils.hpp"
 #include <readline/readline.h>

@@ -8,7 +8,7 @@
 #include "modem/command/command.hpp"
 #include "modem/command/commands_list.hpp"
 #include "cli/utils/io/ncurses_io.hpp"
-#include "cli/defenitions/colors.hpp"
+#include "cli/definitions/colors.hpp"
 #include <string>
 #include <utility>
 

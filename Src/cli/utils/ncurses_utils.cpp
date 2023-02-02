@@ -4,7 +4,7 @@
 
 #include "cli/utils/ncurses_utils.hpp"
 #include "cli/utils/io/ncurses_io.hpp"
-#include "cli/defenitions/colors.hpp"
+#include "cli/definitions/colors.hpp"
 #include <algorithm>
 
 std::stringstream NcursesUtils::ncursesBuffer;

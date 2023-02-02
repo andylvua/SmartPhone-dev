@@ -3,7 +3,7 @@
 //
 
 #include "cli/utils/io/ncurses_io.hpp"
-#include "cli/defenitions/colors.hpp"
+#include "cli/definitions/colors.hpp"
 #include <algorithm>
 
 void ColorPrint::initColors() {

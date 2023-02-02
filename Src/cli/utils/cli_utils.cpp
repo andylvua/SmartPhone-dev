@@ -5,7 +5,7 @@
 #include "cli/cli.hpp"
 #include "cli/utils/cli_utils.hpp"
 #include "cli/utils/ncurses_utils.hpp"
-#include "cli/defenitions/colors.hpp"
+#include "cli/definitions/colors.hpp"
 #include "modem/utils/cache_manager.hpp"
 
 #ifdef BUILD_ON_RASPBERRY
