@@ -65,14 +65,14 @@ void CLI::listen() const {
     cliLogger->flush_on(spdlog::level::debug);
     SPDLOG_LOGGER_INFO(cliLogger, "CLI listener started.");
 
-    initScreen();
+    NcursesUtils::initScreen();
     renderScreen();
 
     int ch;
 
     while (true) {
         if ((ch = getch()) == 27) { // ESC
-            releaseScreen();
+            NcursesUtils::releaseScreen();
             exit(0);
         }
 
@@ -114,7 +114,7 @@ void CLI::prepareScreens() {
     auto aboutScreen = SCREEN_SHARED_PTR("About Device", settingsScreen);
 
     mainScreen->addScreenOption("Exit", []() {
-        releaseScreen();
+        NcursesUtils::releaseScreen();
         exit(0);
     });
     mainScreen->addScreenOption("Phone", CHANGE_SCREEN("Phone"));

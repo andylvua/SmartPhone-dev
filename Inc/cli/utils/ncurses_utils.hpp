@@ -7,11 +7,18 @@
 
 #include <ncurses.h>
 #include <string>
+#include <sstream>
 
-void initScreen();
+class NcursesUtils {
+public:
+    [[maybe_unused]] static std::stringstream ncursesBuffer;
+    [[maybe_unused]] static std::streambuf *oldStreamBuffer;
 
-void releaseScreen();
+    static void initScreen();
 
-void displayPad(const std::string &data, std::string header);
+    static void releaseScreen();
+
+    static void displayPad(const std::string &data, std::string header);
+};
 
 #endif //PHONE_NCURSES_UTILS_HPP

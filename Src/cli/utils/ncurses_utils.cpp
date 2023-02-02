@@ -7,8 +7,10 @@
 #include "cli/defenitions/colors.hpp"
 #include <algorithm>
 
+std::stringstream NcursesUtils::ncursesBuffer;
+std::streambuf *NcursesUtils::oldStreamBuffer;
 
-void initScreen() {
+void NcursesUtils::initScreen() {
     initscr();
     savetty();
     raw();
@@ -19,7 +21,7 @@ void initScreen() {
     ColorPrint::initColors();
 }
 
-void releaseScreen() {
+void NcursesUtils::releaseScreen() {
     refresh();
     keypad(stdscr, FALSE);
     resetty();
@@ -28,7 +30,7 @@ void releaseScreen() {
     system("clear");
 }
 
-void displayPad(const std::string &data, std::string header) {
+void NcursesUtils::displayPad(const std::string &data, std::string header) {
     clear();
     move(0, 0);
 

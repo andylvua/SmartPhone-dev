@@ -165,7 +165,7 @@ void CacheManager::listMessages() {
                             + "\n");
     }
 
-    displayPad(data, "Viewing messages");
+    NcursesUtils::displayPad(data, "Viewing messages");
 
     removeNewMessageNotification();
 }
@@ -186,7 +186,7 @@ void CacheManager::listCalls() {
                             + "\n");
     }
 
-    displayPad(data, "Viewing calls");
+    NcursesUtils::displayPad(data, "Viewing calls");
 
     file.close();
 }

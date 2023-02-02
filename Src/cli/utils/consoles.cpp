@@ -15,7 +15,7 @@ const auto cliLogger = spdlog::get("cli");
 
 void CLI::atConsoleMode() {
     curs_set(1);
-    releaseScreen();
+    NcursesUtils::releaseScreen();
     system("clear");
 
     std::cout << YELLOW_COLOR << "Loading..." << RESET;
@@ -49,13 +49,13 @@ void CLI::atConsoleMode() {
 
     modem.disableATConsoleMode();
 
-    initScreen();
+    NcursesUtils::initScreen();
     renderScreen();
 }
 
 void CLI::ussdConsoleMode() {
     curs_set(1);
-    releaseScreen();
+    NcursesUtils::releaseScreen();
     system("clear");
 
     std::cout << YELLOW_COLOR << "Loading..." << RESET;
@@ -86,7 +86,7 @@ void CLI::ussdConsoleMode() {
 
     modem.disableUSSDConsoleMode();
 
-    initScreen();
+    NcursesUtils::initScreen();
     renderScreen();
 }
 
@@ -114,7 +114,7 @@ std::string parseUrl(std::string httpCommand) {
 
 void CLI::httpConsoleMode() {
     curs_set(1);
-    releaseScreen();
+    NcursesUtils::releaseScreen();
     system("clear");
 
     std::cout << YELLOW_COLOR << "Loading..." << RESET;
@@ -125,7 +125,7 @@ void CLI::httpConsoleMode() {
     if (!consoleEnabled) {
         modem.disableHTTPConsoleMode();
 
-        initScreen();
+        NcursesUtils::initScreen();
         renderScreen();
         return;
     }
@@ -174,6 +174,6 @@ void CLI::httpConsoleMode() {
 
     modem.disableHTTPConsoleMode();
 
-    initScreen();
+    NcursesUtils::initScreen();
     renderScreen();
 }
