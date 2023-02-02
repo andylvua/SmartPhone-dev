@@ -22,7 +22,6 @@ void NcursesUtils::initScreen() {
 }
 
 void NcursesUtils::releaseScreen() {
-    refresh();
     keypad(stdscr, FALSE);
     resetty();
     noraw();
