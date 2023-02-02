@@ -2,8 +2,8 @@
 // Created by Andrew Yaroshevych on 17.01.2023.
 //
 
-#include "../../Inc/cli/ncurses_io.hpp"
-#include "../../Inc/cli/colors.hpp"
+#include "cli/utils/io/ncurses_io.hpp"
+#include "cli/definitions/colors.hpp"
 #include <algorithm>
 
 void ColorPrint::initColors() {

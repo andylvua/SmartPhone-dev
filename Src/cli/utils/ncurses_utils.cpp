@@ -2,13 +2,15 @@
 // Created by Andrew Yaroshevych on 26.01.2023.
 //
 
-#include "../../Inc/cli/ncurses_utils.hpp"
-#include "../../Inc/cli/ncurses_io.hpp"
-#include "../../Inc/cli/colors.hpp"
+#include "cli/utils/ncurses_utils.hpp"
+#include "cli/utils/io/ncurses_io.hpp"
+#include "cli/definitions/colors.hpp"
 #include <algorithm>
 
+std::stringstream NcursesUtils::ncursesBuffer;
+std::streambuf *NcursesUtils::oldStreamBuffer;
 
-void initScreen() {
+void NcursesUtils::initScreen() {
     initscr();
     savetty();
     raw();
@@ -19,8 +21,7 @@ void initScreen() {
     ColorPrint::initColors();
 }
 
-void releaseScreen() {
-    refresh();
+void NcursesUtils::releaseScreen() {
     keypad(stdscr, FALSE);
     resetty();
     noraw();
@@ -28,7 +29,7 @@ void releaseScreen() {
     system("clear");
 }
 
-void displayPad(const std::string &data, std::string header) {
+void NcursesUtils::displayPad(const std::string &data, std::string header) {
     clear();
     move(0, 0);
 

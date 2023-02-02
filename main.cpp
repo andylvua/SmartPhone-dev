@@ -5,13 +5,15 @@
 #include "Inc/modem/serial.hpp"
 #include "Inc/modem/modem.hpp"
 #include "Inc/cli/cli.hpp"
-#include "Inc/cli/colors.hpp"
+#include "Inc/cli/definitions/colors.hpp"
 #include <thread>
 
-//#define DEBUG
+#define DEBUG
 
 int main(int argc, char *argv[]) {
+    qInstallMessageHandler(logOutputHandler);
     QApplication app(argc, argv);
+
     auto mainLogger = spdlog::basic_logger_mt("main",
                                               "../logs/log.txt",
                                               true);

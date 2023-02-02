@@ -2,13 +2,13 @@
 // Created by Andrew Yaroshevych on 21.12.2022.
 //
 
-#include "../../Inc/logging.hpp"
-#include "../../Inc/modem/modem.hpp"
-#include "../../Inc/modem/cache_manager.hpp"
-#include "../../Inc/command/command.hpp"
-#include "../../Inc/command/commands_list.hpp"
-#include "../../Inc/cli/ncurses_io.hpp"
-#include "../../Inc/cli/colors.hpp"
+#include "logging.hpp"
+#include "modem/modem.hpp"
+#include "modem/utils/cache_manager.hpp"
+#include "modem/command/command.hpp"
+#include "modem/command/commands_list.hpp"
+#include "cli/utils/io/ncurses_io.hpp"
+#include "cli/definitions/colors.hpp"
 #include <string>
 #include <utility>
 

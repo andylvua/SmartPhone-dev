@@ -2,14 +2,14 @@
 // Created by Andrew Yaroshevych on 26.01.2023.
 //
 
-#include "../../Inc/modem/modem.hpp"
-#include "../../Inc/modem/cache_manager.hpp"
-#include "../../Inc/cli/colors.hpp"
-#include "../../Inc/logging.hpp"
-#include "../../Inc/decoder.hpp"
-#include "../../Inc/cli/ncurses_io.hpp"
-#include "../../Inc/command/command.hpp"
-#include "../../Inc/command/commands_list.hpp"
+#include "modem/modem.hpp"
+#include "modem/utils/cache_manager.hpp"
+#include "cli/definitions/colors.hpp"
+#include "logging.hpp"
+#include "modem/utils/decoder.hpp"
+#include "cli/utils/io/ncurses_io.hpp"
+#include "modem/command/command.hpp"
+#include "modem/command/commands_list.hpp"
 
 const auto modemLogger = spdlog::get("modem");
 

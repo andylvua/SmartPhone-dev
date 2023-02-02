@@ -5,17 +5,18 @@
 #ifndef PHONE_ROTARY_DIAL_HPP
 #define PHONE_ROTARY_DIAL_HPP
 #include <iostream>
-#include "../cli/ncurses_io.hpp"
+#include "cli/utils/io/ncurses_io.hpp"
 
 #ifdef BUILD_ON_RASPBERRY
+#define pinDial 4
+#define pinPulse 5
+
 class RotaryDial {
-    const int pinDial = 4;  // blue
-    const int pinPulse = 5;  // yellow
 public:
     char phone_number[12];
 
-    void setup();
-    char * listen_for_number(std::ostream &outStream = std::cout);
+    static void setup();
+    char * listen_for_number();
 };
 #endif //BUILD_ON_RASPBERRY
 
