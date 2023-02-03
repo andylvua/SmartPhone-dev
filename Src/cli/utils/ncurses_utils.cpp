@@ -114,8 +114,6 @@ void NcursesUtils::displayPad(QFile &file, std::string header) {
     file.open(QIODevice::Text | QIODevice::ReadOnly);
     QTextStream fileStream(&file);
 
-    std::vector<QString> lines;
-
     int ch;
     int row = 0;
     int col = 0;
@@ -126,7 +124,6 @@ void NcursesUtils::displayPad(QFile &file, std::string header) {
     long dataRows = 0;
     while (!file.atEnd()) {
         QString line = file.readLine();
-        lines.push_back(line);
         if (line.length() > screenCols) {
             dataRows += line.length() / screenCols;
         }
@@ -140,9 +137,10 @@ void NcursesUtils::displayPad(QFile &file, std::string header) {
     initscr();
     keypad(pad, TRUE);
     scrollok(pad, TRUE);
-    for (auto line : lines) {
-        wprintw(pad, "%s", line.toStdString().c_str());
-    }
+
+    file.seek(0);
+    QString data = file.readAll();
+    wprintw(pad, data.toStdString().c_str());
 
     prefresh(pad, row, col, 1, 0, static_cast<int>(screenRows - 1), static_cast<int>(screenCols - 1));
 
@@ -174,7 +172,6 @@ void NcursesUtils::displayPad(QFile &file, std::string header) {
         prefresh(pad, row, col, 1, 0, static_cast<int>(screenRows - 1), static_cast<int>(screenCols - 1));
     }
     file.close();
-    prefresh(pad, row, col, 1, 0, static_cast<int>(screenRows - 1), static_cast<int>(screenCols - 1));
+
     delwin(pad);
-    wrefresh(stdscr);
 }

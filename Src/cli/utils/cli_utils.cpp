@@ -269,9 +269,10 @@ void CLI::sendMessage(const QString &number) {
     modem.message(number.toStdString(), message);
 }
 
-void CLI::viewLogs() {
+void CLI::viewLogs() const {
     printColored(GREEN_PAIR, "Opening logs file");
     CacheManager::listLogs();
+    renderScreen();
 }
 
 void CLI::setMessageMode() {

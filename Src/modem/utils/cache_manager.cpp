@@ -192,10 +192,6 @@ void CacheManager::listCalls() {
 }
 
 void CacheManager::listLogs() {
-//    std::string command = "setsid nohup xdg-open " LOGS_FILEPATH " > /dev/null 2> /dev/null";
-//    system(command.c_str());
     QFile logFile(LOGS_FILEPATH);
-
     NcursesUtils::displayPad(logFile, "Viewing logs");
-
 }
