@@ -6,6 +6,7 @@
 #include "cli/utils/io/ncurses_io.hpp"
 #include "cli/definitions/colors.hpp"
 #include <algorithm>
+#include <QTextStream>
 
 std::stringstream NcursesUtils::ncursesBuffer;
 std::streambuf *NcursesUtils::oldStreamBuffer;
@@ -100,4 +101,80 @@ void NcursesUtils::displayPad(const std::string &data, std::string header) {
     }
 
     delwin(pad);
+}
+
+void NcursesUtils::displayPad(QFile &file, std::string header) {
+    clear();
+    move(0, 0);
+
+    header += " (Press 'q' to exit)";
+    printColored(FILLED_WHITE_PAIR, header);
+    wrefresh(stdscr);
+
+    file.open(QIODevice::Text | QIODevice::ReadOnly);
+    QTextStream fileStream(&file);
+
+    std::vector<QString> lines;
+
+    int ch;
+    int row = 0;
+    int col = 0;
+
+    long screenRows;
+    long screenCols;
+    getmaxyx(stdscr, screenRows, screenCols);
+    long dataRows = 0;
+    while (!file.atEnd()) {
+        QString line = file.readLine();
+        lines.push_back(line);
+        if (line.length() > screenCols) {
+            dataRows += line.length() / screenCols;
+        }
+        dataRows++;
+    }
+    long rows = dataRows;
+    long cols = screenCols;
+    WINDOW *pad = newpad(static_cast<int>(rows+1), static_cast<int>(cols));
+
+
+    initscr();
+    keypad(pad, TRUE);
+    scrollok(pad, TRUE);
+    for (auto line : lines) {
+        wprintw(pad, "%s", line.toStdString().c_str());
+    }
+
+    prefresh(pad, row, col, 1, 0, static_cast<int>(screenRows - 1), static_cast<int>(screenCols - 1));
+
+    while ((ch = wgetch(pad)) != 'q') {
+        switch (ch) {
+            case KEY_UP:
+                if (row > 0) {
+                    row--;
+                }
+                break;
+            case KEY_DOWN:
+                if (row < rows - screenRows) {
+                    row++;
+                }
+                break;
+            case KEY_LEFT:
+                if (col > 0) {
+                    col--;
+                }
+                break;
+            case KEY_RIGHT:
+                if (col < cols - screenCols) {
+                    col++;
+                }
+                break;
+
+            default: break;
+        }
+        prefresh(pad, row, col, 1, 0, static_cast<int>(screenRows - 1), static_cast<int>(screenCols - 1));
+    }
+    file.close();
+    prefresh(pad, row, col, 1, 0, static_cast<int>(screenRows - 1), static_cast<int>(screenCols - 1));
+    delwin(pad);
+    wrefresh(stdscr);
 }
