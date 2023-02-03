@@ -11,17 +11,15 @@
 Screen::Screen(QString name, std::shared_ptr<Screen> parentScreen) : screenName(std::move(name)),
                                                                      parentScreen(std::move(parentScreen)) {}
 
-void Screen::addScreenOption(const QString &name, std::function<void()> const& action) {
+void Screen::addScreenOption(const QString &name, std::function<void()> const &action) {
     std::shared_ptr option = std::make_shared<Option>(name, action);
     screenOptions.push_back(option);
 }
 
-void Screen::addScreenOption(const QString &name, std::function<void()> const& action, bool switcher) {
+void Screen::addScreenOption(const QString &name, std::function<void()> const &action, bool switcher) {
     std::shared_ptr option = std::make_shared<Option>(name, action, true, switcher);
     screenOptions.push_back(option);
 }
-
-[[nodiscard]]
 
 int Screen::getActiveOption() const {
     if (activeOption == -1) {
@@ -69,7 +67,7 @@ void Screen::removeScreenOption(int index) {
     screenOptions.erase(screenOptions.begin() + index);
 }
 
-ContactScreen::ContactScreen(std::shared_ptr<Screen> parentScreen, const Contact& contact, CLI &cli) : Screen(
+ContactScreen::ContactScreen(std::shared_ptr<Screen> parentScreen, const Contact &contact, CLI &cli) : Screen(
         contact.name + ": " + contact.number, std::move(parentScreen)), contact(contact) {
     addScreenOption("Back", [&cli]() {
         cli.gotoParentScreen();

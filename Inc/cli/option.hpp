@@ -19,9 +19,9 @@ public:
     bool switcher = false;
     bool isAvailable = true;
 
-    Option(QString name, std::function<void()> const& action);
+    Option(QString name, std::function<void()> const &action);
 
-    Option(QString name, std::function<void()> const& action, bool isSwitcher, bool switcher);
+    Option(QString name, std::function<void()> const &action, bool isSwitcher, bool switcher);
 
     void execute() const;
 

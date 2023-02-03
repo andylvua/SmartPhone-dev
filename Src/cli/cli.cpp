@@ -17,7 +17,7 @@ CLI::CLI(Modem &modem) : modem(modem) {
     prepareScreens();
 
 #ifdef BUILD_ON_RASPBERRY
-    #include "rotary_reader/rotary_dial.hpp"
+#include "rotary_reader/rotary_dial.hpp"
     RotaryDial::setup();
 #endif
 
@@ -198,23 +198,23 @@ void CLI::prepareScreens() {
     aboutScreen->addScreenOption("Back", GO_BACK);
 
     CLI::screenMap = {
-            {"Main",          mainScreen},
-            {"Incoming Call", incomingCallScreen},
-            {"Phone",         phoneScreen},
-            {"Call",          callScreen},
-            {"In Call",       inCallScreen},
-            {"Contacts",      contactsScreen},
-            {"Contacts Page", contactsPageScreen},
-            {"SMS",           smsScreen},
-            {"Send SMS",      sendSMSScreen},
-            {"Logs",          logScreen},
-            {"USSD Console",  ussdScreen},
-            {"AT Console",    atScreen},
-            {"HTTP Console",  httpScreen},
-            {"AT Console",    atScreen},
-            {"Settings",      settingsScreen},
-            {"Debug Settings",    debugSettingsScreen},
-            {"About Device",  aboutScreen}
+            {"Main",           mainScreen},
+            {"Incoming Call",  incomingCallScreen},
+            {"Phone",          phoneScreen},
+            {"Call",           callScreen},
+            {"In Call",        inCallScreen},
+            {"Contacts",       contactsScreen},
+            {"Contacts Page",  contactsPageScreen},
+            {"SMS",            smsScreen},
+            {"Send SMS",       sendSMSScreen},
+            {"Logs",           logScreen},
+            {"USSD Console",   ussdScreen},
+            {"AT Console",     atScreen},
+            {"HTTP Console",   httpScreen},
+            {"AT Console",     atScreen},
+            {"Settings",       settingsScreen},
+            {"Debug Settings", debugSettingsScreen},
+            {"About Device",   aboutScreen}
     };
 
     currentScreen = mainScreen;

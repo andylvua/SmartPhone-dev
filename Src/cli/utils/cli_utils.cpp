@@ -29,7 +29,7 @@ void render(const std::shared_ptr<Screen> &screen) {
         int previousLine = getcury(stdscr);
         move(LINES - 1, 0);
         printColored(FILLED_WHITE_PAIR, "Page " + std::to_string(activePage + 1)
-        + " of " + std::to_string(pagesCount));
+                                        + " of " + std::to_string(pagesCount));
         move(previousLine, 0);
     }
 
@@ -54,7 +54,7 @@ void render(const std::shared_ptr<Screen> &screen) {
             color = FILLED_RED_PAIR;
         }
         if (option->isSwitcher) {
-            if (i == activeOptionOnPage){
+            if (i == activeOptionOnPage) {
                 color = option->switcher ? FILLED_GREEN_PAIR : FILLED_RED_PAIR;
             } else {
                 color = option->switcher ? GREEN_PAIR : RED_PAIR;
@@ -276,7 +276,7 @@ void CLI::viewLogs() {
 }
 
 void CLI::setMessageMode() {
-    for (const auto& option: CLI::screenMap["Debug Settings"]->screenOptions) {
+    for (const auto &option: CLI::screenMap["Debug Settings"]->screenOptions) {
         if (option->optionName == "Text Mode" && option->isSwitcher) {
             bool success = modem.setMessageMode(!option->getState());
             if (success) {
@@ -290,7 +290,7 @@ void CLI::setMessageMode() {
 }
 
 void CLI::setNumberID() {
-    for (const auto& option: CLI::screenMap["Debug Settings"]->screenOptions) {
+    for (const auto &option: CLI::screenMap["Debug Settings"]->screenOptions) {
         if (option->optionName == "Number Identifier" && option->isSwitcher) {
             bool success = modem.setNumberID(!option->getState());
             if (success) {
@@ -303,9 +303,9 @@ void CLI::setNumberID() {
     updateScreen();
 }
 
-void CLI::setEchoMode(){
-    for (const auto& option: CLI::screenMap["Debug Settings"]->screenOptions) {
-        if (option->optionName == "Echo Mode" && option->isSwitcher){
+void CLI::setEchoMode() {
+    for (const auto &option: CLI::screenMap["Debug Settings"]->screenOptions) {
+        if (option->optionName == "Echo Mode" && option->isSwitcher) {
             bool success = modem.setEchoMode(!option->getState());
             if (success) {
                 option->switchState();
@@ -317,7 +317,7 @@ void CLI::setEchoMode(){
     updateScreen();
 }
 
-void CLI::aboutDevice(){
+void CLI::aboutDevice() {
     changeScreen("About Device");
     QString aboutInfo = modem.aboutDevice();
     printColored(WHITE_PAIR, aboutInfo.toStdString());

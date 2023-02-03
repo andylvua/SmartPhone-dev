@@ -25,9 +25,9 @@ public:
 
     Screen(QString name, std::shared_ptr<Screen> parentScreen);
 
-    void addScreenOption(const QString &name, std::function<void()> const& action);
+    void addScreenOption(const QString &name, std::function<void()> const &action);
 
-    void addScreenOption(const QString &name, std::function<void()> const& action, bool switcher);
+    void addScreenOption(const QString &name, std::function<void()> const &action, bool switcher);
 
     void removeScreenOption(int index);
 
@@ -51,7 +51,7 @@ class ContactScreen : public Screen {
 public:
     Contact contact;
 
-    ContactScreen(std::shared_ptr<Screen> parentScreen, const Contact& contact, CLI &cli);
+    ContactScreen(std::shared_ptr<Screen> parentScreen, const Contact &contact, CLI &cli);
 };
 
 #endif //PHONE_SCREEN_HPP
