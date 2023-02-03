@@ -8,17 +8,23 @@
 #include <vector>
 #include <QString>
 #include <memory>
+#include <unordered_map>
 #include "option.hpp"
 #include "modem/media_types.hpp"
 
 class CLI;
+
+using OptionsMap = std::unordered_map<QString, std::shared_ptr<Option>>;
 
 class Screen {
 public:
     QString screenName;
     std::vector<std::shared_ptr<Screen>> childScreens;
     std::shared_ptr<Screen> parentScreen;
+
     std::vector<std::shared_ptr<Option>> screenOptions;
+    OptionsMap optionsMap;
+
     int activeOption = -1;
 
     std::vector<QString> notifications = {};

@@ -276,43 +276,37 @@ void CLI::viewLogs() {
 }
 
 void CLI::setMessageMode() {
-    for (const auto &option: CLI::screenMap["Debug Settings"]->screenOptions) {
-        if (option->optionName == "Text Mode" && option->isSwitcher) {
-            bool success = modem.setMessageMode(!option->getState());
-            if (success) {
-                option->switchState();
-            } else {
-                printColored(RED_PAIR, "Failed to set Text Mode");
-            }
-        }
+    auto messageModeOption = CLI::screenMap["Debug Settings"]->optionsMap["Text Mode"];
+
+    bool success = modem.setMessageMode(!messageModeOption->getState());
+    if (success) {
+        messageModeOption->switchState();
+    } else {
+        printColored(RED_PAIR, "Failed to set Text Mode");
     }
     updateScreen();
 }
 
 void CLI::setNumberID() {
-    for (const auto &option: CLI::screenMap["Debug Settings"]->screenOptions) {
-        if (option->optionName == "Number Identifier" && option->isSwitcher) {
-            bool success = modem.setNumberID(!option->getState());
-            if (success) {
-                option->switchState();
-            } else {
-                printColored(RED_PAIR, "Failed to set Number Identifier");
-            }
-        }
+    auto numberIDOption = CLI::screenMap["Debug Settings"]->optionsMap["Number Identifier"];
+
+    bool success = modem.setNumberID(!numberIDOption->getState());
+    if (success) {
+        numberIDOption->switchState();
+    } else {
+        printColored(RED_PAIR, "Failed to set Number Identifier");
     }
     updateScreen();
 }
 
 void CLI::setEchoMode() {
-    for (const auto &option: CLI::screenMap["Debug Settings"]->screenOptions) {
-        if (option->optionName == "Echo Mode" && option->isSwitcher) {
-            bool success = modem.setEchoMode(!option->getState());
-            if (success) {
-                option->switchState();
-            } else {
-                printColored(RED_PAIR, "Failed to set Echo Mode");
-            }
-        }
+    auto echoModeOption = CLI::screenMap["Debug Settings"]->optionsMap["Echo Mode"];
+
+    bool success = modem.setEchoMode(!echoModeOption->getState());
+    if (success) {
+        echoModeOption->switchState();
+    } else {
+        printColored(RED_PAIR, "Failed to set Echo Mode");
     }
     updateScreen();
 }
