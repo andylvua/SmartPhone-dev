@@ -6,6 +6,7 @@
 #include "cli/cli.hpp"
 #include "cli/definitions/colors.hpp"
 #include "modem/utils/cache_manager.hpp"
+#include <cmath>
 
 Screen::Screen(QString name, std::shared_ptr<Screen> parentScreen) : screenName(std::move(name)),
                                                                      parentScreen(std::move(parentScreen)) {}
@@ -32,16 +33,32 @@ int Screen::getActiveOption() const {
     return activeOption % optionsSize;
 }
 
+int Screen::getPagesCount() const {
+    return static_cast<int>(std::ceil(static_cast<double>(screenOptions.size()) / getMaxOptionsPerPage()));
+}
+
+int Screen::getActivePage() const {
+    if (activeOption == -1) {
+        return 0;
+    }
+
+    return static_cast<int>(std::floor(static_cast<double>(getActiveOption()) / getMaxOptionsPerPage()));
+}
+
 int Screen::getMaxOptionsPerPage() const {
+    if (screenOptions.size() == (LINES - 1 - notifications.size())) {
+        return static_cast<int>(screenOptions.size());
+    }
+
     return static_cast<int>(LINES - 2 - notifications.size());
 }
 
 bool Screen::isFirstPage() const {
-    return getActiveOption() <= getMaxOptionsPerPage() - 1;
+    return getActivePage() == 0;
 }
 
 bool Screen::isLastPage() const {
-    return static_cast<int>(screenOptions.size() - screenOptions.size() % getMaxOptionsPerPage()) <= getActiveOption();
+    return getActivePage() + 1 == getPagesCount();
 }
 
 void Screen::addNotification(const QString &notification) {

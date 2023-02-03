@@ -17,18 +17,19 @@ void render(const std::shared_ptr<Screen> &screen) {
     int activeOptionIndex = screen->getActiveOption();
 
     int optionsPerPage = screen->getMaxOptionsPerPage();
-    int pagesCount = static_cast<int>(screen->screenOptions.size()) / optionsPerPage;
-    int activePage = activeOptionIndex / optionsPerPage;
+
+    int pagesCount = screen->getPagesCount();
+    int activePage = screen->getActivePage();
     int activeOptionOnPage = activeOptionIndex % optionsPerPage;
 
     int startOptionIndex = activePage * optionsPerPage;
 
-    if (pagesCount > 0) {
+    if (pagesCount > 1) {
         clear();
         int previousLine = getcury(stdscr);
         move(LINES - 1, 0);
         printColored(FILLED_WHITE_PAIR, "Page " + std::to_string(activePage + 1)
-        + " of " + std::to_string(pagesCount + 1));
+        + " of " + std::to_string(pagesCount));
         move(previousLine, 0);
     }
 

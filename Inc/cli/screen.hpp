@@ -31,6 +31,10 @@ public:
 
     void removeScreenOption(int index);
 
+    [[nodiscard]] int getPagesCount() const;
+
+    [[nodiscard]] int getActivePage() const;
+
     [[nodiscard]] int getActiveOption() const;
 
     [[nodiscard]] int getMaxOptionsPerPage() const;
