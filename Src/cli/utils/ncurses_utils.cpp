@@ -121,7 +121,7 @@ void NcursesUtils::displayPad(QFile &file, std::string header) {
     long screenRows;
     long screenCols;
     getmaxyx(stdscr, screenRows, screenCols);
-    long dataRows = 0;
+    long dataRows = 1;
     while (!file.atEnd()) {
         QString line = file.readLine();
         if (line.length() > screenCols) {
@@ -139,8 +139,11 @@ void NcursesUtils::displayPad(QFile &file, std::string header) {
     scrollok(pad, TRUE);
 
     file.seek(0);
-    QString data = file.readAll();
-    wprintw(pad, data.toStdString().c_str());
+
+    while (!file.atEnd()) {
+        QString line = file.readLine();
+        wprintw(pad, line.toStdString().c_str());
+    }
 
     prefresh(pad, row, col, 1, 0, static_cast<int>(screenRows - 1), static_cast<int>(screenCols - 1));
 
