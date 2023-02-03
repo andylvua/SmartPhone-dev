@@ -80,7 +80,7 @@ private:
 
     void sendMessage();
 
-    static void viewLogs();
+    void viewLogs() const;
 
     void ussdConsoleMode();
 

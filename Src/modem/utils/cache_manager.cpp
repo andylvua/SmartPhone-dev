@@ -192,6 +192,6 @@ void CacheManager::listCalls() {
 }
 
 void CacheManager::listLogs() {
-    std::string command = "open " LOGS_FILEPATH;
-    system(command.c_str());
+    QFile logFile(LOGS_FILEPATH);
+    NcursesUtils::displayPad(logFile, "Viewing logs");
 }
