@@ -8,6 +8,7 @@
 #include <ncurses.h>
 #include <string>
 #include <sstream>
+#include <QFile>
 
 class NcursesUtils {
 public:
@@ -19,6 +20,8 @@ public:
     static void releaseScreen();
 
     static void displayPad(const std::string &data, std::string header);
+
+    static void displayPad(QFile &file, std::string header);
 };
 
 #endif //PHONE_NCURSES_UTILS_HPP
