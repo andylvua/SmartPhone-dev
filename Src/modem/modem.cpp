@@ -172,6 +172,8 @@ bool Modem::hangUp() {
 
     if (res == commRes::CR_OK) {
         SPDLOG_LOGGER_INFO(modemLogger, "Hanging up was successful");
+        currentCall.endTime = QDateTime::currentDateTime();
+        CacheManager::saveCall(currentCall);
         return true;
     } else {
         SPDLOG_LOGGER_WARN(modemLogger, "Hanging up failed");
@@ -186,6 +188,7 @@ bool Modem::answer() {
 
     if (res == commRes::CR_OK) {
         SPDLOG_LOGGER_INFO(modemLogger, "Answering was successful");
+        currentCall.callResult = callResult::CR_ANSWERED;
         return true;
     } else {
         SPDLOG_LOGGER_WARN(modemLogger, "Answering failed");
