@@ -21,15 +21,15 @@ public:
 
     static void saveCall(const Call &call);
 
-    static void addContact(const std::string &name, const std::string &number);
+    static void addContact(const QString &name, const QString &number);
 
-    static void removeContact(const std::string &name);
+    static void removeContact(const QString &name);
 
     static void removeNewMessageNotification();
 
-    static std::vector<Contact> getContacts();
+    static QVector<Contact> getContacts();
 
-    static Contact getContact(const std::string &info);
+    static Contact getContact(const QString &info);
 
     static void listMessages();
 
@@ -41,7 +41,7 @@ public:
 
 private:
 
-    static void writeToFile(const std::string &fileName, const std::string &data);
+    static void writeToFile(const QString &fileName, const QString &data);
 
 };
 

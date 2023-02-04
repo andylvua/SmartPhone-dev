@@ -8,17 +8,17 @@
 #include "modem/utils/cache_manager.hpp"
 #include <cmath>
 
-Screen::Screen(QString name, std::shared_ptr<Screen> parentScreen) : screenName(std::move(name)),
+Screen::Screen(QString name, QSharedPointer<Screen> parentScreen) : screenName(std::move(name)),
                                                                      parentScreen(std::move(parentScreen)) {}
 
 void Screen::addScreenOption(const QString &name, std::function<void()> const &action) {
-    std::shared_ptr option = std::make_shared<Option>(name, action);
+    auto option = QSharedPointer<Option>::create(name, action);
     screenOptions.push_back(option);
     optionsMap[name] = option;
 }
 
 void Screen::addScreenOption(const QString &name, std::function<void()> const &action, bool switcher) {
-    std::shared_ptr option = std::make_shared<Option>(name, action, true, switcher);
+    auto option = QSharedPointer<Option>::create(name, action, true, switcher);
     screenOptions.push_back(option);
     optionsMap[name] = option;
 }
@@ -69,7 +69,7 @@ void Screen::removeScreenOption(int index) {
     screenOptions.erase(screenOptions.begin() + index);
 }
 
-ContactScreen::ContactScreen(std::shared_ptr<Screen> parentScreen, const Contact &contact, CLI &cli) : Screen(
+ContactScreen::ContactScreen(QSharedPointer<Screen> parentScreen, const Contact &contact, CLI &cli) : Screen(
         contact.name + ": " + contact.number, std::move(parentScreen)), contact(contact) {
     addScreenOption("Back", [&cli]() {
         cli.gotoParentScreen();
@@ -81,7 +81,7 @@ ContactScreen::ContactScreen(std::shared_ptr<Screen> parentScreen, const Contact
         cli.sendMessage(contact.number);
     });
     addScreenOption("Delete", [&cli, &contact]() {
-        CacheManager::removeContact(contact.name.toStdString());
+        CacheManager::removeContact(contact.name);
 
         printColored(GREEN_PAIR, "Contact deleted. Press any key to continue...");
         getch();
@@ -89,11 +89,11 @@ ContactScreen::ContactScreen(std::shared_ptr<Screen> parentScreen, const Contact
     });
     addScreenOption("Edit", [&cli, &contact]() {
         printColored(YELLOW_PAIR, "Enter new name: ");
-        std::string newName = readString();
+        QString newName = readString();
         printColored(YELLOW_PAIR, "Enter new number: ");
-        std::string newNumber = readString();
+        QString newNumber = readString();
 
-        CacheManager::removeContact(contact.name.toStdString());
+        CacheManager::removeContact(contact.name);
         CacheManager::addContact(newName, newNumber);
 
         printColored(GREEN_PAIR, "Contact updated. Press any key to continue...");

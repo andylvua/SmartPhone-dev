@@ -9,7 +9,7 @@
 #include "cli/utils/io/readline_utils.hpp"
 #include <readline/readline.h>
 #include <readline/history.h>
-#include <regex>
+#include <QRegularExpression>
 
 const auto cliLogger = spdlog::get("cli");
 
@@ -90,21 +90,22 @@ void CLI::ussdConsoleMode() {
     renderScreen();
 }
 
-std::string parseUrl(std::string httpCommand) {
-    std::string url;
-    url = httpCommand.erase(0, httpCommand.find(' ') + 1);
+QString parseUrl(QString httpCommand) {
+    QString url;
+    url = httpCommand.remove(0, httpCommand.indexOf(' ') + 1);
 
-    if (!url.starts_with("http://") && !url.starts_with("https://")) {
+    if (!url.startsWith("http://") && !url.startsWith("https://")) {
         url = "https://" + url;
     }
 
-    url.erase(0, url.find_first_not_of(' '));
-    url.erase(url.find_last_not_of(' ') + 1);
+    url = url.trimmed();
 
-    std::basic_regex<char> urlRegex(
+    QRegularExpression urlRegex(
             "^(http|https)://[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)+([a-zA-Z0-9-._~:/?#[\\]@!$&'()*+,;=]*)?$"
     );
-    if (!std::regex_match(url, urlRegex)) {
+    QRegularExpressionMatch match = urlRegex.match(url);
+
+    if (!match.hasMatch()) {
         std::cout << RED_COLOR << "Invalid URL" << RESET << std::endl;
         return "";
     }
@@ -158,16 +159,16 @@ void CLI::httpConsoleMode() {
             continue;
         }
 
-        std::string rawCommand = http;
-        std::string url = parseUrl(rawCommand);
+        QString rawCommand = http;
+        QString url = parseUrl(rawCommand);
 
-        if (url.empty()) {
-            SPDLOG_LOGGER_INFO(cliLogger, "Invalid HTTP command: {}", rawCommand);
+        if (url.isEmpty()) {
+            SPDLOG_LOGGER_INFO(cliLogger, "Invalid HTTP command: {}", rawCommand.toStdString());
             continue;
         }
 
-        SPDLOG_LOGGER_INFO(cliLogger, "Sending HTTP command: {}", url);
-        modem.sendHTTPConsoleCommand(QString::fromStdString(url), method);
+        SPDLOG_LOGGER_INFO(cliLogger, "Sending HTTP command: {}", url.toStdString());
+        modem.sendHTTPConsoleCommand(url, method);
 
         free((void *) http);
     }

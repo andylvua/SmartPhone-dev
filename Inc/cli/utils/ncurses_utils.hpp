@@ -19,9 +19,9 @@ public:
 
     static void releaseScreen();
 
-    static void displayPad(const std::string &data, std::string header);
+    static void displayPad(const QString &data, QString header);
 
-    static void displayPad(QFile &file, std::string header);
+    static void displayPad(QFile &file, QString header);
 };
 
 #endif //PHONE_NCURSES_UTILS_HPP

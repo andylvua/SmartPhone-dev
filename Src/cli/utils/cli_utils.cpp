@@ -13,7 +13,7 @@
 RotaryDial rtx;
 #endif
 
-void render(const std::shared_ptr<Screen> &screen) {
+void render(const QSharedPointer<Screen> &screen) {
     int activeOptionIndex = screen->getActiveOption();
 
     int optionsPerPage = screen->getMaxOptionsPerPage();
@@ -28,15 +28,15 @@ void render(const std::shared_ptr<Screen> &screen) {
         clear();
         int previousLine = getcury(stdscr);
         move(LINES - 1, 0);
-        printColored(FILLED_WHITE_PAIR, "Page " + std::to_string(activePage + 1)
-                                        + " of " + std::to_string(pagesCount));
+        printColored(FILLED_WHITE_PAIR, "Page " + QString::number(activePage + 1)
+                                        + " of " + QString::number(pagesCount));
         move(previousLine, 0);
     }
 
-    printColored(WHITE_PAIR, screen->screenName.toStdString(), true, true);
+    printColored(WHITE_PAIR, screen->screenName, true, true);
 
     for (const auto &notification: screen->notifications) {
-        printColored(WHITE_PAIR, notification.toStdString());
+        printColored(WHITE_PAIR, notification);
     }
 
     for (int i = 0; i < optionsPerPage; ++i) {
@@ -64,13 +64,13 @@ void render(const std::shared_ptr<Screen> &screen) {
             color = (i == (activeOptionOnPage)) ? FILLED_RED_PAIR : RED_PAIR;
         }
 
-        printColored(color, option->optionName.toStdString());
+        printColored(color, option->optionName);
     }
 
     refresh();
 }
 
-bool checkNumber(std::string &number) {
+bool checkNumber(QString &number) {
     if (number[0] != '+') {
         number = '+' + number;
     }
@@ -80,8 +80,8 @@ bool checkNumber(std::string &number) {
         return false;
     }
 
-    for (size_t i = 1; i < number.length(); ++i) {
-        if (!isdigit(number[i])) {
+    for (int i = 1; i < number.length(); ++i) {
+        if (!number[i].isDigit()) {
             printColored(RED_PAIR, "Invalid number");
             return false;
         }
@@ -111,11 +111,11 @@ void CLI::viewCallHistory() const {
 }
 
 void CLI::call() {
-    std::string number;
+    QString number;
     printColored(YELLOW_PAIR, "Enter number");
 #ifdef BUILD_ON_RASPBERRY
     printColored(YELLOW_PAIR, "Read from rotary dial or keyboard? (r/k)");
-    std::string input;
+    QString input;
     input = readString();
 
     if (input == "r") {
@@ -139,13 +139,13 @@ void CLI::call() {
     printColored(YELLOW_PAIR, "Calling...");
     modem.call(number);
 
-    CLI::screenMap["In Call"]->addNotification("Calling " + QString::fromStdString(number));
+    CLI::screenMap["In Call"]->addNotification("Calling " + number);
     changeScreen("In Call");
 }
 
 void CLI::call(const QString &number) {
     printColored(YELLOW_PAIR, "Calling...");
-    modem.call(number.toStdString());
+    modem.call(number);
 
     CLI::screenMap["In Call"]->addNotification("Calling " + number);
     changeScreen("In Call");
@@ -162,14 +162,14 @@ void CLI::hangUp() {
 
 void CLI::addContact() {
     printColored(YELLOW_PAIR, "Adding contact");
-    std::string name;
-    std::string number;
+    QString name;
+    QString number;
     printColored(YELLOW_PAIR, "Enter name");
     name = readString();
     printColored(YELLOW_PAIR, "Enter number");
 #ifdef BUILD_ON_RASPBERRY
     printColored(YELLOW_PAIR, "Read from rotary dial or keyboard? (r/k)");
-    std::string input;
+    QString input;
     input = readString();
 
     if (input == "r") {
@@ -196,7 +196,7 @@ void CLI::addContact() {
 }
 
 void CLI::viewContacts() {
-    std::vector<Contact> contacts = CacheManager::getContacts();
+    QVector<Contact> contacts = CacheManager::getContacts();
     auto contactsPage = CLI::screenMap["Contacts Page"];
 
     contactsPage->screenOptions.erase(
@@ -207,7 +207,7 @@ void CLI::viewContacts() {
         contactsPage->addScreenOption(
                 contact.name + ": " + contact.number,
                 [contact, this]() {
-                    auto contactScreen = std::make_shared<ContactScreen>(
+                    auto contactScreen = QSharedPointer<ContactScreen>::create(
                             CLI::screenMap["Contacts Page"],
                             contact,
                             *this);
@@ -228,12 +228,12 @@ void CLI::viewMessages() {
 }
 
 void CLI::sendMessage() {
-    std::string number;
-    std::string message;
+    QString number;
+    QString message;
     printColored(YELLOW_PAIR, "Enter number: ");
 #ifdef BUILD_ON_RASPBERRY
     printColored(YELLOW_PAIR, "Read from rotary dial or keyboard? (r/k)");
-    std::string input;
+    QString input;
     input = readString();
 
     if (input == "r") {
@@ -262,12 +262,12 @@ void CLI::sendMessage() {
 }
 
 void CLI::sendMessage(const QString &number) {
-    std::string message;
+    QString message;
     printColored(YELLOW_PAIR, "Enter message: ");
     message = readString();
     printColored(YELLOW_PAIR, "Sending SMS");
 
-    modem.message(number.toStdString(), message);
+    modem.message(number, message);
 }
 
 void CLI::viewLogs() const {
@@ -315,5 +315,5 @@ void CLI::setEchoMode() {
 void CLI::aboutDevice() {
     changeScreen("About Device");
     QString aboutInfo = modem.aboutDevice();
-    printColored(WHITE_PAIR, aboutInfo.toStdString());
+    printColored(WHITE_PAIR, aboutInfo);
 }

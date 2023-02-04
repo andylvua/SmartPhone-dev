@@ -8,7 +8,7 @@
 #include "Inc/cli/definitions/colors.hpp"
 #include <thread>
 
-#define DEBUG
+//#define DEBUG
 
 int main(int argc, char *argv[]) {
     qInstallMessageHandler(logOutputHandler);

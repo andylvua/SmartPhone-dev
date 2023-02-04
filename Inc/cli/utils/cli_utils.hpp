@@ -7,6 +7,6 @@
 
 #include "cli/screen.hpp"
 
-void render(const std::shared_ptr<Screen> &screen);
+void render(const QSharedPointer<Screen> &screen);
 
 #endif //PHONE_CLI_UTILS_HPP

@@ -6,15 +6,11 @@
 #include "modem/command/command.hpp"
 #include <QSerialPortInfo>
 #include <QThread>
-#include <utility>
+//#include <utility>
 
 const auto commandLogger = spdlog::basic_logger_mt("command", "../logs/log.txt", true);
 
-Command::Command(std::string commandText, SerialPort &serial) : commandText(std::move(commandText)), serial(serial) {}
-
-std::string Command::getCommandText() const {
-    return commandText;
-}
+Command::Command(const QString &commandText, SerialPort &serial) : commandData(commandText.toUtf8()), serial(serial) {}
 
 // Returns actual response from uart, dropping echo of command
 QString Command::uartResponseParser(const QByteArray &response, const QString &commandText) {
@@ -47,15 +43,14 @@ QString Command::uartEchoParser(const QByteArray &response) {
 }
 
 QString GetCommand::execute(bool enableInterruptDataRead, bool parseResponse) {
-    SPDLOG_LOGGER_INFO(commandLogger, "Executing GET command: {}", commandText);
-    auto request = QString::fromStdString(commandText);
+    SPDLOG_LOGGER_INFO(commandLogger, "Executing GET command: {}", commandData.toStdString());
 
     if (enableInterruptDataRead) {
         SPDLOG_LOGGER_INFO(commandLogger, "Interrupt data read enabled");
         serial.interruptDataRead = true;
     }
 
-    serial.write((getCommandText() + "\r\n").c_str());
+    serial.write(commandData + "\r\n");
 
     while (serial.interruptDataRead) {
         QThread::msleep(100);
@@ -87,10 +82,10 @@ QString GetCommand::execute(bool enableInterruptDataRead, bool parseResponse) {
         return QString{data};
     }
 
-    QString response = uartResponseParser(data, request);
+    QString response = uartResponseParser(data, commandData);
 
     if (response.isValidUtf16() && !response.isNull()) {
-        if (request != uartEchoParser(data)) {
+        if (commandData != uartEchoParser(data)) {
             qDebug() << "WARNING: Echo of command does not match request";
             SPDLOG_LOGGER_WARN(commandLogger, "Echo of command does not match request");
         }
@@ -104,15 +99,14 @@ QString GetCommand::execute(bool enableInterruptDataRead, bool parseResponse) {
 }
 
 commRes_t SetCommand::execute([[maybe_unused]] bool enableInterruptDataRead) {
-    SPDLOG_LOGGER_INFO(commandLogger, "Executing SET command: {}", commandText);
-    auto request = QString::fromStdString(commandText);
+    SPDLOG_LOGGER_INFO(commandLogger, "Executing SET command: {}", commandData.toStdString());
 
     if (enableInterruptDataRead) {
         SPDLOG_LOGGER_INFO(commandLogger, "Interrupt data read enabled");
         serial.interruptDataRead = true;
     }
 
-    serial.write((getCommandText() + "\r\n").c_str());
+    serial.write(commandData + "\r\n");
 
     while (serial.interruptDataRead) {
         QThread::msleep(100);
@@ -140,7 +134,7 @@ commRes_t SetCommand::execute([[maybe_unused]] bool enableInterruptDataRead) {
     }
 
     if (data.contains("OK")) {
-        if (request != uartEchoParser(data)) {
+        if (commandData != uartEchoParser(data)) {
             SPDLOG_LOGGER_WARN(commandLogger, "Echo is not equal to request");
         }
     } else {
@@ -152,12 +146,12 @@ commRes_t SetCommand::execute([[maybe_unused]] bool enableInterruptDataRead) {
 }
 
 commRes_t Task::execute(bool parseResponse) {
-    SPDLOG_LOGGER_INFO(commandLogger, "Executing task: {}", commandText);
+    SPDLOG_LOGGER_INFO(commandLogger, "Executing task: {}", commandData.toStdString());
 
     serial.interruptDataRead = true;
     SPDLOG_LOGGER_INFO(commandLogger, "Interrupt data read enabled");
 
-    serial.write((getCommandText() + "\r\n").c_str());
+    serial.write(commandData + "\r\n");
 
     while (serial.interruptDataRead) {
         QThread::msleep(100);
@@ -176,7 +170,7 @@ commRes_t Task::execute(bool parseResponse) {
         return commRes::CR_OK;
     }
 
-    QString response = uartResponseParser(data, QString::fromStdString(commandText));
+    QString response = uartResponseParser(data, commandData);
     SPDLOG_LOGGER_INFO(commandLogger, "Unparsed response: {}", QString(data).toStdString());
 
     if (response.isValidUtf16() && !response.isNull()) {

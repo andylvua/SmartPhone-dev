@@ -10,7 +10,7 @@
 #include "cli/utils/io/ncurses_io.hpp"
 #include "cli/definitions/colors.hpp"
 #include <string>
-#include <utility>
+//#include <utility>
 
 const auto modemLogger = spdlog::basic_logger_mt("modem", "../logs/log.txt", true);
 
@@ -31,8 +31,8 @@ bool Modem::enableEcho() {
     }
 }
 
-void Modem::setCharacterSet(const std::string &characterSet) {
-    SPDLOG_LOGGER_INFO(modemLogger, "Setting character set to {}", characterSet);
+void Modem::setCharacterSet(const QString &characterSet) {
+    SPDLOG_LOGGER_INFO(modemLogger, "Setting character set to {}", characterSet.toStdString());
     auto setCharacterSetCommand = SetCommand(AT_CSCS"=" + characterSet, serial);
     setCharacterSetCommand.execute();
 }
@@ -147,20 +147,20 @@ bool Modem::checkRegistration() {
     return false;
 }
 
-bool Modem::call(const std::string &number) {
+bool Modem::call(const QString &number) {
     Task task(ATD + number + ";", serial);
-    SPDLOG_LOGGER_INFO(modemLogger, "Calling {}", number);
+    SPDLOG_LOGGER_INFO(modemLogger, "Calling {}", number.toStdString());
     commRes_t res = task.execute();
 
     if (res == commRes::CR_OK) {
-        SPDLOG_LOGGER_INFO(modemLogger, "Call to {} was successful", number);
+        SPDLOG_LOGGER_INFO(modemLogger, "Call to {} was successful", number.toStdString());
         currentCall.callDirection = callDirection::CD_OUTGOING;
         currentCall.callResult = callResult::CR_NO_ANSWER;
-        currentCall.number = QString::fromStdString(number);
+        currentCall.number = number;
         currentCall.startTime = QDateTime::currentDateTime();
         return true;
     } else {
-        SPDLOG_LOGGER_INFO(modemLogger, "Call to {} failed", number);
+        SPDLOG_LOGGER_INFO(modemLogger, "Call to {} failed", number.toStdString());
         return false;
     }
 }
@@ -196,8 +196,8 @@ bool Modem::answer() {
     }
 }
 
-bool Modem::message(const std::string &number, const std::string &message) {
-    SPDLOG_LOGGER_INFO(modemLogger, "Sending message to {}. Message: {}", number, message);
+bool Modem::message(const QString &number, const QString &message) {
+    SPDLOG_LOGGER_INFO(modemLogger, "Sending message to {}. Message: {}", number.toStdString(), message.toStdString());
     auto setMessage = GetCommand(AT_CMGS"=\"" + number + "\"", serial);
     auto response = setMessage.execute(true, false);
 
@@ -208,16 +208,16 @@ bool Modem::message(const std::string &number, const std::string &message) {
     }
 
     SPDLOG_LOGGER_INFO(modemLogger, "Received >. Writing message");
-    Task task(message + char(26), serial);  // 26 is Ctrl+Z
+    Task task(message.toUtf8() + char(26), serial);
     commRes_t res = task.execute(false);
 
     if (res == commRes::CR_OK) {
         printColored(GREEN_PAIR, "Message sent successfully");
         SPDLOG_LOGGER_INFO(modemLogger, "Message sent");
 
-        CacheManager::saveMessage(Message(QString::fromStdString(number),
+        CacheManager::saveMessage(Message(number,
                                           QDateTime::currentDateTime().toString("yyyy/MM/dd,hh:mm:ss+02"),
-                                          QString::fromStdString(message),
+                                          message,
                                           messageDirection::MD_OUTGOING));
         return true;
     }
@@ -228,7 +228,7 @@ bool Modem::message(const std::string &number, const std::string &message) {
 bool Modem::setMessageMode(bool mode) {
     SPDLOG_LOGGER_INFO(modemLogger, "Setting message mode to {}", mode);
     int modeInt = mode ? 1 : 0;
-    auto command = SetCommand(AT_CMGF"=" + std::to_string(modeInt), serial);
+    auto command = SetCommand(AT_CMGF"=" + QString::number(modeInt), serial);
     commRes_t result = command.execute();
     if (result == commRes::CR_OK) {
         return true;
@@ -240,7 +240,7 @@ bool Modem::setMessageMode(bool mode) {
 bool Modem::setNumberID(bool mode) {
     SPDLOG_LOGGER_INFO(modemLogger, "Setting number ID to {}", mode);
     int modeInt = mode ? 1 : 0;
-    auto command = SetCommand("AT+CLIP="+std::to_string(modeInt), serial);
+    auto command = SetCommand("AT+CLIP="+QString::number(modeInt), serial);
     commRes_t result = command.execute();
     if (result == commRes::CR_OK) {
         return true;
@@ -251,7 +251,7 @@ bool Modem::setNumberID(bool mode) {
 bool Modem::setEchoMode(bool mode) {
     SPDLOG_LOGGER_INFO(modemLogger, "Setting echo to {}", mode);
     int modeInt = mode ? 1 : 0;
-    auto command = SetCommand("ATE"+std::to_string(modeInt), serial);
+    auto command = SetCommand("ATE"+QString::number(modeInt), serial);
     commRes_t result = command.execute();
     if (result == commRes::CR_OK) {
         return true;

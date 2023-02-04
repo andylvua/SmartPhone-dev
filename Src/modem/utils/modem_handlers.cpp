@@ -82,9 +82,8 @@ void Modem::message1Handler(const QString &parsedLine) {
                                           dateTime,
                                           message,
                                           messageDirection::MD_INCOMING));
-        printColored(YELLOW_PAIR, ("New message from " + number + ": " + message).toStdString());
-        SPDLOG_LOGGER_INFO(modemLogger, "New message from: {} Message: {} Date: {}", number.toStdString(),
-                           message.toStdString(), dateTime.toStdString());
+        printColored(YELLOW_PAIR, "New message from " + number + ": " + message);
+        SPDLOG_LOGGER_INFO(modemLogger, "New message from {}: {}", number.toStdString(), message.toStdString());
         emit incomingSMS();
     }
 }

@@ -4,144 +4,157 @@
 
 #include "modem/utils/cache_manager.hpp"
 #include "logging.hpp"
-#include "cli/utils/io/ncurses_io.hpp"
 #include "cli/utils/ncurses_utils.hpp"
-#include <fstream>
+#include <QTextStream>
+
+
+#define SEMICOLON_SEPARATOR(...) QStringList{__VA_ARGS__}.join("; ")
 
 const auto cacheLogger = spdlog::basic_logger_mt("cache", "../logs/log.txt", true);
 
-void CacheManager::checkCacheFiles() {
-    std::ifstream messagesFile(MESSAGES_FILEPATH);
-    SPDLOG_LOGGER_INFO(cacheLogger, "Checking messages file...");
-    if (!messagesFile.is_open()) {
-        std::ofstream createMessagesFile(MESSAGES_FILEPATH);
-        createMessagesFile.close();
-    }
-    SPDLOG_LOGGER_INFO(cacheLogger, "Messages file OK");
+void createIfNotExists(const QString &fileName) {
+    SPDLOG_LOGGER_INFO(cacheLogger, "Checking file: {}", fileName.toStdString());
+    QFile file(fileName);
 
-    std::ifstream callsFile(CALLS_FILEPATH);
-    SPDLOG_LOGGER_INFO(cacheLogger, "Checking calls file...");
-    if (!callsFile.is_open()) {
-        std::ofstream createCallsFile(CALLS_FILEPATH);
-        createCallsFile.close();
+    if (!file.exists()) {
+        SPDLOG_LOGGER_INFO(cacheLogger, "File {} does not exist, creating", fileName.toStdString());
+        file.open(QIODevice::WriteOnly);
+        file.close();
     }
-    SPDLOG_LOGGER_INFO(cacheLogger, "Calls file OK");
-
-    std::ifstream contactsFile(CONTACTS_FILEPATH);
-    SPDLOG_LOGGER_INFO(cacheLogger, "Checking contacts file...");
-    if (!contactsFile.is_open()) {
-        std::ofstream createContactsFile(CONTACTS_FILEPATH);
-        createContactsFile.close();
-    }
-    SPDLOG_LOGGER_INFO(cacheLogger, "Contacts file OK");
 }
 
-void CacheManager::writeToFile(const std::string &fileName, const std::string &data) {
-    std::ifstream checkFile(fileName);
-    if (!checkFile.is_open()) {
-        std::ofstream createFile(fileName);
-        createFile.close();
+void CacheManager::checkCacheFiles() {
+    createIfNotExists(MESSAGES_FILEPATH);
+    createIfNotExists(CALLS_FILEPATH);
+    createIfNotExists(CONTACTS_FILEPATH);
+}
+
+void CacheManager::writeToFile(const QString &fileName, const QString &data) {
+    QFile outputFile(fileName);
+    if (!outputFile.exists()) {
+        outputFile.open(QIODevice::WriteOnly);
+        outputFile.close();
     }
 
-    std::ofstream file(fileName, std::ios::app);
-    file << data << std::endl;
-    file.close();
+    outputFile.open(QIODevice::Append);
+    QTextStream out(&outputFile);
+    out << data << Qt::endl;
+    outputFile.close();
 }
 
 void CacheManager::saveMessage(const Message &message) {
-    std::string isIncoming = message.messageDirection == messageDirection::MD_INCOMING ? "INCOMING" : "OUTGOING";
+    QString isIncoming = message.messageDirection == messageDirection::MD_INCOMING ? "INCOMING" : "OUTGOING";
     QString dateTime = message.dateTime;
-    std::string data = message.number.toStdString() + "; " + isIncoming + "; " + dateTime.toStdString() + "; "
-                       + message.message.toStdString();
+    QString data = SEMICOLON_SEPARATOR(message.number, isIncoming, dateTime, message.message);
 
     if (message.messageDirection == messageDirection::MD_INCOMING) {
         data += " * new *";
     }
 
-    SPDLOG_LOGGER_INFO(cacheLogger, "Saving message: {}", data);
+    SPDLOG_LOGGER_INFO(cacheLogger, "Saving message: {}", data.toStdString());
     writeToFile(MESSAGES_FILEPATH, data);
 }
 
 void CacheManager::saveCall(const Call &call) {
     QString dateTime = call.startTime.toString("dd.MM.yyyy hh:mm:ss");
     QString duration = QString::number(call.startTime.secsTo(call.endTime));
-    std::string callDirection = call.callDirection == callDirection::CD_INCOMING ? "INCOMING" : "OUTGOING";
-    std::string isMissed = call.callResult == callResult::CR_NO_ANSWER ? "MISSED" : "ACCEPTED";
+    QString callDirection = call.callDirection == callDirection::CD_INCOMING ? "INCOMING" : "OUTGOING";
+    QString isMissed = call.callResult == callResult::CR_NO_ANSWER ? "MISSED" : "ACCEPTED";
 
-    std::string data = call.number.toStdString() + "; " + dateTime.toStdString() + "; "
-                       + duration.toStdString() + "; " + callDirection + "; " + isMissed;
+    QString data = SEMICOLON_SEPARATOR(call.number, dateTime, duration, callDirection, isMissed);
 
-    SPDLOG_LOGGER_INFO(cacheLogger, "Saving call: {}", data);
+    SPDLOG_LOGGER_INFO(cacheLogger, "Saving call: {}", data.toStdString());
     writeToFile(CALLS_FILEPATH, data);
 }
 
-void CacheManager::addContact(const std::string &name, const std::string &number) {
-    std::string data = name + "; " + number;
-    SPDLOG_LOGGER_INFO(cacheLogger, "Adding contact: {}", data);
+void CacheManager::addContact(const QString &name, const QString &number) {
+    QString data = SEMICOLON_SEPARATOR(name, number);
+
+    SPDLOG_LOGGER_INFO(cacheLogger, "Adding contact: {}", data.toStdString());
+
     writeToFile(CONTACTS_FILEPATH, data);
     SPDLOG_LOGGER_INFO(cacheLogger, "Contact added");
 }
 
-void CacheManager::removeContact(const std::string &name) {
-    SPDLOG_LOGGER_INFO(cacheLogger, "Removing contact: {}", name);
-    std::ifstream file(CONTACTS_FILEPATH);
-    std::string line;
-    std::string data;
+void CacheManager::removeContact(const QString &name) {
+    SPDLOG_LOGGER_INFO(cacheLogger, "Removing contact: {}", name.toStdString());
 
-    while (std::getline(file, line)) {
-        if (line.find(name) == std::string::npos)
+    QFile file(CONTACTS_FILEPATH);
+    file.open(QIODevice::ReadOnly);
+
+    QTextStream in(&file);
+    QString data;
+    while (!in.atEnd()) {
+        QString line = in.readLine();
+        if (!line.contains(name)) {
             data += line + "\n";
-    }
-
-    file.close();
-
-    std::ofstream contactsFile(CONTACTS_FILEPATH);
-    contactsFile << data;
-    SPDLOG_LOGGER_INFO(cacheLogger, "Contact removed");
-}
-
-void CacheManager::removeNewMessageNotification() {
-    std::ifstream file(MESSAGES_FILEPATH);
-    std::string line;
-    std::string data;
-
-    while (std::getline(file, line)) {
-        if (line.find("* new *") == std::string::npos) {
-            data += line + "\n";
-        } else {
-            data += line.replace(line.find("* new *"), 7, "") + "\n";
         }
     }
 
     file.close();
 
-    std::ofstream messagesFile(MESSAGES_FILEPATH);
-    messagesFile << data;
+    file.open(QIODevice::WriteOnly);
+    QTextStream out(&file);
+
+    out << data;
+    file.close();
+
+    SPDLOG_LOGGER_INFO(cacheLogger, "Contact removed");
 }
 
-std::vector<Contact> CacheManager::getContacts() {
-    SPDLOG_LOGGER_INFO(cacheLogger, "Getting contacts");
-    std::ifstream file(CONTACTS_FILEPATH);
-    std::string line;
-    std::vector<Contact> contacts;
+void CacheManager::removeNewMessageNotification() {
+    QFile file(MESSAGES_FILEPATH);
+    file.open(QIODevice::ReadOnly);
 
-    while (std::getline(file, line)) {
-        auto contact = QString::fromStdString(line).split("; ");
-        contacts.emplace_back(contact[0], contact[1]);
+    QTextStream in(&file);
+    QString data;
+    while (!in.atEnd()) {
+        QString line = in.readLine();
+        if (line.contains("* new *")) {
+            line.replace(line.indexOf("* new *"), 7, "");
+        }
+        data += line + "\n";
+    }
+
+    file.close();
+
+    file.open(QIODevice::WriteOnly);
+    QTextStream out(&file);
+
+    out << data;
+    file.close();
+}
+
+QVector<Contact> CacheManager::getContacts() {
+    SPDLOG_LOGGER_INFO(cacheLogger, "Getting contacts");
+    QFile file(CONTACTS_FILEPATH);
+    file.open(QIODevice::ReadOnly);
+    QTextStream in(&file);
+    QString line;
+
+    QVector<Contact> contacts;
+
+    while (!in.atEnd()) {
+        line = in.readLine();
+        auto contact = line.split("; ");
+        contacts.push_back({contact[0], contact[1]});
     }
 
     file.close();
     return contacts;
 }
 
-Contact CacheManager::getContact(const std::string &info) {
-    SPDLOG_LOGGER_INFO(cacheLogger, "Getting contact by name: {}", info);
-    std::ifstream file(CONTACTS_FILEPATH);
-    std::string line;
+Contact CacheManager::getContact(const QString &info) {
+    SPDLOG_LOGGER_INFO(cacheLogger, "Getting contact by name: {}", info.toStdString());
+    QFile file(CONTACTS_FILEPATH);
+    file.open(QIODevice::ReadOnly);
+    QTextStream in(&file);
+    QString line;
 
-    while (std::getline(file, line)) {
-        if (line.find(info) != std::string::npos) {
-            auto contact = QString::fromStdString(line).split("; ");
+    while (!in.atEnd()) {
+        line = in.readLine();
+        if (line.contains(info)) {
+            auto contact = line.split("; ");
             return {contact[0], contact[1]};
         }
     }
@@ -152,17 +165,22 @@ Contact CacheManager::getContact(const std::string &info) {
 
 void CacheManager::listMessages() {
     SPDLOG_LOGGER_INFO(cacheLogger, "Listing messages");
-    std::ifstream file(MESSAGES_FILEPATH);
-    std::string line;
-    std::string data;
 
-    while (std::getline(file, line)) {
-        auto message = QString::fromStdString(line).split("; ");
-        data += std::string("Number: " + message[0].toStdString() + "\n"
-                            + " Direction: " + message[1].toStdString() + "\n"
-                            + " Date: " + message[2].toStdString() + "\n"
-                            + " Message: " + message[3].toStdString()
-                            + "\n");
+    QFile file(MESSAGES_FILEPATH);
+    file.open(QIODevice::ReadOnly);
+    QTextStream in(&file);
+    QString line;
+
+    QString data;
+
+    while (!in.atEnd()) {
+        line = in.readLine();
+        auto message = line.split("; ");
+        data += "Number: " + message[0] + "\n"
+                + " Direction: " + message[1] + "\n"
+                + " Date: " + message[2] + "\n"
+                + " Message: " + message[3]
+                + "\n";
     }
 
     NcursesUtils::displayPad(data, "Viewing messages");
@@ -172,18 +190,21 @@ void CacheManager::listMessages() {
 
 void CacheManager::listCalls() {
     SPDLOG_LOGGER_INFO(cacheLogger, "Listing calls");
-    std::ifstream file(CALLS_FILEPATH);
-    std::string line;
-    std::string data;
+    QFile file(CALLS_FILEPATH);
+    file.open(QIODevice::ReadOnly);
+    QString line;
 
-    while (std::getline(file, line)) {
-        auto call = QString::fromStdString(line).split("; ");
-        data += std::string("Number: " + call[0].toStdString() + "\n"
-                            + " Date: " + call[1].toStdString() + "\n"
-                            + " Duration: " + call[2].toStdString() + "\n"
-                            + " Direction: " + call[3].toStdString() + "\n"
-                            + " Call result: " + call[4].toStdString()
-                            + "\n");
+    QString data;
+
+    while (!file.atEnd()) {
+        line = file.readLine();
+        auto call = line.split("; ");
+        data += "Number: "         + call[0] + "\n"
+                + " Date: "        + call[1] + "\n"
+                + " Duration: "    + call[2] + "\n"
+                + " Direction: "   + call[3] + "\n"
+                + " Call result: " + call[4]
+                + "\n";
     }
 
     NcursesUtils::displayPad(data, "Viewing calls");

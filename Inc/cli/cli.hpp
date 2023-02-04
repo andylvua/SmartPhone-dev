@@ -16,7 +16,7 @@
 #include <ncurses.h>
 #include <unordered_map>
 
-using ScreenMap = std::unordered_map<QString, std::shared_ptr<Screen>>;
+using ScreenMap = QHash<QString, QSharedPointer<Screen>>;
 
 class CLI : public QObject {
 Q_OBJECT
@@ -25,7 +25,7 @@ public:
     explicit CLI(Modem &modem);
 
     Modem &modem;
-    std::shared_ptr<Screen> currentScreen{};
+    QSharedPointer<Screen> currentScreen;
     ScreenMap screenMap;
 
     void incrementActiveOption() const;
