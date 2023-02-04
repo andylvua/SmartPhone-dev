@@ -5,7 +5,7 @@
 #ifndef PHONE_CLI_MACROS_HPP
 #define PHONE_CLI_MACROS_HPP
 
-#define SCREEN_SHARED_PTR(name, parentScreen) std::make_shared<Screen>(name, parentScreen)
+#define SCREEN_SHARED_PTR(name, parentScreen) QSharedPointer<Screen>::create(name, parentScreen)
 
 #define GO_BACK [&](){gotoParentScreen();}
 #define CHANGE_SCREEN(screenName) [&](){changeScreen(screenName);}

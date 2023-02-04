@@ -13,7 +13,7 @@
 RotaryDial rtx;
 #endif
 
-void render(const std::shared_ptr<Screen> &screen) {
+void render(const QSharedPointer<Screen> &screen) {
     int activeOptionIndex = screen->getActiveOption();
 
     int optionsPerPage = screen->getMaxOptionsPerPage();
@@ -196,7 +196,7 @@ void CLI::addContact() {
 }
 
 void CLI::viewContacts() {
-    std::vector<Contact> contacts = CacheManager::getContacts();
+    QVector<Contact> contacts = CacheManager::getContacts();
     auto contactsPage = CLI::screenMap["Contacts Page"];
 
     contactsPage->screenOptions.erase(
@@ -207,7 +207,7 @@ void CLI::viewContacts() {
         contactsPage->addScreenOption(
                 contact.name + ": " + contact.number,
                 [contact, this]() {
-                    auto contactScreen = std::make_shared<ContactScreen>(
+                    auto contactScreen = QSharedPointer<ContactScreen>::create(
                             CLI::screenMap["Contacts Page"],
                             contact,
                             *this);

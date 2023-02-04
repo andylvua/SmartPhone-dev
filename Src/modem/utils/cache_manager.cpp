@@ -125,19 +125,19 @@ void CacheManager::removeNewMessageNotification() {
     file.close();
 }
 
-std::vector<Contact> CacheManager::getContacts() {
+QVector<Contact> CacheManager::getContacts() {
     SPDLOG_LOGGER_INFO(cacheLogger, "Getting contacts");
     QFile file(CONTACTS_FILEPATH);
     file.open(QIODevice::ReadOnly);
     QTextStream in(&file);
     QString line;
 
-    std::vector<Contact> contacts;
+    QVector<Contact> contacts;
 
     while (!in.atEnd()) {
         line = in.readLine();
         auto contact = line.split("; ");
-        contacts.emplace_back(contact[0], contact[1]);
+        contacts.push_back({contact[0], contact[1]});
     }
 
     file.close();

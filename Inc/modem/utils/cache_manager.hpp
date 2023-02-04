@@ -27,7 +27,7 @@ public:
 
     static void removeNewMessageNotification();
 
-    static std::vector<Contact> getContacts();
+    static QVector<Contact> getContacts();
 
     static Contact getContact(const QString &info);
 

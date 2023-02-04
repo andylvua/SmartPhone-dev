@@ -14,22 +14,22 @@
 
 class CLI;
 
-using OptionsMap = std::unordered_map<QString, std::shared_ptr<Option>>;
+using OptionsMap = QHash<QString, QSharedPointer<Option>>;
 
 class Screen {
 public:
     QString screenName;
-    std::vector<std::shared_ptr<Screen>> childScreens;
-    std::shared_ptr<Screen> parentScreen;
+    QVector<QSharedPointer<Screen>> childScreens;
+    QSharedPointer<Screen> parentScreen;
 
-    std::vector<std::shared_ptr<Option>> screenOptions;
+    QVector<QSharedPointer<Option>> screenOptions;
     OptionsMap optionsMap;
 
     int activeOption = -1;
 
-    std::vector<QString> notifications = {};
+    QVector<QString> notifications = {};
 
-    Screen(QString name, std::shared_ptr<Screen> parentScreen);
+    Screen(QString name, QSharedPointer<Screen> parentScreen);
 
     void addScreenOption(const QString &name, std::function<void()> const &action);
 
@@ -57,7 +57,7 @@ class ContactScreen : public Screen {
 public:
     Contact contact;
 
-    ContactScreen(std::shared_ptr<Screen> parentScreen, const Contact &contact, CLI &cli);
+    ContactScreen(QSharedPointer<Screen> parentScreen, const Contact &contact, CLI &cli);
 };
 
 #endif //PHONE_SCREEN_HPP
