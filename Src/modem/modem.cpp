@@ -20,7 +20,7 @@ bool Modem::enableEcho() {
     SPDLOG_LOGGER_INFO(modemLogger, "Enabling echo");
     auto enableEchoCommand = SetCommand(ATE1, serial);
 
-    auto response = enableEchoCommand.execute(false);
+    auto response = enableEchoCommand.execute(workerStatus);
 
     if (response == commRes::CR_OK) {
         SPDLOG_LOGGER_INFO(modemLogger, "Echo enabled successfully");
@@ -31,60 +31,78 @@ bool Modem::enableEcho() {
     }
 }
 
+bool Modem::disableEcho() {
+    SPDLOG_LOGGER_INFO(modemLogger, "Disabling echo");
+    auto disableEchoCommand = SetCommand(ATE0, serial);
+
+    auto response = disableEchoCommand.execute(workerStatus);
+
+    if (response == commRes::CR_OK) {
+        SPDLOG_LOGGER_INFO(modemLogger, "Echo disabled successfully");
+        return true;
+    } else {
+        SPDLOG_LOGGER_ERROR(modemLogger, "Echo disabled failed");
+        return false;
+    }
+}
+
 void Modem::setCharacterSet(const QString &characterSet) {
     SPDLOG_LOGGER_INFO(modemLogger, "Setting character set to {}", characterSet.toStdString());
     auto setCharacterSetCommand = SetCommand(AT_CSCS"=" + characterSet, serial);
     setCharacterSetCommand.execute();
 }
 
-void Modem::enableATConsoleMode() {
+bool Modem::enableATConsoleMode() {
     SPDLOG_LOGGER_INFO(modemLogger, "Console mode enabled");
-    serial.write(ATE0"\r\n");
-    QThread::msleep(serial.timeout);
+    if (!disableEcho()) {
+        SPDLOG_LOGGER_ERROR(modemLogger, "Failed to disable echo");
+        return false;
+    }
     consoleMode.enabled = true;
     consoleMode.consoleType = consoleType::CM_AT;
+    return true;
 }
 
 void Modem::disableATConsoleMode() {
     SPDLOG_LOGGER_INFO(modemLogger, "Console mode disabled");
     consoleMode.enabled = false;
-    serial.write(ATE1"\r\n");
+    enableEcho();
 }
 
-void Modem::enableUSSDConsoleMode() {
+bool Modem::enableUSSDConsoleMode() {
     SPDLOG_LOGGER_INFO(modemLogger, "USSD console mode enabled");
     setCharacterSet("HEX");
-    serial.write(ATE0"\r\n");
-    QThread::msleep(serial.timeout);
+    if (!disableEcho()) {
+        SPDLOG_LOGGER_ERROR(modemLogger, "Failed to disable echo");
+        return false;
+    }
     consoleMode.enabled = true;
     consoleMode.consoleType = consoleType::CM_USSD;
+    return true;
 }
 
 void Modem::disableUSSDConsoleMode() {
     SPDLOG_LOGGER_INFO(modemLogger, "USSD console mode disabled");
     consoleMode.enabled = false;
-    serial.write(ATE1"\r\n");
+    enableEcho();
 }
 
 bool Modem::enableHTTPConsoleMode() {
     SPDLOG_LOGGER_INFO(modemLogger, "HTTP console mode enabled");
 
-    serial.write(ATE0"\r\n");
-    QThread::msleep(serial.timeout);
+    if (!disableEcho()) {
+        SPDLOG_LOGGER_ERROR(modemLogger, "Failed to disable echo");
+        return false;
+    }
 
-    auto setAPNCommand = SetCommand(R"(AT+CGDCONT=1,"IP","internet")", serial);
-    auto response = setAPNCommand.execute();
-
-    if (response != commRes::CR_OK) {
+    if (SetCommand(R"(AT+CGDCONT=1,"IP","internet")", serial).execute() != commRes::CR_OK) {
         SPDLOG_LOGGER_ERROR(modemLogger, "Failed to set APN");
         std::cout << RED_COLOR << "\nFailed to set APN" << RESET << std::endl;
         QThread::msleep(3000);
         return false;
     }
 
-    auto activateConnectionCommand = SetCommand("AT+CGACT=1,1", serial);
-    response = activateConnectionCommand.execute();
-    if (response != commRes::CR_OK) {
+    if (SetCommand("AT+CGACT=1,1", serial).execute() != commRes::CR_OK) {
         SPDLOG_LOGGER_ERROR(modemLogger, "Failed to activate connection");
         std::cout << RED_COLOR << "\nFailed to activate connection" << RESET << std::endl;
         QThread::msleep(3000);
@@ -99,7 +117,7 @@ bool Modem::enableHTTPConsoleMode() {
 void Modem::disableHTTPConsoleMode() {
     SPDLOG_LOGGER_INFO(modemLogger, "HTTP console mode disabled");
     consoleMode.enabled = false;
-    serial.write(ATE1"\r\n");
+    enableEcho();
 }
 
 void Modem::sendATConsoleCommand(const QString &command) {

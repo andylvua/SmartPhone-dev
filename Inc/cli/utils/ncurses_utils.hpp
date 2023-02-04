@@ -22,6 +22,8 @@ public:
     static void displayPad(const QString &data, QString header);
 
     static void displayPad(QFile &file, QString header);
+
+    static void clearCurrentLine();
 };
 
 #endif //PHONE_NCURSES_UTILS_HPP
