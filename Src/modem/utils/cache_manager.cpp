@@ -165,22 +165,19 @@ Contact CacheManager::getContact(const QString &info) {
 
 void CacheManager::listMessages() {
     SPDLOG_LOGGER_INFO(cacheLogger, "Listing messages");
-
     QFile file(MESSAGES_FILEPATH);
     file.open(QIODevice::ReadOnly);
-    QTextStream in(&file);
     QString line;
 
     QString data;
 
-    while (!in.atEnd()) {
-        line = in.readLine();
+    while (!file.atEnd()) {
+        line = file.readLine();
         auto message = line.split("; ");
-        data += "Number: " + message[0] + "\n"
+        data += "Number: "       + message[0] + "\n"
                 + " Direction: " + message[1] + "\n"
-                + " Date: " + message[2] + "\n"
-                + " Message: " + message[3]
-                + "\n";
+                + " Date: "      + message[2] + "\n"
+                + " Message: "   + message[3] + "\n";
     }
 
     NcursesUtils::displayPad(data, "Viewing messages");
@@ -203,8 +200,7 @@ void CacheManager::listCalls() {
                 + " Date: "        + call[1] + "\n"
                 + " Duration: "    + call[2] + "\n"
                 + " Direction: "   + call[3] + "\n"
-                + " Call result: " + call[4]
-                + "\n";
+                + " Call result: " + call[4] + "\n";
     }
 
     NcursesUtils::displayPad(data, "Viewing calls");
