@@ -18,12 +18,10 @@ using commRes_t = enum class commRes {
 
 class Command {
 public:
-    std::string commandText;
+    QByteArray commandData;
     SerialPort &serial;
 
-    Command(std::string commandText, SerialPort &serial);
-
-    [[nodiscard]] std::string getCommandText() const;
+    Command(const QString &commandText, SerialPort &serial);
 
     static QString uartResponseParser(const QByteArray &response, const QString &commandText);
 

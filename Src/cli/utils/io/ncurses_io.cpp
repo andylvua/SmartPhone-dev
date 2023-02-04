@@ -17,17 +17,17 @@ void ColorPrint::initColors() {
     init_pair(FILLED_GREEN_PAIR, COLOR_GREEN, COLOR_WHITE);
 }
 
-void printColored(int color, const std::string &text, bool newLine, bool bold) {
+void printColored(int color, const QString &text, bool newLine, bool bold) {
     attron(COLOR_PAIR(color));
     if (bold) {
         attron(A_BOLD);
     }
 
     if (newLine) {
-        printw("%s\n", text.c_str());
+        printw("%s\n", text.toUtf8().data());
         refresh();
     } else {
-        printw("%s", text.c_str());
+        printw("%s", text.toUtf8().data());
         refresh();
     }
 
@@ -35,22 +35,22 @@ void printColored(int color, const std::string &text, bool newLine, bool bold) {
     attroff(A_BOLD);
 }
 
-void printColored(int color, const std::string &text, bool newLine, bool bold, WINDOW *window) {
+void printColored(int color, const QString &text, bool newLine, bool bold, WINDOW *window) {
     wattron(window, COLOR_PAIR(color));
     if (bold) {
         wattron(window, A_BOLD);
     }
     if (newLine) {
-        wprintw(window, "%s\n", text.c_str());
+        wprintw(window, "%s\n", text.toUtf8().data());
     } else {
-        wprintw(window, "%s", text.c_str());
+        wprintw(window, "%s", text.toUtf8().data());
     }
     wrefresh(window);
     wattroff(window, COLOR_PAIR(color));
     wattroff(window, A_BOLD);
 }
 
-std::string readString(size_t bufferSize) {
+QString readString(size_t bufferSize) {
     echo();
     char buffer[bufferSize];
     getstr(buffer);
@@ -58,7 +58,7 @@ std::string readString(size_t bufferSize) {
     return {buffer};
 }
 
-std::string readString(size_t bufferSize, WINDOW *window) {
+QString readString(size_t bufferSize, WINDOW *window) {
     char buffer[bufferSize];
     int ch;
     int i = 0;

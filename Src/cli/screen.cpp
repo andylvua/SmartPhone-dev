@@ -81,7 +81,7 @@ ContactScreen::ContactScreen(std::shared_ptr<Screen> parentScreen, const Contact
         cli.sendMessage(contact.number);
     });
     addScreenOption("Delete", [&cli, &contact]() {
-        CacheManager::removeContact(contact.name.toStdString());
+        CacheManager::removeContact(contact.name);
 
         printColored(GREEN_PAIR, "Contact deleted. Press any key to continue...");
         getch();
@@ -89,11 +89,11 @@ ContactScreen::ContactScreen(std::shared_ptr<Screen> parentScreen, const Contact
     });
     addScreenOption("Edit", [&cli, &contact]() {
         printColored(YELLOW_PAIR, "Enter new name: ");
-        std::string newName = readString();
+        QString newName = readString();
         printColored(YELLOW_PAIR, "Enter new number: ");
-        std::string newNumber = readString();
+        QString newNumber = readString();
 
-        CacheManager::removeContact(contact.name.toStdString());
+        CacheManager::removeContact(contact.name);
         CacheManager::addContact(newName, newNumber);
 
         printColored(GREEN_PAIR, "Contact updated. Press any key to continue...");

@@ -7,18 +7,19 @@
 
 #include <iostream>
 #include <ncurses.h>
+#include <QString>
 
 class ColorPrint {
 public:
     static void initColors();
 };
 
-void printColored(int color, const std::string &text, bool newLine = true, bool bold = false);
+void printColored(int color, const QString &text, bool newLine = true, bool bold = false);
 
-void printColored(int color, const std::string &text, bool newLine, bool bold, WINDOW *window);
+void printColored(int color, const QString &text, bool newLine, bool bold, WINDOW *window);
 
-std::string readString(size_t bufferSize = 256);
+QString readString(size_t bufferSize = 256);
 
-std::string readString(size_t bufferSize, WINDOW *window);
+QString readString(size_t bufferSize, WINDOW *window);
 
 #endif //PHONE_NCURSES_IO_HPP

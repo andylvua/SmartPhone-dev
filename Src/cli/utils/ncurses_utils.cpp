@@ -30,7 +30,7 @@ void NcursesUtils::releaseScreen() {
     system("clear");
 }
 
-void NcursesUtils::displayPad(const std::string &data, std::string header) {
+void NcursesUtils::displayPad(const QString &data, QString header) {
     clear();
     move(0, 0);
 
@@ -68,7 +68,7 @@ void NcursesUtils::displayPad(const std::string &data, std::string header) {
     initscr();
     keypad(pad, TRUE);
     scrollok(pad, TRUE);
-    wprintw(pad, data.c_str());
+    wprintw(pad, "%s", data.toUtf8().data());
 
     prefresh(pad, row, col, 1, 0, static_cast<int>(screenRows - 1), static_cast<int>(screenCols - 1));
 
@@ -103,7 +103,7 @@ void NcursesUtils::displayPad(const std::string &data, std::string header) {
     delwin(pad);
 }
 
-void NcursesUtils::displayPad(QFile &file, std::string header) {
+void NcursesUtils::displayPad(QFile &file, QString header) {
     clear();
     move(0, 0);
 

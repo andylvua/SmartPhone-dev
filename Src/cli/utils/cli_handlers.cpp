@@ -6,7 +6,7 @@
 #include "modem/utils/cache_manager.hpp"
 
 void CLI::handleIncomingCall(const QString &number) {
-    auto contact = CacheManager::getContact(number.toStdString());
+    auto contact = CacheManager::getContact(number);
 
     QString info = "Incoming call from ";
 

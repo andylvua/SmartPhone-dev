@@ -61,19 +61,19 @@ public:
 
     void sendHTTPConsoleCommand(const QString &command, httpMethod_t method);
 
-    void setCharacterSet(const std::string &characterSet);
+    void setCharacterSet(const QString &characterSet);
 
     bool checkAT();
 
     bool checkRegistration();
 
-    bool call(const std::string &number);
+    bool call(const QString &number);
 
     bool hangUp();
 
     bool answer();
 
-    bool message(const std::string &number, const std::string &message);
+    bool message(const QString &number, const QString &message);
 
     [[nodiscard]] bool setMessageMode(bool mode);
 
