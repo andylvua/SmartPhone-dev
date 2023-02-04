@@ -80,7 +80,7 @@ bool Modem::initialize() {
 
     SPDLOG_LOGGER_INFO(modemLogger, "Setting SMS mode to text...");
     auto setMessageMode = SetCommand(AT_CMGF"=1", serial);
-    commRes_t messageModeStatus = setMessageMode.execute(false);
+    commRes_t messageModeStatus = setMessageMode.execute(workerStatus);
 
     if (messageModeStatus != commRes::CR_OK) {
         std::cout << RED_COLOR << "\nError: Message mode failed" << RESET << std::endl;

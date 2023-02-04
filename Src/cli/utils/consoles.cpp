@@ -14,14 +14,19 @@
 const auto cliLogger = spdlog::get("cli");
 
 void CLI::atConsoleMode() {
-    curs_set(1);
-    NcursesUtils::releaseScreen();
-    system("clear");
-
+    disableNcursesScreen();
     std::cout << YELLOW_COLOR << "Loading..." << RESET;
     std::cout.flush();
 
-    modem.enableATConsoleMode();
+    if (!modem.enableATConsoleMode()) {
+        std::cout << RED_COLOR << "\nFailed to enable AT console mode" << RESET << std::endl;
+        SPDLOG_LOGGER_ERROR(cliLogger, "Failed to enable AT console mode");
+        QThread::msleep(1000);
+        modem.disableATConsoleMode();
+
+        enableNcursesScreen();
+        return;
+    }
 
     initReadlineCompletions();
     rl_attempted_completion_function = commandCompletion;
@@ -48,20 +53,23 @@ void CLI::atConsoleMode() {
     }
 
     modem.disableATConsoleMode();
-
-    NcursesUtils::initScreen();
-    renderScreen();
+    enableNcursesScreen();
 }
 
 void CLI::ussdConsoleMode() {
-    curs_set(1);
-    NcursesUtils::releaseScreen();
-    system("clear");
-
+    disableNcursesScreen();
     std::cout << YELLOW_COLOR << "Loading..." << RESET;
     std::cout.flush();
 
-    modem.enableUSSDConsoleMode();
+    if (!modem.enableUSSDConsoleMode()) {
+        std::cout << RED_COLOR << "\nFailed to enable USSD console mode" << RESET << std::endl;
+        SPDLOG_LOGGER_ERROR(cliLogger, "Failed to enable USSD console mode");
+        QThread::msleep(1000);
+        modem.disableUSSDConsoleMode();
+
+        disableNcursesScreen();
+        return;
+    }
 
     const char *ussd;
 
@@ -85,9 +93,7 @@ void CLI::ussdConsoleMode() {
     }
 
     modem.disableUSSDConsoleMode();
-
-    NcursesUtils::initScreen();
-    renderScreen();
+    enableNcursesScreen();
 }
 
 QString parseUrl(QString httpCommand) {
@@ -114,10 +120,7 @@ QString parseUrl(QString httpCommand) {
 }
 
 void CLI::httpConsoleMode() {
-    curs_set(1);
-    NcursesUtils::releaseScreen();
-    system("clear");
-
+    disableNcursesScreen();
     std::cout << YELLOW_COLOR << "Loading..." << RESET;
     std::cout.flush();
 
@@ -174,7 +177,5 @@ void CLI::httpConsoleMode() {
     }
 
     modem.disableHTTPConsoleMode();
-
-    NcursesUtils::initScreen();
-    renderScreen();
+    enableNcursesScreen();
 }

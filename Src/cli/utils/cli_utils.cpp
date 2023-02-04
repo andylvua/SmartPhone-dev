@@ -90,6 +90,17 @@ bool checkNumber(QString &number) {
     return true;
 }
 
+void CLI::disableNcursesScreen() {
+    curs_set(1);
+    NcursesUtils::releaseScreen();
+    system("clear");
+}
+
+void CLI::enableNcursesScreen() {
+    NcursesUtils::initScreen();
+    renderScreen();
+}
+
 void CLI::rejectCall() {
     printColored(YELLOW_PAIR, "Rejecting call");
     modem.hangUp();
@@ -314,6 +325,8 @@ void CLI::setEchoMode() {
 
 void CLI::aboutDevice() {
     changeScreen("About Device");
+    printColored(YELLOW_PAIR, "Getting device info", false);
     QString aboutInfo = modem.aboutDevice();
+    NcursesUtils::clearCurrentLine();
     printColored(WHITE_PAIR, aboutInfo);
 }

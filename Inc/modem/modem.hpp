@@ -43,11 +43,13 @@ public:
 
     bool enableEcho();
 
-    void enableATConsoleMode();
+    bool disableEcho();
+
+    [[nodiscard]] bool enableATConsoleMode();
 
     void disableATConsoleMode();
 
-    void enableUSSDConsoleMode();
+    [[nodiscard]] bool enableUSSDConsoleMode();
 
     void disableUSSDConsoleMode();
 

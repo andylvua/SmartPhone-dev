@@ -64,6 +64,10 @@ public slots:
 
 private:
 
+    void disableNcursesScreen();
+
+    void enableNcursesScreen();
+
     void rejectCall();
 
     void answerCall();

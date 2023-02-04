@@ -178,3 +178,8 @@ void NcursesUtils::displayPad(QFile &file, QString header) {
 
     delwin(pad);
 }
+
+void NcursesUtils::clearCurrentLine() {
+    move(getcury(stdscr), 0);
+    clrtoeol();
+}
