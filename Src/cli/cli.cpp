@@ -15,7 +15,7 @@ const auto cliLogger = spdlog::basic_logger_mt("cli",
                                                LOGS_FILEPATH, true);
 #ifdef BUILD_ON_RASPBERRY
 #include "rotary_reader/rotary_dial.hpp"
-RotaryDial rtx;
+static RotaryDial rtx;
 #endif
 
 CLI::CLI(Modem &modem) : modem(modem) {

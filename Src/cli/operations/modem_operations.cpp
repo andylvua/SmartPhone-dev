@@ -15,7 +15,7 @@
 const auto cliLogger = spdlog::get("cli");
 #ifdef BUILD_ON_RASPBERRY
 #include "rotary_reader/rotary_dial.hpp"
-RotaryDial rtx;
+static RotaryDial rtx;
 #endif
 
 void CLI::rejectCall() {
@@ -224,7 +224,7 @@ void CLI::ussdConsoleMode() {
         QThread::msleep(1000);
         modem.disableUSSDConsoleMode();
 
-        disableNcursesScreen();
+        enableNcursesScreen();
         return;
     }
 
@@ -284,10 +284,12 @@ void CLI::httpConsoleMode() {
     auto consoleEnabled = modem.enableHTTPConsoleMode();
 
     if (!consoleEnabled) {
+        std::cout << RED_COLOR << "\nFailed to enable HTTP console mode" << RESET << std::endl;
+        SPDLOG_LOGGER_ERROR(cliLogger, "Failed to enable HTTP console mode");
+        QThread::msleep(1000);
         modem.disableHTTPConsoleMode();
 
-        NcursesUtils::initScreen();
-        renderScreen();
+        enableNcursesScreen();
         return;
     }
 
