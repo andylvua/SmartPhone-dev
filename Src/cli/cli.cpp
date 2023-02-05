@@ -20,9 +20,12 @@ CLI::CLI() : modemController(nullptr) {
 #ifdef BUILD_ON_RASPBERRY
 #include "rotary_reader/rotary_dial.hpp"
 RotaryDial::setup();
-static RotaryDial rtx;
 #endif
 }
+
+#ifdef BUILD_ON_RASPBERRY
+static RotaryDial rtx;
+#endif
 
 void CLI::setModemController(ModemController *controller) {
     this->modemController = controller;
