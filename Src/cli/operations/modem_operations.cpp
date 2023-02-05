@@ -13,6 +13,10 @@
 #include <QRegularExpression>
 
 const auto cliLogger = spdlog::get("cli");
+#ifdef BUILD_ON_RASPBERRY
+#include "rotary_reader/rotary_dial.hpp"
+RotaryDial rtx;
+#endif
 
 void CLI::rejectCall() {
     printColored(YELLOW_PAIR, "Rejecting call");
