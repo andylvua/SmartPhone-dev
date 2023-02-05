@@ -4,13 +4,14 @@
 
 #include "modem/utils/cache_manager.hpp"
 #include "logging.hpp"
-#include "cli/utils/ncurses_utils.hpp"
+#include "cli/utils/ncurses/ncurses_utils.hpp"
 #include <QTextStream>
 
 
 #define SEMICOLON_SEPARATOR(...) QStringList{__VA_ARGS__}.join("; ")
 
-const auto cacheLogger = spdlog::basic_logger_mt("cache", "../logs/log.txt", true);
+const auto cacheLogger = spdlog::basic_logger_mt("cache",
+                                                 LOGS_FILEPATH, true);
 
 void createIfNotExists(const QString &fileName) {
     SPDLOG_LOGGER_INFO(cacheLogger, "Checking file: {}", fileName.toStdString());
@@ -82,10 +83,9 @@ void CacheManager::removeContact(const QString &name) {
     QFile file(CONTACTS_FILEPATH);
     file.open(QIODevice::ReadOnly);
 
-    QTextStream in(&file);
     QString data;
-    while (!in.atEnd()) {
-        QString line = in.readLine();
+    while (!file.atEnd()) {
+        QString line = file.readLine();
         if (!line.contains(name)) {
             data += line + "\n";
         }
@@ -106,10 +106,9 @@ void CacheManager::removeNewMessageNotification() {
     QFile file(MESSAGES_FILEPATH);
     file.open(QIODevice::ReadOnly);
 
-    QTextStream in(&file);
     QString data;
-    while (!in.atEnd()) {
-        QString line = in.readLine();
+    while (!file.atEnd()) {
+        QString line = file.readLine();
         if (line.contains("* new *")) {
             line.replace(line.indexOf("* new *"), 7, "");
         }
@@ -129,13 +128,12 @@ QVector<Contact> CacheManager::getContacts() {
     SPDLOG_LOGGER_INFO(cacheLogger, "Getting contacts");
     QFile file(CONTACTS_FILEPATH);
     file.open(QIODevice::ReadOnly);
-    QTextStream in(&file);
     QString line;
 
     QVector<Contact> contacts;
 
-    while (!in.atEnd()) {
-        line = in.readLine();
+    while (!file.atEnd()) {
+        line = file.readLine();
         auto contact = line.split("; ");
         contacts.push_back({contact[0], contact[1]});
     }
@@ -148,11 +146,10 @@ Contact CacheManager::getContact(const QString &info) {
     SPDLOG_LOGGER_INFO(cacheLogger, "Getting contact by name: {}", info.toStdString());
     QFile file(CONTACTS_FILEPATH);
     file.open(QIODevice::ReadOnly);
-    QTextStream in(&file);
     QString line;
 
-    while (!in.atEnd()) {
-        line = in.readLine();
+    while (!file.atEnd()) {
+        line = file.readLine();
         if (line.contains(info)) {
             auto contact = line.split("; ");
             return {contact[0], contact[1]};

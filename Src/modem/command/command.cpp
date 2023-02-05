@@ -4,11 +4,12 @@
 
 #include "logging.hpp"
 #include "modem/command/command.hpp"
+#include "modem/utils/cache_manager.hpp"
 #include <QSerialPortInfo>
 #include <QThread>
-//#include <utility>
 
-const auto commandLogger = spdlog::basic_logger_mt("command", "../logs/log.txt", true);
+const auto commandLogger = spdlog::basic_logger_mt("command",
+                                                   LOGS_FILEPATH, true);
 
 Command::Command(const QString &commandText, SerialPort &serial) : commandData(commandText.toUtf8()), serial(serial) {}
 

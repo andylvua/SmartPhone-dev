@@ -3,12 +3,13 @@
 //
 
 #include "logging.hpp"
+#include "modem/utils/cache_manager.hpp"
 #include <QFile>
 #include <QIODevice>
 #include <QTextStream>
 
 void logOutputHandler(QtMsgType type, [[maybe_unused]] const QMessageLogContext &context, const QString &msg) {
-    QFile logsFile("../logs/log.txt");
+    QFile logsFile(LOGS_FILEPATH);
     logsFile.open(QIODevice::WriteOnly | QIODevice::Append);
     QTextStream logsStream(&logsFile);
     QByteArray localMsg = msg.toLocal8Bit();

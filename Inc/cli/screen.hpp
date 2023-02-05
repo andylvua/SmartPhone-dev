@@ -35,8 +35,6 @@ public:
 
     void addScreenOption(const QString &name, std::function<void()> const &action, bool switcher);
 
-    void removeScreenOption(int index);
-
     [[nodiscard]] int getPagesCount() const;
 
     [[nodiscard]] int getActivePage() const;

@@ -6,16 +6,17 @@
 #include "Inc/modem/modem.hpp"
 #include "Inc/cli/cli.hpp"
 #include "Inc/cli/definitions/colors.hpp"
+#include "modem/utils/cache_manager.hpp"
 #include <thread>
 
-//#define DEBUG
+#define DEBUG
 
 int main(int argc, char *argv[]) {
     qInstallMessageHandler(logOutputHandler);
     QApplication app(argc, argv);
 
     auto mainLogger = spdlog::basic_logger_mt("main",
-                                              "../logs/log.txt",
+                                              LOGS_FILEPATH,
                                               true);
 
     spdlog::flush_on(spdlog::level::debug);
@@ -28,7 +29,7 @@ int main(int argc, char *argv[]) {
     #endif
 
     SerialPort serial(portName,
-                      1000,
+                      500,
                       QSerialPort::Baud115200,
                       QSerialPort::Data8,
                       QSerialPort::NoParity,

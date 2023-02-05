@@ -5,7 +5,7 @@
 #include "modem/modem.hpp"
 #include "logging.hpp"
 #include "modem/utils/cache_manager.hpp"
-#include "cli/utils/io/ncurses_io.hpp"
+#include "cli/utils/ncurses/ncurses_io.hpp"
 #include "cli/definitions/colors.hpp"
 
 const auto modemLogger = spdlog::get("modem");

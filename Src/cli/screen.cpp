@@ -2,7 +2,6 @@
 // Created by paul on 1/15/23.
 //
 
-#include <utility>
 #include "cli/cli.hpp"
 #include "cli/definitions/colors.hpp"
 #include "modem/utils/cache_manager.hpp"
@@ -63,10 +62,6 @@ bool Screen::isLastPage() const {
 
 void Screen::addNotification(const QString &notification) {
     notifications.push_back(notification);
-}
-
-void Screen::removeScreenOption(int index) {
-    screenOptions.erase(screenOptions.begin() + index);
 }
 
 ContactScreen::ContactScreen(QSharedPointer<Screen> parentScreen, const Contact &contact, CLI &cli) : Screen(

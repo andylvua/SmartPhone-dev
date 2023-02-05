@@ -7,14 +7,15 @@
 
 #include "cli/option.hpp"
 #include "cli/definitions/colors.hpp"
-#include "cli/utils/io/ncurses_io.hpp"
+#include "cli/utils/ncurses/ncurses_io.hpp"
 #include <QThread>
 
 
 Option::Option(QString name, std::function<void()> const& action) : optionName(std::move(name)), action(action) {}
 
 // TODO: remove unused isSwitcher parameter
-Option::Option(QString name, std::function<void()> const& action, bool isSwitcher, bool switcher) : optionName(std::move(name)), action(action), isSwitcher(isSwitcher), switcher(switcher) {}
+Option::Option(QString name, std::function<void()> const& action, bool isSwitcher, bool switcher) :
+optionName(std::move(name)), action(action), isSwitcher(isSwitcher), switcher(switcher) {}
 
 void Option::execute() const {
     if (isAvailable){

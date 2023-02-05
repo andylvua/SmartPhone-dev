@@ -4,17 +4,70 @@
 
 #include "logging.hpp"
 #include "modem/modem.hpp"
+#include "modem/utils/decoder.hpp"
 #include "modem/utils/cache_manager.hpp"
 #include "modem/command/command.hpp"
 #include "modem/command/commands_list.hpp"
-#include "cli/utils/io/ncurses_io.hpp"
+#include "cli/utils/ncurses/ncurses_io.hpp"
 #include "cli/definitions/colors.hpp"
 #include <string>
-//#include <utility>
 
-const auto modemLogger = spdlog::basic_logger_mt("modem", "../logs/log.txt", true);
+const auto modemLogger = spdlog::basic_logger_mt("modem",
+                                                 LOGS_FILEPATH, true);
 
 Modem::Modem(SerialPort &serial) : serial(serial) {}
+
+void Modem::listen() {
+    while (Modem::workerStatus) {
+        if (serial.interruptDataRead) {
+            dataInterruptHandler();
+        }
+
+        if (consoleMode.enabled) {
+            if (consoleMode.consoleType == consoleType::CM_AT) {
+                atConsoleMode();
+            }
+
+            if (consoleMode.consoleType == consoleType::CM_USSD) {
+                ussdConsoleMode();
+            }
+
+            if (consoleMode.consoleType == consoleType::CM_HTTP) {
+                httpConsoleMode();
+            }
+
+            continue;
+        }
+
+        QByteArray data = readLine();
+        QString parsedLine = parseLine(data);
+
+        if (parsedLine.contains("RING")) {
+            SPDLOG_LOGGER_INFO(modemLogger, "RING received");
+            ringHandler(parsedLine);
+        }
+
+        if (parsedLine.contains("CIEV: \"CALL\",1")) {
+            SPDLOG_LOGGER_INFO(modemLogger, "CIEV: \"CALL\",1 received");
+            cievCall1Handler();
+        }
+
+        if (parsedLine.contains("+CIEV: \"SOUNDER\",0")) {
+            SPDLOG_LOGGER_INFO(modemLogger, "+CIEV: \"SOUNDER\",0 received");
+            sounder0Handler();
+        }
+
+        if (parsedLine.contains("CIEV: \"CALL\",0")) {
+            SPDLOG_LOGGER_INFO(modemLogger, "CIEV: \"CALL\",0 received");
+            cievCall0Handler(parsedLine);
+        }
+
+        if (parsedLine.contains("CIEV: \"MESSAGE\",1")) {
+            SPDLOG_LOGGER_INFO(modemLogger, "CIEV: \"MESSAGE\",1 received");
+            message1Handler(parsedLine);
+        }
+    }
+}
 
 bool Modem::enableEcho() {
     SPDLOG_LOGGER_INFO(modemLogger, "Enabling echo");
@@ -69,6 +122,27 @@ void Modem::disableATConsoleMode() {
     enableEcho();
 }
 
+void Modem::atConsoleMode() {
+    while (consoleMode.enabled) {
+        QByteArray data = readLine();
+        QString parsedLine = parseLine(data);
+
+        if (parsedLine.isEmpty()) {
+            return;
+        }
+
+        const char* responseColor = WHITE_COLOR;
+        if (parsedLine.contains("ERROR")) {
+            responseColor = RED_COLOR;
+        } else if (parsedLine.contains("OK")) {
+            responseColor = GREEN_COLOR;
+        }
+
+        SPDLOG_LOGGER_INFO(modemLogger, "Console mode: {}", parsedLine.toStdString());
+        std::cout << responseColor << parsedLine.toStdString() << RESET << std::endl;
+    }
+}
+
 bool Modem::enableUSSDConsoleMode() {
     SPDLOG_LOGGER_INFO(modemLogger, "USSD console mode enabled");
     setCharacterSet("HEX");
@@ -85,6 +159,45 @@ void Modem::disableUSSDConsoleMode() {
     SPDLOG_LOGGER_INFO(modemLogger, "USSD console mode disabled");
     consoleMode.enabled = false;
     enableEcho();
+}
+
+void Modem::ussdConsoleMode() {
+    while (consoleMode.enabled) {
+        QByteArray data = readLine();
+        QString parsedLine = parseLine(data);
+
+        if (parsedLine.isEmpty()) {
+            return;
+        }
+        SPDLOG_LOGGER_INFO(modemLogger, "Console mode: {}", parsedLine.toStdString());
+
+        ussdEncoding encoding;
+
+        if (parsedLine.right(3) == ",15") {
+            encoding = ussdEncoding::UE_GSM7;
+        } else if (parsedLine.right(3) == ",72") {
+            encoding = ussdEncoding::UE_UCS2;
+        } else {
+            encoding = ussdEncoding::UE_UNKNOWN;
+        }
+
+        if (encoding == ussdEncoding::UE_UNKNOWN) {
+            std::cout << RED_COLOR << "Error: Unknown encoding" << RESET << std::endl;
+            std::cout << RED_COLOR << parsedLine.toStdString() << RESET << std::endl;
+            continue;
+        }
+
+        auto response = parsedLine.split("\"")[1];
+        QString decoded;
+
+        if (encoding == ussdEncoding::UE_GSM7) {
+            decoded = Decoder::decode7Bit(response);
+        } else {
+            decoded = Decoder::decodeUCS2(response);
+        }
+
+        std::cout << GREEN_COLOR << decoded.toStdString() << RESET << std::endl;
+    }
 }
 
 bool Modem::enableHTTPConsoleMode() {
@@ -120,6 +233,25 @@ void Modem::disableHTTPConsoleMode() {
     enableEcho();
 }
 
+void Modem::httpConsoleMode() {
+    while (consoleMode.enabled) {
+        QByteArray data = readLine();
+        QString parsedLine = parseLine(data);
+
+        if (parsedLine.isEmpty()) {
+            return;
+        }
+
+        SPDLOG_LOGGER_INFO(modemLogger, "Console mode: {}", parsedLine.toStdString());
+        if (parsedLine.left(15) == "OKHTTP/1.1  200") {
+            std::cout << GREEN_COLOR << "OK - HTTP/1.1 200 OK" << RESET << std::endl;
+            std::cout << GREEN_COLOR << parsedLine.left(100).toStdString() + "..." << RESET << std::endl;
+        } else {
+            std::cout << RED_COLOR << parsedLine.left(15).toStdString() << RESET << std::endl;
+        }
+    }
+}
+
 void Modem::sendATConsoleCommand(const QString &command) {
     SPDLOG_LOGGER_INFO(modemLogger, "sendConsoleCommand: {}", command.toStdString());
     serial.write((command.toStdString() + "\r\n").c_str());
@@ -138,31 +270,6 @@ void Modem::sendHTTPConsoleCommand(const QString &command, httpMethod_t method) 
     } else if (method == httpMethod_t::HM_POST) {
         serial.write(("AT+HTTPPOST=\"" + command.toStdString() + "\"\r\n").c_str());
     }
-}
-
-bool Modem::checkAT() {
-    auto command = GetCommand(AT, serial);
-    auto response = command.execute(false);
-
-    if (response.indexOf("OK") != -1) {
-        return true;
-    }
-
-    return false;
-}
-
-bool Modem::checkRegistration() {
-    auto command = GetCommand(AT_CREG"?", serial);
-    auto response = command.execute(false);
-
-    if (response.indexOf("+CREG: 0,1") != -1
-        || (response.indexOf("+CREG: 0,5") != -1)
-        || (response.indexOf("+CREG: 1,1") != -1)
-        || (response.indexOf("+CREG: 1,5") != -1)) {
-        return true;
-    }
-
-    return false;
 }
 
 bool Modem::call(const QString &number) {
@@ -289,56 +396,4 @@ void Modem::worker() {
     Modem::workerStatus = true;
     SPDLOG_LOGGER_INFO(modemLogger, "Worker started");
     Modem::listen();
-}
-
-void Modem::listen() {
-    while (Modem::workerStatus) {
-        if (serial.interruptDataRead) {
-            dataInterruptHandler();
-        }
-
-        if (consoleMode.enabled) {
-            if (consoleMode.consoleType == consoleType::CM_AT) {
-                atConsoleMode();
-            }
-
-            if (consoleMode.consoleType == consoleType::CM_USSD) {
-                ussdConsoleMode();
-            }
-
-            if (consoleMode.consoleType == consoleType::CM_HTTP) {
-                httpConsoleMode();
-            }
-
-            continue;
-        }
-
-        QByteArray data = readLine();
-        QString parsedLine = parseLine(data);
-
-        if (parsedLine.contains("RING")) {
-            SPDLOG_LOGGER_INFO(modemLogger, "RING received");
-            ringHandler(parsedLine);
-        }
-
-        if (parsedLine.contains("CIEV: \"CALL\",1")) {
-            SPDLOG_LOGGER_INFO(modemLogger, "CIEV: \"CALL\",1 received");
-            cievCall1Handler();
-        }
-
-        if (parsedLine.contains("+CIEV: \"SOUNDER\",0")) {
-            SPDLOG_LOGGER_INFO(modemLogger, "+CIEV: \"SOUNDER\",0 received");
-            sounder0Handler();
-        }
-
-        if (parsedLine.contains("CIEV: \"CALL\",0")) {
-            SPDLOG_LOGGER_INFO(modemLogger, "CIEV: \"CALL\",0 received");
-            cievCall0Handler(parsedLine);
-        }
-
-        if (parsedLine.contains("CIEV: \"MESSAGE\",1")) {
-            SPDLOG_LOGGER_INFO(modemLogger, "CIEV: \"MESSAGE\",1 received");
-            message1Handler(parsedLine);
-        }
-    }
 }

@@ -5,7 +5,7 @@
 #ifndef PHONE_ROTARY_DIAL_HPP
 #define PHONE_ROTARY_DIAL_HPP
 #include <iostream>
-#include "cli/utils/io/ncurses_io.hpp"
+#include "cli/utils/ncurses/ncurses_io.hpp"
 
 #ifdef BUILD_ON_RASPBERRY
 #define pinDial 4

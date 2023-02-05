@@ -20,7 +20,7 @@ endif()
 file(GLOB_RECURSE SOURCES Src/*.cpp)
 file(GLOB_RECURSE HEADERS Inc/*.hpp)
 
-add_executable(phone main.cpp ${SOURCES} ${HEADERS})
+add_executable(phone main.cpp ${SOURCES} ${HEADERS} Src/cli/operations/screen_operations.cpp Src/cli/operations/modem_operations.cpp Inc/cli/utils/assertions.hpp Src/cli/utils/assertions.cpp)
 
 set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};$ENV{HOME}/Qt/${QT_VERSION}/gcc_64")
 set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};$ENV{HOME}/Qt/${QT_VERSION}/clang_64")

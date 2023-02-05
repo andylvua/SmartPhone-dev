@@ -2,7 +2,7 @@
 // Created by Andrew Yaroshevych on 17.01.2023.
 //
 
-#include "cli/utils/io/ncurses_io.hpp"
+#include "cli/utils/ncurses/ncurses_io.hpp"
 #include "cli/definitions/colors.hpp"
 #include <algorithm>
 

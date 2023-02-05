@@ -9,10 +9,10 @@
 #include <QString>
 #include "modem/media_types.hpp"
 
-constexpr const char *CONTACTS_FILEPATH = "../module_cache/contacts.txt";
-constexpr const char *MESSAGES_FILEPATH = "../module_cache/messages.txt";
-constexpr const char *CALLS_FILEPATH = "../module_cache/calls.txt";
-#define LOGS_FILEPATH "../logs/log.txt"
+constexpr const char *CONTACTS_FILEPATH = "../cache/contacts.txt";
+constexpr const char *MESSAGES_FILEPATH = "../cache/messages.txt";
+constexpr const char *CALLS_FILEPATH = "../cache/calls.txt";
+#define LOGS_FILEPATH "../cache/logs/log.txt"
 
 class CacheManager {
 public:

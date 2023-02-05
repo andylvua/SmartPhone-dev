@@ -28,6 +28,36 @@ public:
     QSharedPointer<Screen> currentScreen;
     ScreenMap screenMap;
 
+    void listen() const;
+
+    void gotoParentScreen();
+
+    void viewContacts();
+
+    void call();
+
+    void call(const QString &number);
+
+    void sendMessage();
+
+    void sendMessage(const QString &number);
+
+public slots:
+
+    void handleIncomingCall(const QString &number);
+
+    void handleIncomingSMS();
+
+    void handleCallEnded();
+
+protected:
+    void changeScreen(const QString &screenName);
+
+private:
+    static void render(const QSharedPointer<Screen> &screen) ;
+
+    void prepareScreens();
+
     void incrementActiveOption() const;
 
     void decrementActiveOption() const;
@@ -40,31 +70,7 @@ public:
 
     void updateScreen() const;
 
-    void changeScreen(const QString &screenName);
-
-    void gotoParentScreen();
-
-    void listen() const;
-
-    void prepareScreens();
-
-    void viewContacts();
-
-    void call(const QString &number);
-
-    void sendMessage(const QString &number);
-
-public slots:
-
-    void handleIncomingCall(const QString &number);
-
-    void handleIncomingSMS();
-
-    void handleCallEnded();
-
-private:
-
-    void disableNcursesScreen();
+    static void disableNcursesScreen();
 
     void enableNcursesScreen();
 
@@ -72,17 +78,13 @@ private:
 
     void answerCall();
 
-    void viewCallHistory() const;
-
-    void call();
-
     void hangUp();
 
     void addContact();
 
-    void viewMessages();
+    void viewCallHistory() const;
 
-    void sendMessage();
+    void viewMessages();
 
     void viewLogs() const;
 

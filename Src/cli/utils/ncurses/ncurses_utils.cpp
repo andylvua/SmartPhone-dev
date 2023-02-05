@@ -2,8 +2,8 @@
 // Created by Andrew Yaroshevych on 26.01.2023.
 //
 
-#include "cli/utils/ncurses_utils.hpp"
-#include "cli/utils/io/ncurses_io.hpp"
+#include "cli/utils/ncurses/ncurses_utils.hpp"
+#include "cli/utils/ncurses/ncurses_io.hpp"
 #include "cli/definitions/colors.hpp"
 #include <algorithm>
 #include <QTextStream>
