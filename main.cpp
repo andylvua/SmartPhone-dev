@@ -1,15 +1,14 @@
-#include "Inc/logging.hpp"
 #include <QApplication>
 #include <QtSerialPort/QSerialPort>
-
-#include "Inc/modem/serial.hpp"
-#include "Inc/modem/modem.hpp"
-#include "Inc/cli/cli.hpp"
-#include "Inc/cli/definitions/colors.hpp"
+#include "logging.hpp"
+#include "modem/serial.hpp"
 #include "modem/utils/cache_manager.hpp"
+#include "cli/cli.hpp"
+#include "cli/modem_controller.hpp"
+#include "cli/definitions/colors.hpp"
 #include <thread>
 
-#define DEBUG
+//#define DEBUG
 
 int main(int argc, char *argv[]) {
     qInstallMessageHandler(logOutputHandler);
@@ -49,7 +48,10 @@ int main(int argc, char *argv[]) {
 
 
     Modem modem{serial};
-    CLI cli{modem};
+    CLI cli;
+
+    ModemController modemController{cli, modem};
+    cli.setModemController(&modemController);
 
     #ifndef DEBUG
     bool modemReady = modem.initialize();

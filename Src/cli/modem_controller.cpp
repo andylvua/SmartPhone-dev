@@ -3,38 +3,31 @@
 //
 
 #include "logging.hpp"
-#include "cli/cli.hpp"
+#include "cli/modem_controller.hpp"
 #include "cli/definitions/colors.hpp"
 #include "cli/utils/assertions.hpp"
-#include "cli/utils/ncurses/ncurses_utils.hpp"
 #include "cli/utils/readline/readline_utils.hpp"
+#include "cli/utils/ncurses/ncurses_utils.hpp"
+#include "modem/utils/cache_manager.hpp"
 #include <readline/readline.h>
 #include <readline/history.h>
 #include <QRegularExpression>
 
-const auto cliLogger = spdlog::get("cli");
+auto modemControllerLogger = spdlog::basic_logger_mt("modem_controller", LOGS_FILEPATH, true);
 #ifdef BUILD_ON_RASPBERRY
 #include "rotary_reader/rotary_dial.hpp"
 static RotaryDial rtx;
 #endif
 
-void CLI::rejectCall() {
-    printColored(YELLOW_PAIR, "Rejecting call");
-    modem.hangUp();
-    CLI::screenMap["Incoming Call"]->notifications.clear();
-    CLI::screenMap["In Call"]->notifications.clear();
-    changeScreen("Main");
+ModemController::ModemController(CLI &cli, Modem &modem) : cli(cli), modem(modem) {
+    connect(&modem, &Modem::incomingCall, &cli, &CLI::handleIncomingCall);
+    connect(&modem, &Modem::incomingSMS, &cli, &CLI::handleIncomingSMS);
+    connect(&modem, &Modem::callEnded, &cli, &CLI::handleCallEnded);
 }
 
-void CLI::answerCall() {
-    printColored(YELLOW_PAIR, "Answering call");
-    modem.answer();
-    changeScreen("In Call");
-}
-
-void CLI::call() {
+void ModemController::call() {
     QString number;
-    printColored(YELLOW_PAIR, "Enter number");
+    printColored(YELLOW_PAIR, "Enter number:");
 #ifdef BUILD_ON_RASPBERRY
     printColored(YELLOW_PAIR, "Read from rotary dial or keyboard? (r/k)");
     QString input;
@@ -61,29 +54,42 @@ void CLI::call() {
     printColored(YELLOW_PAIR, "Calling...");
     modem.call(number);
 
-    CLI::screenMap["In Call"]->addNotification("Calling " + number);
-    changeScreen("In Call");
+    cli.screenMap["In Call"]->addNotification("Calling " + number);
+    cli.changeScreen("In Call");
 }
 
-void CLI::call(const QString &number) {
+void ModemController::call(const QString &number) {
     printColored(YELLOW_PAIR, "Calling...");
     modem.call(number);
 
-    CLI::screenMap["In Call"]->addNotification("Calling " + number);
-    changeScreen("In Call");
+    cli.screenMap["In Call"]->addNotification("Calling " + number);
+    cli.changeScreen("In Call");
 }
 
-void CLI::hangUp() {
+void ModemController::answerCall() {
+    printColored(YELLOW_PAIR, "Answering call");
+    modem.answer();
+    cli.changeScreen("In Call");
+}
+
+void ModemController::rejectCall() {
+    printColored(YELLOW_PAIR, "Rejecting call");
     modem.hangUp();
-    CLI::screenMap["In Call"]->notifications.clear();
+    cli.screenMap["Incoming Call"]->notifications.clear();
+    cli.screenMap["In Call"]->notifications.clear();
+    cli.changeScreen("Main");
+}
+
+void ModemController::hangUp() {
+    modem.hangUp();
+    cli.screenMap["In Call"]->notifications.clear();
 
     printColored(YELLOW_PAIR, "Hanging up");
     QThread::msleep(2000);
-    changeScreen("Main");
+    cli.changeScreen("Main");
 }
 
-
-void CLI::sendMessage() {
+void ModemController::sendMessage() {
     QString number;
     QString message;
     printColored(YELLOW_PAIR, "Enter number: ");
@@ -117,7 +123,7 @@ void CLI::sendMessage() {
     modem.message(number, message);
 }
 
-void CLI::sendMessage(const QString &number) {
+void ModemController::sendMessage(const QString &number) {
     QString message;
     printColored(YELLOW_PAIR, "Enter message: ");
     message = readString();
@@ -126,62 +132,18 @@ void CLI::sendMessage(const QString &number) {
     modem.message(number, message);
 }
 
-void CLI::setMessageMode() {
-    auto messageModeOption = CLI::screenMap["Debug Settings"]->optionsMap["Text Mode"];
-
-    bool success = modem.setMessageMode(!messageModeOption->getState());
-    if (success) {
-        messageModeOption->switchState();
-    } else {
-        printColored(RED_PAIR, "Failed to set Text Mode");
-    }
-    updateScreen();
-}
-
-void CLI::setNumberID() {
-    auto numberIDOption = CLI::screenMap["Debug Settings"]->optionsMap["Number Identifier"];
-
-    bool success = modem.setNumberID(!numberIDOption->getState());
-    if (success) {
-        numberIDOption->switchState();
-    } else {
-        printColored(RED_PAIR, "Failed to set Number Identifier");
-    }
-    updateScreen();
-}
-
-void CLI::setEchoMode() {
-    auto echoModeOption = CLI::screenMap["Debug Settings"]->optionsMap["Echo Mode"];
-
-    bool success = modem.setEchoMode(!echoModeOption->getState());
-    if (success) {
-        echoModeOption->switchState();
-    } else {
-        printColored(RED_PAIR, "Failed to set Echo Mode");
-    }
-    updateScreen();
-}
-
-void CLI::aboutDevice() {
-    changeScreen("About Device");
-    printColored(YELLOW_PAIR, "Getting device info", false);
-    QString aboutInfo = modem.aboutDevice();
-    NcursesUtils::clearCurrentLine();
-    printColored(WHITE_PAIR, aboutInfo);
-}
-
-void CLI::atConsoleMode() {
-    disableNcursesScreen();
+void ModemController::atConsoleMode() {
+    CLI::disableNcursesScreen();
     std::cout << YELLOW_COLOR << "Loading..." << RESET;
     std::cout.flush();
 
     if (!modem.enableATConsoleMode()) {
         std::cout << RED_COLOR << "\nFailed to enable AT console mode" << RESET << std::endl;
-        SPDLOG_LOGGER_ERROR(cliLogger, "Failed to enable AT console mode");
+        SPDLOG_LOGGER_ERROR(modemControllerLogger, "Failed to enable AT console mode");
         QThread::msleep(1000);
         modem.disableATConsoleMode();
 
-        enableNcursesScreen();
+        cli.enableNcursesScreen();
         return;
     }
 
@@ -210,21 +172,21 @@ void CLI::atConsoleMode() {
     }
 
     modem.disableATConsoleMode();
-    enableNcursesScreen();
+    cli.enableNcursesScreen();
 }
 
-void CLI::ussdConsoleMode() {
-    disableNcursesScreen();
+void ModemController::ussdConsoleMode() {
+    CLI::disableNcursesScreen();
     std::cout << YELLOW_COLOR << "Loading..." << RESET;
     std::cout.flush();
 
     if (!modem.enableUSSDConsoleMode()) {
         std::cout << RED_COLOR << "\nFailed to enable USSD console mode" << RESET << std::endl;
-        SPDLOG_LOGGER_ERROR(cliLogger, "Failed to enable USSD console mode");
+        SPDLOG_LOGGER_ERROR(modemControllerLogger, "Failed to enable USSD console mode");
         QThread::msleep(1000);
         modem.disableUSSDConsoleMode();
 
-        enableNcursesScreen();
+        cli.enableNcursesScreen();
         return;
     }
 
@@ -250,7 +212,7 @@ void CLI::ussdConsoleMode() {
     }
 
     modem.disableUSSDConsoleMode();
-    enableNcursesScreen();
+    cli.enableNcursesScreen();
 }
 
 QString parseUrl(QString httpCommand) {
@@ -276,8 +238,8 @@ QString parseUrl(QString httpCommand) {
     return url;
 }
 
-void CLI::httpConsoleMode() {
-    disableNcursesScreen();
+void ModemController::httpConsoleMode() {
+    CLI::disableNcursesScreen();
     std::cout << YELLOW_COLOR << "Loading..." << RESET;
     std::cout.flush();
 
@@ -285,11 +247,11 @@ void CLI::httpConsoleMode() {
 
     if (!consoleEnabled) {
         std::cout << RED_COLOR << "\nFailed to enable HTTP console mode" << RESET << std::endl;
-        SPDLOG_LOGGER_ERROR(cliLogger, "Failed to enable HTTP console mode");
+        SPDLOG_LOGGER_ERROR(modemControllerLogger, "Failed to enable HTTP console mode");
         QThread::msleep(1000);
         modem.disableHTTPConsoleMode();
 
-        enableNcursesScreen();
+        cli.enableNcursesScreen();
         return;
     }
 
@@ -325,16 +287,60 @@ void CLI::httpConsoleMode() {
         QString url = parseUrl(rawCommand);
 
         if (url.isEmpty()) {
-            SPDLOG_LOGGER_INFO(cliLogger, "Invalid HTTP command: {}", rawCommand.toStdString());
+            SPDLOG_LOGGER_INFO(modemControllerLogger, "Invalid HTTP command: {}", rawCommand.toStdString());
             continue;
         }
 
-        SPDLOG_LOGGER_INFO(cliLogger, "Sending HTTP command: {}", url.toStdString());
+        SPDLOG_LOGGER_INFO(modemControllerLogger, "Sending HTTP command: {}", url.toStdString());
         modem.sendHTTPConsoleCommand(url, method);
 
         free((void *) http);
     }
 
     modem.disableHTTPConsoleMode();
-    enableNcursesScreen();
+    cli.enableNcursesScreen();
+}
+
+void ModemController::setMessageMode() {
+    auto messageModeOption = cli.screenMap["Debug Settings"]->optionsMap["Text Mode"];
+
+    bool success = modem.setMessageMode(!messageModeOption->getState());
+    if (success) {
+        messageModeOption->switchState();
+    } else {
+        printColored(RED_PAIR, "Failed to set Text Mode");
+    }
+    cli.updateScreen();
+}
+
+void ModemController::setNumberID() {
+    auto numberIDOption = cli.screenMap["Debug Settings"]->optionsMap["Number Identifier"];
+
+    bool success = modem.setNumberID(!numberIDOption->getState());
+    if (success) {
+        numberIDOption->switchState();
+    } else {
+        printColored(RED_PAIR, "Failed to set Number Identifier");
+    }
+    cli.updateScreen();
+}
+
+void ModemController::setEchoMode() {
+    auto echoModeOption = cli.screenMap["Debug Settings"]->optionsMap["Echo Mode"];
+
+    bool success = modem.setEchoMode(!echoModeOption->getState());
+    if (success) {
+        echoModeOption->switchState();
+    } else {
+        printColored(RED_PAIR, "Failed to set Echo Mode");
+    }
+    cli.updateScreen();
+}
+
+void ModemController::aboutDevice() {
+    cli.changeScreen("About Device");
+    printColored(YELLOW_PAIR, "Getting device info", false);
+    QString aboutInfo = modem.aboutDevice();
+    NcursesUtils::clearCurrentLine();
+    printColored(WHITE_PAIR, aboutInfo);
 }

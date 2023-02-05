@@ -5,10 +5,68 @@
 #include "cli/cli.hpp"
 #include "cli/definitions/colors.hpp"
 #include "modem/utils/cache_manager.hpp"
+#include "cli/modem_controller.hpp"
 #include <cmath>
 
 Screen::Screen(QString name, QSharedPointer<Screen> parentScreen) : screenName(std::move(name)),
                                                                      parentScreen(std::move(parentScreen)) {}
+
+void Screen::render() {
+    int activeOptionIndex = getActiveOption();
+
+    int optionsPerPage = getMaxOptionsPerPage();
+
+    int pagesCount = getPagesCount();
+    int activePage = getActivePage();
+    int activeOptionOnPage = activeOptionIndex % optionsPerPage;
+
+    int startOptionIndex = activePage * optionsPerPage;
+
+    if (pagesCount > 1) {
+        clear();
+        int previousLine = getcury(stdscr);
+        move(LINES - 1, 0);
+        printColored(FILLED_WHITE_PAIR, "Page " + QString::number(activePage + 1)
+                                        + " of " + QString::number(pagesCount));
+        move(previousLine, 0);
+    }
+
+    printColored(WHITE_PAIR, screenName, true, true);
+
+    for (const auto &notification: notifications) {
+        printColored(WHITE_PAIR, notification);
+    }
+
+    for (int i = 0; i < optionsPerPage; ++i) {
+        int optionIndex = startOptionIndex + i;
+
+        if (optionIndex >= static_cast<int>(screenOptions.size())) {
+            break;
+        }
+
+        auto option = screenOptions[optionIndex];
+
+        int color = (i == (activeOptionOnPage)) ? FILLED_WHITE_PAIR : WHITE_PAIR;
+
+        if (i == 0 && i == activeOptionOnPage && activePage == 0) {
+            color = FILLED_RED_PAIR;
+        }
+        if (option->isSwitcher) {
+            if (i == activeOptionOnPage) {
+                color = option->switcher ? FILLED_GREEN_PAIR : FILLED_RED_PAIR;
+            } else {
+                color = option->switcher ? GREEN_PAIR : RED_PAIR;
+            }
+        }
+        if (!option->isAvailable) {
+            color = (i == (activeOptionOnPage)) ? FILLED_RED_PAIR : RED_PAIR;
+        }
+
+        printColored(color, option->optionName);
+    }
+
+    refresh();
+}
 
 void Screen::addScreenOption(const QString &name, std::function<void()> const &action) {
     auto option = QSharedPointer<Option>::create(name, action);
@@ -17,7 +75,7 @@ void Screen::addScreenOption(const QString &name, std::function<void()> const &a
 }
 
 void Screen::addScreenOption(const QString &name, std::function<void()> const &action, bool switcher) {
-    auto option = QSharedPointer<Option>::create(name, action, true, switcher);
+    auto option = QSharedPointer<Option>::create(name, action, switcher);
     screenOptions.push_back(option);
     optionsMap[name] = option;
 }
@@ -70,10 +128,10 @@ ContactScreen::ContactScreen(QSharedPointer<Screen> parentScreen, const Contact 
         cli.gotoParentScreen();
     });
     addScreenOption("Call", [&cli, &contact]() {
-        cli.call(contact.number);
+        cli.modemController->call(contact.number);
     });
     addScreenOption("SMS", [&cli, &contact]() {
-        cli.sendMessage(contact.number);
+        cli.modemController->sendMessage(contact.number);
     });
     addScreenOption("Delete", [&cli, &contact]() {
         CacheManager::removeContact(contact.name);

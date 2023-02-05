@@ -9,6 +9,7 @@
 #include <QString>
 #include <memory>
 #include <unordered_map>
+#include <QSharedPointer>
 #include "option.hpp"
 #include "modem/media_types.hpp"
 
@@ -31,9 +32,13 @@ public:
 
     Screen(QString name, QSharedPointer<Screen> parentScreen);
 
+    void render();
+
     void addScreenOption(const QString &name, std::function<void()> const &action);
 
     void addScreenOption(const QString &name, std::function<void()> const &action, bool switcher);
+
+    void addNotification(const QString &notification);
 
     [[nodiscard]] int getPagesCount() const;
 
@@ -46,8 +51,6 @@ public:
     [[nodiscard]] bool isFirstPage() const;
 
     [[nodiscard]] bool isLastPage() const;
-
-    void addNotification(const QString &notification);
 
 };
 
