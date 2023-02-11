@@ -8,30 +8,28 @@
 #include "cli/definitions/colors.hpp"
 #include "modem/utils/cache_manager.hpp"
 #include "cli/utils/assertions.hpp"
-#include <QProcess>
 #include <string>
 
 const auto cliLogger = spdlog::basic_logger_mt("cli",
                                                LOGS_FILEPATH, true);
+
+
+CLI::CLI() : modemController(nullptr) {
+    initScreens();
+
 #ifdef BUILD_ON_RASPBERRY
 #include "rotary_reader/rotary_dial.hpp"
+RotaryDial::setup();
+#endif
+}
+
+#ifdef BUILD_ON_RASPBERRY
 static RotaryDial rtx;
 #endif
 
-CLI::CLI(Modem &modem) : modem(modem) {
-    prepareScreens();
-
-#ifdef BUILD_ON_RASPBERRY
-#include "rotary_reader/rotary_dial.hpp"
-    RotaryDial::setup();
-#endif
-
-    connect(&modem, SIGNAL(incomingCall(QString)),
-            this, SLOT(handleIncomingCall(QString)));
-    connect(&modem, SIGNAL(incomingSMS()), this, SLOT(handleIncomingSMS()));
-    connect(&modem, SIGNAL(callEnded()), this, SLOT(handleCallEnded()));
+void CLI::setModemController(ModemController *controller) {
+    this->modemController = controller;
 }
-
 
 void CLI::listen() const {
     cliLogger->flush_on(spdlog::level::debug);
@@ -73,37 +71,37 @@ void CLI::listen() const {
     }
 }
 
-void CLI::handleIncomingCall(const QString &number) {
-    auto contact = CacheManager::getContact(number);
+void CLI::renderScreen() const {
+    clear();
+    currentScreen->render();
+}
 
-    QString info = "Incoming call from ";
+void CLI::updateScreen() const {
+    move(0, 0);
+    currentScreen->render();
+}
 
-    if (contact.hasValue()) {
-        info += contact.name;
-    } else {
-        info += number;
+void CLI::changeScreen(const QString &screenName) {
+    currentScreen = screenMap[screenName];
+    renderScreen();
+}
+
+void CLI::gotoParentScreen() {
+    if (currentScreen->parentScreen != nullptr) {
+        currentScreen = currentScreen->parentScreen;
+        renderScreen();
     }
-
-    CLI::screenMap["Incoming Call"]->addNotification(info);
-    CLI::screenMap["In Call"]->addNotification(info);
-    changeScreen("Incoming Call");
 }
 
-void CLI::handleIncomingSMS() {
-    CLI::screenMap["Main"]->addNotification("    *New SMS");
+void CLI::enableNcursesScreen() const {
+    NcursesUtils::initScreen();
     renderScreen();
 }
 
-void CLI::handleCallEnded() {
-    CLI::screenMap["Incoming Call"]->notifications.clear();
-    CLI::screenMap["In Call"]->notifications.clear();
-    changeScreen("Main");
-}
-
-void CLI::viewCallHistory() const {
-    printColored(YELLOW_PAIR, "Call history:");
-    CacheManager::listCalls();
-    renderScreen();
+void CLI::disableNcursesScreen() {
+    curs_set(1);
+    NcursesUtils::releaseScreen();
+    system("clear");
 }
 
 void CLI::addContact() {
@@ -166,6 +164,12 @@ void CLI::viewContacts() {
     renderScreen();
 }
 
+void CLI::viewCallHistory() const {
+    printColored(YELLOW_PAIR, "Call history:");
+    CacheManager::listCalls();
+    renderScreen();
+}
+
 void CLI::viewMessages() {
     CLI::screenMap["Main"]->notifications.clear();
     printColored(YELLOW_PAIR, "Listing messages");
@@ -173,9 +177,63 @@ void CLI::viewMessages() {
     renderScreen();
 }
 
-
 void CLI::viewLogs() const {
     printColored(GREEN_PAIR, "Opening logs file");
     CacheManager::listLogs();
     renderScreen();
+}
+
+void CLI::handleIncomingCall(const QString &number) {
+    auto contact = CacheManager::getContact(number);
+
+    QString info = "Incoming call from ";
+
+    if (contact.hasValue()) {
+        info += contact.name;
+    } else {
+        info += number;
+    }
+
+    CLI::screenMap["Incoming Call"]->addNotification(info);
+    CLI::screenMap["In Call"]->addNotification(info);
+    changeScreen("Incoming Call");
+}
+
+void CLI::handleIncomingSMS() {
+    CLI::screenMap["Main"]->addNotification("    *New SMS");
+    renderScreen();
+}
+
+void CLI::handleCallEnded() {
+    CLI::screenMap["Incoming Call"]->notifications.clear();
+    CLI::screenMap["In Call"]->notifications.clear();
+    changeScreen("Main");
+}
+
+void CLI::incrementActiveOption() const {
+    currentScreen->activeOption++;
+    updateScreen();
+}
+
+void CLI::decrementActiveOption() const {
+    if (currentScreen->activeOption > -1) {
+        currentScreen->activeOption--;
+    }
+    updateScreen();
+}
+
+void CLI::incrementActivePage() const {
+    int optionsPerPage = currentScreen->getMaxOptionsPerPage();
+    if (!currentScreen->isLastPage()) {
+        currentScreen->activeOption += optionsPerPage - currentScreen->getActiveOption() % optionsPerPage;
+    }
+    updateScreen();
+}
+
+void CLI::decrementActivePage() const {
+    int optionsPerPage = currentScreen->getMaxOptionsPerPage();
+    if (!currentScreen->isFirstPage()) {
+        currentScreen->activeOption -= optionsPerPage + currentScreen->getActiveOption() % optionsPerPage;
+        updateScreen();
+    }
 }

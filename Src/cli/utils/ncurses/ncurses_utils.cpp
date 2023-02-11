@@ -8,8 +8,8 @@
 #include <algorithm>
 #include <QTextStream>
 
-std::stringstream NcursesUtils::ncursesBuffer;
-std::streambuf *NcursesUtils::oldStreamBuffer;
+[[maybe_unused]] std::stringstream NcursesUtils::ncursesBuffer;
+[[maybe_unused]] std::streambuf *NcursesUtils::oldStreamBuffer;
 
 void NcursesUtils::initScreen() {
     initscr();

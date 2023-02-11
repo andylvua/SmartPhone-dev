@@ -21,7 +21,7 @@ public:
 
     Option(QString name, std::function<void()> const &action);
 
-    Option(QString name, std::function<void()> const &action, bool isSwitcher, bool switcher);
+    Option(QString name, std::function<void()> const &action, bool switcher);
 
     void execute() const;
 

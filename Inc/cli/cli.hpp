@@ -5,42 +5,56 @@
 #ifndef PHONE_CLI_HPP
 #define PHONE_CLI_HPP
 
-#include "modem/modem.hpp"
-#include "rotary_reader/rotary_dial.hpp"
-#include "cli/option.hpp"
-
 #include <QObject>
+#include <QMainWindow>
 #include <iostream>
-#include "screen.hpp"
 #include <memory>
 #include <ncurses.h>
 #include <unordered_map>
+#include <QSharedPointer>
+#include "screen.hpp"
+#include "cli/option.hpp"
+#include "rotary_reader/rotary_dial.hpp"
 
 using ScreenMap = QHash<QString, QSharedPointer<Screen>>;
+
+class ModemController;
 
 class CLI : public QObject {
 Q_OBJECT
 
 public:
-    explicit CLI(Modem &modem);
+    explicit CLI();
 
-    Modem &modem;
+    ModemController *modemController;
     QSharedPointer<Screen> currentScreen;
     ScreenMap screenMap;
 
+    void setModemController(ModemController *modemController);
+
     void listen() const;
+
+    void renderScreen() const;
+
+    void updateScreen() const;
+
+    void changeScreen(const QString &screenName);
 
     void gotoParentScreen();
 
+    void enableNcursesScreen() const;
+
+    static void disableNcursesScreen();
+
+    void addContact();
+
     void viewContacts();
 
-    void call();
+    void viewCallHistory() const;
 
-    void call(const QString &number);
+    void viewMessages();
 
-    void sendMessage();
-
-    void sendMessage(const QString &number);
+    void viewLogs() const;
 
 public slots:
 
@@ -50,13 +64,9 @@ public slots:
 
     void handleCallEnded();
 
-protected:
-    void changeScreen(const QString &screenName);
-
 private:
-    static void render(const QSharedPointer<Screen> &screen) ;
 
-    void prepareScreens();
+    void initScreens();
 
     void incrementActiveOption() const;
 
@@ -65,43 +75,6 @@ private:
     void incrementActivePage() const;
 
     void decrementActivePage() const;
-
-    void renderScreen() const;
-
-    void updateScreen() const;
-
-    static void disableNcursesScreen();
-
-    void enableNcursesScreen();
-
-    void rejectCall();
-
-    void answerCall();
-
-    void hangUp();
-
-    void addContact();
-
-    void viewCallHistory() const;
-
-    void viewMessages();
-
-    void viewLogs() const;
-
-    void ussdConsoleMode();
-
-    void atConsoleMode();
-
-    void httpConsoleMode();
-
-    void setMessageMode();
-
-    void setNumberID();
-
-    void setEchoMode();
-
-    void aboutDevice();
-
 };
 
 #endif //PHONE_CLI_HPP
